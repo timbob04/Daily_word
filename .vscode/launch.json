@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        // add any files here that I want to do debugging on
+        {
+            "name": "Debug an API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "StartStopProgram.startStopProgram_main",  // The file I want to be able to debug
+            "cwd": "${workspaceFolder}",  // Working directory
+            "justMyCode": false  // Allows debugging external libraries if needed
+        },
+        {
+            "name": "Debug another API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "PresentWordsAndDefinitions.PresentWordsAndDefinitions_main",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        }
+    ]
+}
