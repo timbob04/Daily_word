@@ -1,26 +1,69 @@
-import os
-import shutil
-
 class makeExecutables():
-    def __init__(self,dep,fileNames):
-        # Parameters
+    def __init__(self,dep,fileName,consoleNeeded):
+        # Input parameters
         self.dep = dep
-        self.fileNames = fileNames
+        self.fileName = fileName    
+        self.consoleNeeded = consoleNeeded    
+        # Fixed parameters
+        self.projectRoot = dep.os.path.abspath(dep.os.path.join(dep.getBaseDir(dep.sys,dep.os), ".."))
+        self.executableName = self.fileName.split(".")[-1]
         # Initializer methods
         self.deleteBinAndBuildFolders()
+        self.getPythonFilePath()
+        self.getModuleDependencies()
+        self.makeCommandsToAddDependencies()
+        self.makeCommandsToAddNeededFolders()
+        self.makeCommandForTerminalOpenOrClosed()
+        self.createPyInstallerCommand()
+        self.runPyInstallerCommand()
 
     # To start afresh
     def deleteBinAndBuildFolders(self):
         for folder in ["bin", "build"]:
-            if os.path.exists(folder) and os.path.isdir(folder):
-                shutil.rmtree(folder)   
+            if self.dep.os.path.exists(folder) and self.dep.os.path.isdir(folder):
+                self.dep.shutil.rmtree(folder)                       
 
-    def getDependencies(self,curModule):  
-        getModuleImports = GetModuleImports(curModule)
-        return getModuleImports.imports
+    def getPythonFilePath(self):     
+        self.pythonFile = self.dep.os.path.join(self.projectRoot, self.fileName.replace(".", self.dep.os.sep)) + ".py"              
 
+    def getModuleDependencies(self):  
+        getModuleImports = GetModuleImports(self.dep,self.fileName)
+        self.dependencies = getModuleImports.imports
+    
+    def makeCommandsToAddDependencies(self):
+        self.hidden_imports_cmd = [
+            f'--hidden-import={dep}' 
+            for dep in self.dependencies
+            ]
 
+    def makeCommandsToAddNeededFolders(self):
+        folders = [ self.fileName.split(".")[0], "utils" ]
+        separator = ";" if self.dep.os.name == "nt" else ":"
+        self.neededFoldersCmd = [
+            f'--add-data={self.dep.os.path.join(self.projectRoot, folder)}{separator}{folder}'
+            for folder in folders
+        ]
 
+    def makeCommandForTerminalOpenOrClosed(self):
+        if self.consoleNeeded:
+            self.consoleCommand = "--console"
+        else:
+            self.consoleCommand = "--windowed"    
+
+    def createPyInstallerCommand(self):    
+        self.pyInstallerCommand = [
+            "pyinstaller", "--onedir", "--noupx", "--clean", self.consoleCommand,
+            "--name", self.executableName,
+            "--distpath", "bin",
+            self.pythonFile,
+            *self.hidden_imports_cmd,
+            *self.neededFoldersCmd
+        ] 
+
+    def runPyInstallerCommand(self):   
+        result = self.dep.subprocess.run(self.pyInstallerCommand , capture_output=True, text=True)
+
+# Finds all imports at the top of the main file being made into the executable
 class GetModuleImports():
     def __init__(self, dep, moduleName):
         self.dep = dep
@@ -40,10 +83,12 @@ class GetModuleImports():
             self.tree = self.dep.ast.parse(file.read(), filename=self.file_path) 
 
     def findAndStoreImports(self):
-         for node in self.dep.ast.walk(self.tree):
+        self.imports = set()  # Use a set to avoid duplicates
+        for node in self.dep.ast.walk(self.tree):
             if isinstance(node, self.dep.ast.Import):
                 for alias in node.names:
-                    self.imports.append(alias.name)
+                    self.imports.add(alias.name)
             elif isinstance(node, self.dep.ast.ImportFrom):
                 if node.module:  # Ignore relative imports with None
-                    self.imports.append(node.module)
+                    self.imports.add(node.module)
+        self.imports = list(self.imports)  # Convert back to a list          
