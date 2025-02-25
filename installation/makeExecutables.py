@@ -61,7 +61,7 @@ class makeExecutables():
         ] 
 
     def runPyInstallerCommand(self):   
-        result = self.dep.subprocess.run(self.pyInstallerCommand , capture_output=True, text=True)
+        self.dep.subprocess.run(self.pyInstallerCommand , capture_output=True, text=True)
 
 # Finds all imports at the top of the main file being made into the executable
 class GetModuleImports():

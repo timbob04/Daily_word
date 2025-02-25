@@ -4,6 +4,9 @@ from datetime import datetime
 import os
 from utils.utils import getBaseDir
 
+# So installed executables can find their dependencies
+# sys.path.insert(0, os.path.join(os.path.dirname(__file__), "_internal"))
+
 def printConsoleMessage():
 
     programRunTimeOb = ReadProgramRunTime()
