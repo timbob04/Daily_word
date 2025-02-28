@@ -15,4 +15,12 @@ class storeDependencies:
     def __init__(self, *args):
         for idx, value in enumerate(args):            
             attr_name = getattr(value, "__name__", f"arg_{idx}")
-            setattr(self, attr_name, value)    
+            setattr(self, attr_name, value) 
+
+def readJSONfile(json,filepath):
+    try:
+        with open(filepath, 'r') as file:
+            data = json.load(file)
+            return data
+    except (json.JSONDecodeError, FileNotFoundError, IOError):
+        return None   

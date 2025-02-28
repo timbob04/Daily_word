@@ -16,7 +16,15 @@
             "request": "launch",
             "module": "installation.arrangeExecutableFiles",
             "cwd": "${workspaceFolder}",
-            "justMyCode": false
+            "justMyCode": true
+        },
+        {
+            "name": "Debug another API",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "DailyWordApp.main",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true
         }
     ]
 }
