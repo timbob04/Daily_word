@@ -1,10 +1,10 @@
-class WordAndDefinition():
+class DailyWord():
     def __init__(self,dep):
         # Inputs
-        self.WordList = None
-        self.filePath = None
         self.dep = dep
         # Parameters
+        self.WordList = None
+        self.filePath = None
         self.allWordsPrevShown = None
         self.positionOfWord = None
         self.word = "No words added"
@@ -23,6 +23,7 @@ class WordAndDefinition():
             self.getDailyWordPosInWordList()
             self.getWordAndDefintion()
             self.getWordPriorityWordStatus()
+            self.updateWordList()
 
     def getWordListFilePath(self):    
         base_dir = self.dep.getBaseDir(self.dep.sys,self.dep.os)
@@ -61,9 +62,6 @@ class WordAndDefinition():
             self.word = self.WordList[self.positionOfWord]['word']
             self.definition = self.WordList[self.positionOfWord]['definition']
 
-    def returnWordAndDefinition(self):
-        return self.word, self.definition
-
     def updateWordList(self):       
         if (self.allWordsPrevShown):
             for word in self.WordList[1:]: # change all 'wordShown' to false, except for the first
@@ -73,9 +71,92 @@ class WordAndDefinition():
         self.updateJSONfile()
 
     def updateJSONfile(self):
-        with open(self.fileName, 'w') as file:
+        with open(self.filePath, 'w') as file:
             self.dep.json.dump(self.WordList, file, indent=4)  
 
     def getWordPriorityWordStatus(self):
         if self.wordPresent:
             self.wordPriorityStatus = self.WordList[self.positionOfWord]['isPriorityWord']
+
+    def returnWordAndDefinition(self):
+        return self.word, self.definition        
+
+class DailyPriorityWord():
+    def __init__(self,dep):       
+        # Inputs
+        self.dep = dep
+        # Parameters
+        self.WordList = None
+        self.filePath = None
+        self.dataExists = False
+        self.PriorityWordPresent = False
+        self.allPriorityWordsPrevShown = False
+        self.priorityWordPos = None
+        self.priorityWordAndDef = "Currently no priority words"        
+        # Methods on initiation
+        self.getWordListFilePath()
+        self.getWordList()
+        self.doesDataExist()
+        if self.dataExists:
+            self.isPriorityWordPresent()
+        if self.PriorityWordPresent:
+            self.getPriorityWordPositions()
+            self.areAllPriorityWordsShown()            
+            self.getPositionOfTodaysPriorityWord()
+            self.updateWordList()  
+            self.makePriorityWordWithDefText()      
+
+    def getWordListFilePath(self):    
+        base_dir = self.dep.getBaseDir(self.dep.sys,self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
+
+    def getWordList(self):    
+        self.wordList = self.dep.readJSONfile(self.dep.json, self.filePath)     
+
+    def doesDataExist(self):    
+        self.dataExists = not (self.wordList is None) and len(self.wordList) > 0   
+
+    def isPriorityWordPresent(self):
+        self.PriorityWordPresent = any(word['isPriorityWord'] for word in self.wordList)
+
+    def getPriorityWordPositions(self):
+        self.priorityWordPositions = []
+        for index, word in enumerate(self.wordList):
+            if word['isPriorityWord']:
+                self.priorityWordPositions.append(index)
+
+    def areAllPriorityWordsShown(self):
+        self.allPriorityWordsPrevShown = all(self.wordList[i]['priorityWordShown'] for i in self.priorityWordPositions)
+
+    def getPositionOfTodaysPriorityWord(self):
+        if self.allPriorityWordsPrevShown:
+            self.priorityWordPos = self.priorityWordPositions[0]         
+        else:
+            self.priorityWordPos = self.priorityWord_firstFalse()
+
+    def priorityWord_firstFalse(self):    
+        for i in self.priorityWordPositions: 
+            if not self.wordList[i]['priorityWordShown']:
+                return i    
+            
+    def updateWordList(self):
+        if self.allPriorityWordsPrevShown:
+            for i in self.priorityWordPositions[1:]: 
+                self.wordList[i]['priorityWordShown'] = False            
+        else:
+            self.wordList[self.priorityWordPos]['priorityWordShown'] = True
+        self.updateJSONfile()
+
+    def updateJSONfile(self):
+        with open(self.filePath, 'w') as file:
+            self.dep.json.dump(self.wordList, file, indent=4)  
+
+    def makePriorityWordWithDefText(self): 
+        prioriotyWord = self.wordList[self.priorityWordPos]['word']
+        definition = self.wordList[self.priorityWordPos]['definition']            
+        self.priorityWordAndDef = prioriotyWord + ": " + definition\
+
+    def returnWordAndDefinition(self):
+            return self.priorityWordAndDef                 
+         

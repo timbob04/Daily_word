@@ -4,7 +4,7 @@
         "definition": "unwilling or refusing to change one's views or to agree about something",
         "wordShown": true,
         "isPriorityWord": false,
-        "priorityWordShown": false
+        "priorityWordShown": true
     },
     {
         "word": "Esoteric",
@@ -30,7 +30,7 @@
     {
         "word": "Harbinger",
         "definition": "a person or thing that announces or signals the approach of another",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     }

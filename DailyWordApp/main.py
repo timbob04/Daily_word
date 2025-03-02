@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from utils.utils import readJSONfile, getBaseDir, storeDependencies
 
-from DailyWordApp.getDailyWords import WordAndDefinition
+from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 
 
 
@@ -27,12 +27,16 @@ def runDailyWordApp():
 
     # # Obtain current machine's scaling factor (determines the size of things on screen)
 
-    # Obtain daily word (and daily priority word)
-    wordAndDefinition = WordAndDefinition(dep)
-    word, definition = wordAndDefinition.returnWordAndDefinition()
+    # Obtain daily word
+    dailyWord = DailyWord(dep)
+    word, definition = dailyWord.returnWordAndDefinition()
+    # Obtain daily priority word
+    dailyPriorityWord = DailyPriorityWord(dep)
+    priorityWordAndDef = dailyPriorityWord.returnWordAndDefinition()
+    print(priorityWordAndDef)
+    
 
-    print(word)
-    print(definition)
+    
     # Make application's content
     # It's own main class, and sub-classes/functions, defined in its own script, called makeAppContents
 
