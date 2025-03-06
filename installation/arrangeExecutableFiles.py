@@ -35,6 +35,8 @@ def organizeExecutableFiles(dep):
 
         if dep.os.name == "nt": 
             exe_path = dep.os.path.join(dir_folderItem, folderItem + ".exe") 
+        else:
+            exe_path = dep.os.path.join(dir_folderItem, folderItem) 
 
         # Move any executables in the current folder to the bin folder
         if dep.os.path.exists(exe_path) and dep.os.path.isfile(exe_path):

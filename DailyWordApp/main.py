@@ -30,10 +30,12 @@ def runDailyWordApp():
     # Obtain daily word
     dailyWord = DailyWord(dep)
     word, definition = dailyWord.returnWordAndDefinition()
+    print(word)
+    print(definition)
     # Obtain daily priority word
     dailyPriorityWord = DailyPriorityWord(dep)
     priorityWordAndDef = dailyPriorityWord.returnWordAndDefinition()
-    print(priorityWordAndDef)
+    
     
 
     
