@@ -163,6 +163,6 @@ cython_debug/
 
 # Custom folders to ignore
 extra/
-installation
+installation/output
 bin/
 build/
