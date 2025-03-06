@@ -46,7 +46,7 @@ def runDailyWordApp():
 
     # Start application
 
-
+def getSystemScalingFactors():
 
 
 
