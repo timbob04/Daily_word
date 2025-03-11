@@ -3,61 +3,53 @@ import sys
 from datetime import datetime
 import json
 import platform
+import inspect
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QScrollArea
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QFontMetrics, QCursor
+from PyQt5.QtGui import QFont, QFontMetrics, QCursor, QTextDocument, QTextOption
 
-from utils.utils import readJSONfile, getBaseDir, storeDependencies
-from utils.utils_UI import SystemScalingFactors, DefineUIsizes, DefineFontSizes, Boundaries, StaticText, centerWindowOnScreen
+from utils.utils import readJSONfile, getBaseDir, storeDependencies, softHyphenateLongWords, get_lines_above
+from utils.utils_UI import SystemScalingFactors, DefineUIsizes, DefineFontSizes,  StaticText, centerWindowOnScreen, MakeTextWithMaxHeight
 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 
-dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt, Boundaries, StaticText, QLabel, QApplication, platform, QCursor)
+above = get_lines_above(inspect)
+print(above)
+
+
+# Can make a function that finds all instances of "import" above this line, and then gets all the dependencies this way, automatically
+dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt,  StaticText, QLabel, QApplication, platform, QCursor, QVBoxLayout, QTextDocument, QTextOption, QScrollArea, softHyphenateLongWords, MakeTextWithMaxHeight)
 
 def runDailyWordApp():
 
     # Make application
     app = QApplication(sys.argv)
     window = QMainWindow()
-
     SetWindowTitle(window,datetime)
+    
+    # Create a central widget for the application
+    central_widget = QWidget()
+    window.setCentralWidget(central_widget)
+    
+    fonts = DefineFontSizes(QApplication)
+    UIsizes = DefineUIsizes()
 
-    scalingFactors = SystemScalingFactors(dep,app)
-
-    # Initialize objects to get the daily word and the daily priority word
+    # Get daily word and daily priority word
     dailyWord = DailyWord(dep)
     dailyPriorityWord = DailyPriorityWord(dep)
 
-    # Define sizes for the app's spacing and fonts
-    print(scalingFactors.UIelementsScaleFactor)
-    sizeOb = DefineUIsizes(scalingFactors.UIelementsScaleFactor)
-    UIsizes = sizeOb.returnSizes()
-    fontsizeOb = DefineFontSizes(scalingFactors.fontScaleFactor,QFont)
-    fonts = fontsizeOb.returnFonts()
+    makeAppContents(dep,central_widget,fonts)    
 
-    # Class to store the main boundaries of the app
-    boundaries = Boundaries()
-
-    # makeAppContents(dep,window,UIsizes,fonts,boundaries)    
-
-    window.resize(int(UIsizes["padding_large"]), int(UIsizes["padding_large"]))
-
-    # # Show window
     window.show()
 
-    # # Center the window - put in the function (pass it 'window' and 'app')
     centerWindowOnScreen(window,QApplication)
 
     # # Run application's event loop
     exit_code = app.exec_()
     sys.exit(exit_code)
-
-
-
-
 
 
 
@@ -215,5 +207,5 @@ def runDailyWordApp():
 #     # Exit application
 #     sys.exit(exit_code)
 
-if __name__ == "__main__":
-    runDailyWordApp()    
+# if __name__ == "__main__":
+    # runDailyWordApp()    
