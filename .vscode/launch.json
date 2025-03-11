@@ -24,7 +24,10 @@
             "request": "launch",
             "module": "DailyWordApp.main",
             "cwd": "${workspaceFolder}",
-            "justMyCode": true
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
         }
     ]
 }

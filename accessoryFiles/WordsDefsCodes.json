@@ -16,7 +16,7 @@
     {
         "word": "Inexorable",
         "definition": "impossible to stop or prevent",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
@@ -25,7 +25,7 @@
         "definition": "a sign or warning that something, especially something momentous or calamitous, is likely to happen",
         "wordShown": false,
         "isPriorityWord": true,
-        "priorityWordShown": false
+        "priorityWordShown": true
     },
     {
         "word": "Harbinger",
