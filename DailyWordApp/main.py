@@ -6,7 +6,7 @@ import platform
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QFontMetrics
+from PyQt5.QtGui import QFont, QFontMetrics, QCursor
 
 from utils.utils import readJSONfile, getBaseDir, storeDependencies
 from utils.utils_UI import SystemScalingFactors, DefineUIsizes, DefineFontSizes, Boundaries, StaticText, centerWindowOnScreen
@@ -15,11 +15,9 @@ from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 
-dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt, Boundaries, StaticText, QLabel, QApplication, platform)
+dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt, Boundaries, StaticText, QLabel, QApplication, platform, QCursor)
 
 def runDailyWordApp():
-
-    scalingFactors = SystemScalingFactors(dep)
 
     # Make application
     app = QApplication(sys.argv)
@@ -27,13 +25,14 @@ def runDailyWordApp():
 
     SetWindowTitle(window,datetime)
 
-    scalingFactors.getScaleFactors(app)
+    scalingFactors = SystemScalingFactors(dep,app)
 
     # Initialize objects to get the daily word and the daily priority word
     dailyWord = DailyWord(dep)
     dailyPriorityWord = DailyPriorityWord(dep)
 
     # Define sizes for the app's spacing and fonts
+    print(scalingFactors.UIelementsScaleFactor)
     sizeOb = DefineUIsizes(scalingFactors.UIelementsScaleFactor)
     UIsizes = sizeOb.returnSizes()
     fontsizeOb = DefineFontSizes(scalingFactors.fontScaleFactor,QFont)
@@ -42,9 +41,9 @@ def runDailyWordApp():
     # Class to store the main boundaries of the app
     boundaries = Boundaries()
 
-    makeAppContents(dep,window,UIsizes,fonts,boundaries)    
+    # makeAppContents(dep,window,UIsizes,fonts,boundaries)    
 
-    window.resize(int(boundaries.right+UIsizes["padding_large"]), int(boundaries.bottom+UIsizes["padding_large"]))
+    window.resize(int(UIsizes["padding_large"]), int(UIsizes["padding_large"]))
 
     # # Show window
     window.show()

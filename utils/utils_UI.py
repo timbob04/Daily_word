@@ -1,30 +1,18 @@
 class SystemScalingFactors():
-    def __init__(self,dep):
+    def __init__(self,dep,app):
         # Inputs
         self.dep = dep
+        self.app = app
         # Initializer methods
-        self.setDefaultScalingAttribute()
+        self.getScaleFactors()
 
-    def setDefaultScalingAttribute(self):
-        if self.dep.platform.system() == "Darwin":
-            # **Force High-DPI Scaling for macOS**
-            self.dep.os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-            self.dep.os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-        if self.dep.os.getenv("QT_SCALE_FACTOR"):  # Check if Qt is already scaling
-            print("QT_SCALE_FACTOR detected, disabling Qt scaling.")
-            self.dep.QApplication.setAttribute(self.dep.Qt.AA_DisableHighDpiScaling)
-        else:
-            self.dep.QApplication.setAttribute(self.dep.Qt.AA_EnableHighDpiScaling, True)
-            self.dep.QApplication.setAttribute(self.dep.Qt.AA_UseHighDpiPixmaps, True)
-
-    def getScaleFactors(self,app):
+    def getScaleFactors(self):
         self.dpi_base = 96
-        self.screen = app.primaryScreen()
-        self.screenDPI = self.screen.physicalDotsPerInch() if self.screen else self.dpi_base
-        self.fontScaleFactor = self.screenDPI / self.dpi_base
+        screen = self.app.primaryScreen()
+        self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
+        # self.fontScaleFactor = self.screenDPI / self.dpi_base
+        self.fontScaleFactor = screen.devicePixelRatio()
         self.UIelementsScaleFactor = self.screenDPI / 25.4
-
-
 
 class DefineFontSizes:
     def __init__(self,scalingFactor,Qfont):
@@ -64,9 +52,9 @@ class DefineUIsizes:
 
     def defineSizes_mm(self):    
         self.sizesInputs = {
-        "padding_small": 1,
-        "padding_medium": 2,
-        "padding_large": 4
+        "padding_small": 10,
+        "padding_medium": 20,
+        "padding_large": 40
         }
 
     def convert_mmToPixels(self):    
