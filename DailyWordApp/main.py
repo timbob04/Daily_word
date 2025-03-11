@@ -1,52 +1,70 @@
 import os
 import sys
-import datetime
+from datetime import datetime
 import json
 
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont, QFontMetrics
 
 from utils.utils import readJSONfile, getBaseDir, storeDependencies
+from utils.utils_UI import GetSystemScalingFactors, DefineUIsizes, DefineFontSizes, Boundaries, StaticText, centerWindowOnScreen
 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
+from DailyWordApp.makeAppContents import makeAppContents
+from DailyWordApp.utils import SetWindowTitle
 
 
-
-dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json)
+dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt, Boundaries, StaticText, QLabel)
 
 def runDailyWordApp():
 
-    # # Make application
-    # app = QApplication(sys.argv)
-    # window = QMainWindow()
+    # Make application
+    app = QApplication(sys.argv)
+    window = QMainWindow()
 
-    # setWindowTitle(window,datetime)
+    SetWindowTitle(window,datetime)
 
-    # # Define sizes for the app's spacing and fonts
-    # sizes = Sizes()
-    # ############## Make sizes here more in tune with my current terminology
+    # Get system scaling factors for UI
+    scalingFactors = GetSystemScalingFactors(app,Qt)
 
-    # # Obtain current machine's scaling factor (determines the size of things on screen)
-
-    # Obtain daily word
+    # Initialize objects to get the daily word and the daily priority word
     dailyWord = DailyWord(dep)
-    word, definition = dailyWord.returnWordAndDefinition()
-    print(word)
-    print(definition)
-    # Obtain daily priority word
     dailyPriorityWord = DailyPriorityWord(dep)
-    priorityWordAndDef = dailyPriorityWord.returnWordAndDefinition()
-    
-    
+
+    # Define sizes for the app's spacing and fonts
+    sizeOb = DefineUIsizes(scalingFactors.UIelementsScaleFactor)
+    UIsizes = sizeOb.returnSizes()
+    fontsizeOb = DefineFontSizes(scalingFactors.fontScaleFactor,QFont)
+    fonts = fontsizeOb.returnFonts()
+
+    # Class to store the main boundaries of the app
+    boundaries = Boundaries()
+
+    makeAppContents(dep,window,UIsizes,fonts,boundaries)    
+
+    window.resize(int(boundaries.right+UIsizes["padding_large"]), int(boundaries.bottom+UIsizes["padding_large"]))
+
+    # # Show window
+    window.show()
+
+    # # Center the window - put in the function (pass it 'window' and 'app')
+    centerWindowOnScreen(window,QApplication)
+
+    # # Run application's event loop
+    exit_code = app.exec_()
+    sys.exit(exit_code)
+
+
+
+
+
+
+
+
+
 
     
-    # Make application's content
-    # It's own main class, and sub-classes/functions, defined in its own script, called makeAppContents
-
-    # Adjust window's size and position
-
-    # Start application
-
-def getSystemScalingFactors():
 
 
 
@@ -55,54 +73,6 @@ def getSystemScalingFactors():
 
 
 
-
-
-
-
-
-
-
-# In utils
-
-class Sizes:
-    def __init__(self):
-        self.padding_small = 5
-        self.padding_medium = 10
-        self.padding_large = 20
-        self.WODwidth = 400
-        self.maxWODheight = 120
-        self.maxDefheight = 200
-        self.smallTextWidth = 120
-        self.width_toggle = 22
-        self.PODwidth = self.WODwidth * 0.8
-        self.maxPODheight = 150
-
-class setWindowTitle():
-    def __init__(self,window,datetime):
-        # Inputs
-        self.window = window
-        self.datatime = datetime        
-        # Initializer methods
-        self.getTodaysDay()
-        self.getSuffixForTodaysDay()
-        self.formatTitleToIncludeDay()
-        self.setTitle
-
-    def getTodaysDay(self):
-        todaysDate = self.datetime.now()
-        self.todaysDay = todaysDate.day
-
-    def getSuffixForTodaysDay(self):
-        if 10 <= self.todaysDay <= 20:  # "Teen" numbers always get "th"
-            self.suffix = "th"
-        else:
-            self.suffix = {1: "st", 2: "nd", 3: "rd"}.get(self.todaysDay % 10, "th")
-
-    def formatTitleToIncludeDay(self):        
-        self.dateForTitle = self.todaysDate.strftime(f"%d{self.suffix} %B %Y")
-
-    def setTitle(self):          
-        self.window.setWindowTitle("Word of the day.  " + self.dateForTitle)        
 
 
 
@@ -114,7 +84,6 @@ class setWindowTitle():
 #     fonts.makeFonts()
 
 #     # Word title (small)
-#     # Toggle button text - Add WOD
 #     text = 'Word:'
 #     textAlignment = Qt.AlignLeft | Qt.AlignTop    
 #     textPos = (sizes.padding_large, sizes.padding_large, 0, 0)

@@ -1,4 +1,3 @@
-
 def getBaseDir(sys,os):
     # Check if the program is running as an executable
     if getattr(sys, 'frozen', False):                
