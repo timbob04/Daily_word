@@ -32,29 +32,16 @@ def softHyphenateLongWords(text, max_word_length=15):
             wrapped_words.append(word)
     # Join words back with spaces
     return ' '.join(wrapped_words)
-
-class StoreDependencies():
-    def __init__(self,inspect,os):
-        self.inspect = inspect
-        self.os = inspect
-        self.findFileNameAndLineNumber
+class StoreDependencies:
+    def __init__(self,globalScope):
+        self.globalScope = globalScope
+        self.getImportedModules()
+        self.setImportsAsClassAttributes()
+        
+    def getImportedModules(self):    
+        # Finds imported modules where this class is instantiated
+        self.imported_modules = {name: obj for name, obj in self.globalScope.items() if not name.startswith("__")}
     
-    def findFileNameAndLineNumber(self):
-        here = self.os.path.abspath(__file__)
-        for frame in self.inspect.stack():
-            if self.os.path.abspath(frame.filename) != here:
-                self.callerFileName = frame.filename
-                self.callerLineNumber = frame.lineno
-                break
-    
-    def retrieveLinesOfCodeBeforeCall(self):          
-        with open(self.callerFileName, 'r') as f:
-            lines = f.readlines()
-            self.lines = lines[:self.callerLineNumber - 1]
-            
-    # Get the words after instances of 'import', ignoring spaces and commas
-
-    def __init__(self, *args):
-        for idx, value in enumerate(args):            
-            attr_name = getattr(value, "__name__", f"arg_{idx}")
-            setattr(self, attr_name, value) 
+    def setImportsAsClassAttributes(self):
+        for name, obj in self.imported_modules.items():
+            setattr(self, name, obj)

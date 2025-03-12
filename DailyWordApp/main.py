@@ -4,24 +4,21 @@ from datetime import datetime
 import json
 import platform
 import inspect
+import re
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QScrollArea
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontMetrics, QCursor, QTextDocument, QTextOption
 
-from utils.utils import readJSONfile, getBaseDir, storeDependencies, softHyphenateLongWords, get_lines_above
+from utils.utils import readJSONfile, getBaseDir, StoreDependencies, softHyphenateLongWords
 from utils.utils_UI import SystemScalingFactors, DefineUIsizes, DefineFontSizes,  StaticText, centerWindowOnScreen, MakeTextWithMaxHeight
 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 
-above = get_lines_above(inspect)
-print(above)
-
-
-# Can make a function that finds all instances of "import" above this line, and then gets all the dependencies this way, automatically
-dep = storeDependencies(getBaseDir, sys, os, readJSONfile, json, QFont, QFontMetrics, Qt,  StaticText, QLabel, QApplication, platform, QCursor, QVBoxLayout, QTextDocument, QTextOption, QScrollArea, softHyphenateLongWords, MakeTextWithMaxHeight)
+dep = StoreDependencies(globals())
+print(dep.QMainWindow)
 
 def runDailyWordApp():
 
