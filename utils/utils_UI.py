@@ -1,18 +1,18 @@
-class SystemScalingFactors():
-    def __init__(self,dep,app):
-        # Inputs
-        self.dep = dep
-        self.app = app
-        # Initializer methods
-        self.getScaleFactors()
+# class SystemScalingFactors():
+#     def __init__(self,dep,app):
+#         # Inputs
+#         self.dep = dep
+#         self.app = app
+#         # Initializer methods
+#         self.getScaleFactors()
 
-    def getScaleFactors(self):
-        self.dpi_base = 96
-        screen = self.app.primaryScreen()
-        self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
-        # self.fontScaleFactor = self.screenDPI / self.dpi_base
-        self.fontScaleFactor = screen.devicePixelRatio()
-        self.UIelementsScaleFactor = self.screenDPI / 25.4
+#     def getScaleFactors(self):
+#         self.dpi_base = 96
+#         screen = self.app.primaryScreen()
+#         self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
+#         # self.fontScaleFactor = self.screenDPI / self.dpi_base
+#         self.fontScaleFactor = screen.devicePixelRatio()
+#         self.UIelementsScaleFactor = self.screenDPI / 25.4
 
 class DefineFontSizes:
     def __init__(self,QApplication):
@@ -35,16 +35,21 @@ class DefineUIsizes:
     def __init__(self):
         # Initializer methods
         self.defineSizes()
+        self.setSizesAsObjectAttributes()
 
     def defineSizes(self):    
         self.sizesInputs = {
-        "padding_small": 10,
-        "padding_medium": 20,
-        "padding_large": 40,
+        "pad_small": 5,
+        "pad_medium": 10,
+        "pad_large": 20,
         "maxButtonWidth_small": 100,
         "maxButtonWidth_med": 200,
         "maxButtonWidth_large": 300
         }
+        
+    def setSizesAsObjectAttributes(self):
+        for name, obj in self.sizesInputs.items():
+            setattr(self, name, obj)
 
 # Create static text boxes
 class StaticText:
