@@ -8,8 +8,8 @@ class SystemScalingFactors():
 
     def getScaleFactors(self):
         self.dpi_base = 96
-        screen = self.app.primaryScreen()
-        self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
+        screen = self.app.screenAt(self.dep.QCursor.pos())
+        self.screenDPI = screen.logicalDotsPerInch()
         # self.fontScaleFactor = self.screenDPI / self.dpi_base
         self.fontScaleFactor = screen.devicePixelRatio()
         self.UIelementsScaleFactor = self.screenDPI / 25.4
