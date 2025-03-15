@@ -6,15 +6,6 @@
 #         # Initializer methods
 #         self.getScaleFactors()
 
-<<<<<<< HEAD
-    def getScaleFactors(self):
-        self.dpi_base = 96
-        screen = self.app.screenAt(self.dep.QCursor.pos())
-        self.screenDPI = screen.logicalDotsPerInch()
-        # self.fontScaleFactor = self.screenDPI / self.dpi_base
-        self.fontScaleFactor = screen.devicePixelRatio()
-        self.UIelementsScaleFactor = self.screenDPI / 25.4
-=======
 #     def getScaleFactors(self):
 #         self.dpi_base = 96
 #         screen = self.app.primaryScreen()
@@ -22,7 +13,6 @@
 #         # self.fontScaleFactor = self.screenDPI / self.dpi_base
 #         self.fontScaleFactor = screen.devicePixelRatio()
 #         self.UIelementsScaleFactor = self.screenDPI / 25.4
->>>>>>> 5d280cc4a9dc7ee714106245cf5c260767a89bc9
 
 class DefineFontSizes:
     def __init__(self,QApplication):
@@ -142,6 +132,7 @@ class MakeTextWithMaxHeight:
         self.scroll_area.setWidgetResizable(True)             
         self.scroll_area.setHorizontalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOff)  
         self.scroll_area.setVerticalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOn) 
+        self.scroll_area.setMaximumHeight(self.maxHeight)
         self.scroll_area.show()                
     
 def centerWindowOnScreen(window,QApplication):

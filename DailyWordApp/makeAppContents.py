@@ -15,7 +15,7 @@ def makeAppContents(dep,window,fonts,UIsizes):
     layout.addSpacing(UIsizes.pad_small)
     
     text = "HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello"
-    ts = dep.MakeTextWithMaxHeight(dep,fonts,"default",text,400,300)
+    ts = dep.MakeTextWithMaxHeight(dep,fonts,"default",text,600,250)
     ts_wordOfDay = ts.makeScrollableText()
     layout.addWidget(ts_wordOfDay)
     
