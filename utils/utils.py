@@ -10,11 +10,6 @@ def getBaseDir(sys,os):
     else:
         return os.getcwd()  # Default to current working directory if __file__ is missing
     
-class storeDependencies:
-    def __init__(self, *args):
-        for idx, value in enumerate(args):            
-            attr_name = getattr(value, "__name__", f"arg_{idx}")
-            setattr(self, attr_name, value) 
 
 def readJSONfile(json,filepath):
     try:
@@ -23,3 +18,30 @@ def readJSONfile(json,filepath):
             return data
     except (json.JSONDecodeError, FileNotFoundError, IOError):
         return None   
+    
+def softHyphenateLongWords(text, max_word_length=15):
+    # Add soft hyphens to long words, which are only used if the word needs to be wrapped
+    words = text.split()  # Split text by spaces
+    wrapped_words = []
+    for word in words:
+        if len(word) > max_word_length:
+            # Insert soft hyphens at every max_word_length characters for long words
+            wrapped_word = '\u00AD'.join([word[i:i+max_word_length] for i in range(0, len(word), max_word_length)]) # list comprehensions for storing each part of the long word, and then using join to join them all with soft hyphens in between
+            wrapped_words.append(wrapped_word)
+        else:
+            wrapped_words.append(word)
+    # Join words back with spaces
+    return ' '.join(wrapped_words)
+class StoreDependencies:
+    def __init__(self,globalScope):
+        self.globalScope = globalScope
+        self.getImportedModules()
+        self.setImportsAsClassAttributes()
+        
+    def getImportedModules(self):    
+        # Finds imported modules where this class is instantiated
+        self.imported_modules = {name: obj for name, obj in self.globalScope.items() if not name.startswith("__")}
+    
+    def setImportsAsClassAttributes(self):
+        for name, obj in self.imported_modules.items():
+            setattr(self, name, obj)

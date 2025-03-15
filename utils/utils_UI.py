@@ -1,11 +1,12 @@
-class SystemScalingFactors():
-    def __init__(self,dep,app):
-        # Inputs
-        self.dep = dep
-        self.app = app
-        # Initializer methods
-        self.getScaleFactors()
+# class SystemScalingFactors():
+#     def __init__(self,dep,app):
+#         # Inputs
+#         self.dep = dep
+#         self.app = app
+#         # Initializer methods
+#         self.getScaleFactors()
 
+<<<<<<< HEAD
     def getScaleFactors(self):
         self.dpi_base = 96
         screen = self.app.screenAt(self.dep.QCursor.pos())
@@ -13,68 +14,136 @@ class SystemScalingFactors():
         # self.fontScaleFactor = self.screenDPI / self.dpi_base
         self.fontScaleFactor = screen.devicePixelRatio()
         self.UIelementsScaleFactor = self.screenDPI / 25.4
+=======
+#     def getScaleFactors(self):
+#         self.dpi_base = 96
+#         screen = self.app.primaryScreen()
+#         self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
+#         # self.fontScaleFactor = self.screenDPI / self.dpi_base
+#         self.fontScaleFactor = screen.devicePixelRatio()
+#         self.UIelementsScaleFactor = self.screenDPI / 25.4
+>>>>>>> 5d280cc4a9dc7ee714106245cf5c260767a89bc9
 
 class DefineFontSizes:
-    def __init__(self,scalingFactor,Qfont):
-        self.scalingFactor = scalingFactor
-        self.Qfont = Qfont 
-        self.fontFamily = "Arial"
-        # Initializer methods
-        self.defineFontSizes()
-        self.convertFontSizes()
-        self.makeFonts()
-
-    def defineFontSizes(self):
-        self.fontSizes = {str(num): num for num in range(5, 16)}
-
-    def convertFontSizes(self):
-        self.fontSizes = {key: value * self.scalingFactor for key, value in self.fontSizes.items()}
-
-    def makeFonts(self):
-        # Make standard fonts
-        self.fonts = {key: self.Qfont(self.fontFamily, int(size), self.Qfont.Normal, False) 
-            for key, size in self.fontSizes.items()}
-        # Make bold fonts
-        self.fonts.update({
-        f"{key}_bold": self.Qfont(self.fontFamily, int(size), self.Qfont.Bold, False) 
-            for key, size in self.fontSizes.items()
-        })
-
-    def returnFonts(self):        
-        return self.fonts
+    def __init__(self,QApplication):
+        self.QApplication = QApplication
+        self.getSystemDefaultFont()
+        self.defineDefaultFontSize()
+        self.defineFontScalers()
+         
+    def getSystemDefaultFont(self):
+        self.default_font = self.QApplication.font()
+        
+    def defineDefaultFontSize(self): 
+        scaleFactor = 2   
+        self.defaultFontSize = self.default_font.pointSize()*scaleFactor
+        
+    def defineFontScalers(self):    
+        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
 
 class DefineUIsizes:
-    def __init__(self,scalingFactor):
-        self.scalingFactor = scalingFactor
-        # Initializer methods
-        self.defineSizes_mm()
-        self.convert_mmToPixels()
-
-    def defineSizes_mm(self):    
-        self.sizesInputs = {
-        "padding_small": 10,
-        "padding_medium": 20,
-        "padding_large": 40
-        }
-
-    def convert_mmToPixels(self):    
-        self.UIsizes = {key: value * self.scalingFactor for key, value in self.sizesInputs.items()}
-
-    def returnSizes(self):        
-        return self.UIsizes
- 
-class Boundaries:
     def __init__(self):
-        self.bottom = 0
-        self.right = 0
-        self.savePoints = {}
+        # Initializer methods
+        self.defineSizes()
+        self.setSizesAsObjectAttributes()
 
-    def storeBoundaries(self,bottom,right,new=None):
-        self.bottom = max(self.bottom,bottom)
-        self.right = max(self.right,right)
-        if new is not None:
-            self.savePoints.update(new)
+    def defineSizes(self):    
+        self.sizesInputs = {
+        "pad_small": 5,
+        "pad_medium": 10,
+        "pad_large": 20,
+        "maxButtonWidth_small": 100,
+        "maxButtonWidth_med": 200,
+        "maxButtonWidth_large": 300
+        }
+        
+    def setSizesAsObjectAttributes(self):
+        for name, obj in self.sizesInputs.items():
+            setattr(self, name, obj)
 
+# Create static text boxes
+class StaticText:
+    def __init__(self, dep, fontSize, text, textAlignment):
+        # Input values
+        self.dep = dep
+        self.fontSize = fontSize
+        self.text = text
+        self.textAlignment = textAlignment
+        # Default values        
+        self.color = 'black'    
+        self.wordWrap = True    
+        # Initialize some variables
+        self.positionAdjust = None
+        self.Vcenter = None
+        self.Hcenter = None    
+        # Constructor functions
+    
+    def makeTextObject(self):
+        textOb = self.dep.QLabel(self.text)
+        textOb.setWordWrap(self.wordWrap)    
+        font = self.dep.QFont()
+        font.setPointSizeF(self.fontSize)  # or .setPointSize(12)
+        textOb.setFont(font)
+        textOb.setAlignment(self.textAlignment)
+        textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
+        textOb.show()
+        return textOb        
+
+class MakeTextWithMaxHeight:
+    def __init__(self, dep, fonts, fontSize, text, maxWidth, maxHeight):
+        # Inputs and default parameters
+        self.dep = dep
+        self.fonts = fonts
+        self.fontSize = fontSize 
+        self.maxWidth = maxWidth
+        self.maxHeight = maxHeight
+        self.textAlignment = dep.Qt.AlignLeft
+        self.setWordWrap = True
+        self.text = dep.softHyphenateLongWords(text)
+        # Initializer methods
+        self.makeFont()
+        self.makeDummyTextDoc()   
+        self.getHeightOfDummyTextDoc()     
+        self.makeTextObject()  
+        
+    def makeFont(self):
+        self.font = self.dep.QFont()
+        fontSize = self.fonts.defaultFontSize * self.fonts.fontScalers[self.fontSize]
+        self.font.setPointSizeF(fontSize) 
+        
+    def makeDummyTextDoc(self):      
+        self.doc = self.dep.QTextDocument()
+        text_option = self.dep.QTextOption(self.textAlignment)
+        text_option.setWrapMode(self.dep.QTextOption.WordWrap)
+        self.doc.setDefaultTextOption(text_option)
+        self.doc.setDefaultFont(self.font)
+        self.doc.setTextWidth(self.maxWidth)
+        self.doc.setPlainText(self.text)
+        
+    def getHeightOfDummyTextDoc(self):   
+        self.height = self.doc.size().height()  
+        
+    def makeTextObject(self):
+        fontScaler = self.fonts.fontScalers[self.fontSize]        
+        t = self.dep.StaticText(self.dep, self.fonts.defaultFontSize*fontScaler, self.text, self.textAlignment )     
+        self.t_wordOfDay = t.makeTextObject()
+        self.t_wordOfDay.setMaximumWidth(self.maxWidth)
+            
+    def makeScrollableText(self):
+        if self.height > self.maxHeight:
+            self.makeVerticalScrollBar()
+            self.scroll_area.setWidget(self.t_wordOfDay)
+        else:
+            self.scroll_area = self.t_wordOfDay
+        return self.scroll_area    
+    
+    def makeVerticalScrollBar(self):
+        self.scroll_area = self.dep.QScrollArea()
+        self.scroll_area.setWidgetResizable(True)             
+        self.scroll_area.setHorizontalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOff)  
+        self.scroll_area.setVerticalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOn) 
+        self.scroll_area.show()                
+    
 def centerWindowOnScreen(window,QApplication):
     frameGm = window.frameGeometry()
     screen = QApplication.primaryScreen()
@@ -82,54 +151,3 @@ def centerWindowOnScreen(window,QApplication):
     frameGm.moveCenter(centerPoint)
     window.move(frameGm.topLeft())           
 
-# Create static text boxes
-class StaticText:
-    def __init__(self, dep, window, font, text, position, textAlignment):
-        # Input values
-        self.dep = dep
-        self.window = window
-        self.font = font
-        self.text = text
-        self.textAlignment = textAlignment
-        self.position = position
-        # Default values        
-        self.fontMetrics = self.dep.QFontMetrics(font)  
-        self.color = 'black'        
-        # Initialize some variables
-        self.positionAdjust = None
-        self.Vcenter = None
-        self.Hcenter = None    
-        # Constructor functions
-        self.getActualPosition()
-        self.getVandHcenter()
-
-    def getActualPosition(self):
-        if self.position[2] > 0:
-            bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.position[2]),int(self.position[3]), self.textAlignment | Qt.TextWordWrap, self.text)       
-        else:
-            bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.position[2]),int(self.position[3]), self.textAlignment, self.text)       
-        self.positionAdjust = [int(self.position[0]), int(self.position[1]), int(bounding_rect.width()), int(bounding_rect.height())]
-
-    def getVandHcenter(self):
-        self.Hcenter = self.positionAdjust[0] + self.positionAdjust[2]/2
-        self.Vcenter = self.positionAdjust[1] + self.positionAdjust[3]/2
-
-    def centerAlign_V(self):
-        self.positionAdjust[1] = int(self.positionAdjust[1] - self.positionAdjust[3]/2)
-
-    def centerAlign_H(self):
-        self.positionAdjust[0] = int(self.positionAdjust[0] - self.positionAdjust[2]/2)
-
-    def alignBottom(self):
-        self.positionAdjust[1] = int(self.positionAdjust[1] - self.positionAdjust[3])
-            
-    def makeTextObject(self):
-        textOb = self.dep.QLabel(self.text, self.window)
-        textOb.setWordWrap(True)    
-        textOb.setFont(self.font)
-        textOb.setAlignment(self.textAlignment)
-        textOb.setGeometry(*self.positionAdjust) 
-        textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
-        textOb.show()
-        return textOb        
-    

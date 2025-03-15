@@ -1,11 +1,25 @@
-def makeAppContents(dep,window,UIsizes,fonts,boundaries):
+def makeAppContents(dep,window,fonts,UIsizes):
+    
+    layout = dep.QVBoxLayout(window)
+    
+    layout.addSpacing(UIsizes.pad_large)
 
     # Title - "word:"
     text = 'Word:'
-    textAlignment = dep.Qt.AlignLeft | dep.Qt.AlignTop    
-    textPos = (UIsizes["padding_large"], UIsizes["padding_large"], 0, 0)
-    ST_wordTitle = dep.StaticText(dep,window,fonts["15"],text,textPos,textAlignment)     
-    ST_wordTitle.makeTextObject()
+    textAlignment = dep.Qt.AlignLeft
+    fontScaler = fonts.fontScalers["small"]
+    t = dep.StaticText(dep,fonts.defaultFontSize*fontScaler,text,textAlignment)     
+    t_wordTitle = t.makeTextObject()
+    layout.addWidget(t_wordTitle)
+    
+    layout.addSpacing(UIsizes.pad_small)
+    
+    text = "HelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHelloHello"
+    ts = dep.MakeTextWithMaxHeight(dep,fonts,"default",text,400,300)
+    ts_wordOfDay = ts.makeScrollableText()
+    layout.addWidget(ts_wordOfDay)
+    
 
-    boundaries.storeBoundaries(ST_wordTitle.positionAdjust[1] + ST_wordTitle.positionAdjust[3],
-                               ST_wordTitle.positionAdjust[0] + ST_wordTitle.positionAdjust[1])
+
+            
+
