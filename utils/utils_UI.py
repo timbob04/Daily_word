@@ -1,19 +1,3 @@
-# class SystemScalingFactors():
-#     def __init__(self,dep,app):
-#         # Inputs
-#         self.dep = dep
-#         self.app = app
-#         # Initializer methods
-#         self.getScaleFactors()
-
-#     def getScaleFactors(self):
-#         self.dpi_base = 96
-#         screen = self.app.primaryScreen()
-#         self.screenDPI = screen.logicalDotsPerInch() * screen.devicePixelRatio()
-#         # self.fontScaleFactor = self.screenDPI / self.dpi_base
-#         self.fontScaleFactor = screen.devicePixelRatio()
-#         self.UIelementsScaleFactor = self.screenDPI / 25.4
-
 class DefineFontSizes:
     def __init__(self,QApplication):
         self.QApplication = QApplication
