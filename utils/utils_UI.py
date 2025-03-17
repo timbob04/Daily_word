@@ -1,19 +1,26 @@
 class DefineFontSizes:
-    def __init__(self,QApplication):
+    def __init__(self,QApplication,dep):
+        # Input values
         self.QApplication = QApplication
+        self.dep = dep
+        # Default values
+        self.extraScaleFactor = 1.33
+        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
+        # Constructor functions
         self.getSystemDefaultFont()
+        self.getScreenDPI()
         self.defineDefaultFontSize()
-        self.defineFontScalers()
-         
+
     def getSystemDefaultFont(self):
         self.default_font = self.QApplication.font()
+
+    def getScreenDPI(self):    
+        screen = self.QApplication.primaryScreen()
+        dpi = screen.logicalDotsPerInch()
+        self.DPIscaleFactor = dpi / 96  # Normalize to 96 (standard) DPI
         
-    def defineDefaultFontSize(self): 
-        scaleFactor = 2   
-        self.defaultFontSize = self.default_font.pointSize()*scaleFactor
-        
-    def defineFontScalers(self):    
-        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
+    def defineDefaultFontSize(self):         
+        self.defaultFontSize = self.default_font.pointSize()*self.DPIscaleFactor*self.extraScaleFactor
 
 class DefineUIsizes:
     def __init__(self):
@@ -61,7 +68,7 @@ class StaticText:
         textOb.setAlignment(self.textAlignment)
         textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
         textOb.show()
-        return textOb        
+        return textOb       
 
 class MakeTextWithMaxHeight:
     def __init__(self, dep, fonts, fontSize, text, maxWidth, maxHeight):
@@ -99,7 +106,7 @@ class MakeTextWithMaxHeight:
         
     def makeTextObject(self):
         fontScaler = self.fonts.fontScalers[self.fontSize]        
-        t = self.dep.StaticText(self.dep, self.fonts.defaultFontSize*fontScaler, self.text, self.textAlignment )     
+        t = self.dep.StaticText(self.dep, self.fonts.defaultFontSize*fontScaler, self.text, self.textAlignment)     
         self.t_wordOfDay = t.makeTextObject()
         self.t_wordOfDay.setMaximumWidth(self.maxWidth)
             
@@ -124,5 +131,35 @@ def centerWindowOnScreen(window,QApplication):
     screen = QApplication.primaryScreen()
     centerPoint = screen.availableGeometry().center()
     frameGm.moveCenter(centerPoint)
-    window.move(frameGm.topLeft())           
+    window.move(frameGm.topLeft())         
 
+class GetAppSizeUsingSentence:
+    def __init__(self,dep,fonts,sentence):
+        # Input values  
+        self.dep = dep        
+        self.fonts = fonts
+        self.sentence = sentence
+        # Constructor functions
+        self.makeFont()
+        self.getSentenceWidth()
+        self.getScreenSize()
+        self.getAppWidth()
+
+    def makeFont(self):
+        self.font = self.dep.QFont()
+        fontSize = self.fonts.defaultFontSize * self.fonts.fontScalers["default"]
+        self.font.setPointSizeF(fontSize)
+
+    def getSentenceWidth(self):
+        fontMetrics = self.dep.QFontMetrics(self.font)
+        boundingRect = fontMetrics.boundingRect(self.sentence)
+        self.sentenceWidth = boundingRect.width()
+
+    def getScreenSize(self):
+        screen = self.dep.QApplication.primaryScreen()
+        self.screenSize = screen.size()
+        self.screenWidth = self.screenSize.width()
+        self.screenHeight = self.screenSize.height()
+
+    def getAppWidth(self):
+        self.appWidth = min(self.sentenceWidth,self.screenWidth)

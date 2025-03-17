@@ -2,14 +2,14 @@ def makeAppContents(dep,window,fonts,UIsizes):
 
     # Input parameters
     wordBoxMaxWidth = 600
-    wordBoxMaxHeight = 250
+    wordBoxMaxHeight = 300
 
     layout = dep.QVBoxLayout(window)
     
     layout.addSpacing(UIsizes.pad_small)
 
     # Title - "Word:"
-    text = 'Word:'
+    text = 'There once was a man who lived in a boat, who then died'
     textAlignment = dep.Qt.AlignLeft
     fontScaler = fonts.fontScalers["small"]
     t = dep.StaticText(dep,fonts.defaultFontSize*fontScaler,text,textAlignment)     
@@ -43,4 +43,8 @@ def makeAppContents(dep,window,fonts,UIsizes):
     layout.addWidget(ts_defintion)
 
             
+
+
+
+
 
