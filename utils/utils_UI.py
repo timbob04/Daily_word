@@ -23,33 +23,42 @@ class DefineFontSizes:
         self.defaultFontSize = self.default_font.pointSize()*self.DPIscaleFactor*self.extraScaleFactor
 
 class DefineUIsizes:
-    def __init__(self):
+    def __init__(self,appSizeOb):
+        # Input values
+        self.appSizeOb = appSizeOb
         # Initializer methods
         self.defineSizes()
+        self.defineSizesRelToAppSize()
         self.setSizesAsObjectAttributes()
 
     def defineSizes(self):    
         self.sizesInputs = {
-        "pad_small": 5,
-        "pad_medium": 10,
-        "pad_large": 20,
-        "maxButtonWidth_small": 100,
-        "maxButtonWidth_med": 200,
-        "maxButtonWidth_large": 300
+        "pad_small": 0.01,
+        "pad_medium": 0.02,
+        "pad_large": 0.04,
         }
-        
+
+    def defineSizesRelToAppSize(self):  
+        # Create new dictionary with scaled values
+        self.sizesScaled = {
+            name: obj * self.appSizeOb.sentenceWidth 
+            for name, obj in self.sizesInputs.items()
+        }
+
     def setSizesAsObjectAttributes(self):
-        for name, obj in self.sizesInputs.items():
+        for name, obj in self.sizesScaled.items():
             setattr(self, name, obj)
 
-# Create static text boxes
+
 class StaticText:
-    def __init__(self, dep, fontSize, text, textAlignment):
+    def __init__(self, dep, window, fontSize, text, textAlignment, textPos):
         # Input values
         self.dep = dep
+        self.window = window
         self.fontSize = fontSize
         self.text = text
         self.textAlignment = textAlignment
+        self.textPos = textPos
         # Default values        
         self.color = 'black'    
         self.wordWrap = True    
@@ -58,74 +67,120 @@ class StaticText:
         self.Vcenter = None
         self.Hcenter = None    
         # Constructor functions
-    
+        self.makeFont()
+        self.getActualPosition()
+        self.makeTextObject()
+
+    def makeFont(self):
+        self.font = self.dep.QFont()
+        self.font.setPointSizeF(self.fontSize)
+        self.fontMetrics = self.dep.QFontMetrics(self.font) 
+
+    def getActualPosition(self):
+        if self.textPos[2] > 0:
+            bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.textPos[2]),int(self.textPos[3]), self.textAlignment | self.dep.Qt.TextWordWrap, self.text)       
+        else:
+            bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.textPos[2]),int(self.textPos[3]), self.textAlignment, self.text)       
+        self.positionAdjust = [int(self.textPos[0]), int(self.textPos[1]), int(bounding_rect.width()), int(bounding_rect.height())]
+
     def makeTextObject(self):
-        textOb = self.dep.QLabel(self.text)
-        textOb.setWordWrap(self.wordWrap)    
-        font = self.dep.QFont()
-        font.setPointSizeF(self.fontSize)  # or .setPointSize(12)
-        textOb.setFont(font)
-        textOb.setAlignment(self.textAlignment)
-        textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
-        textOb.show()
-        return textOb       
+        self.textOb = self.dep.QLabel(self.text, self.window)
+        self.textOb.setWordWrap(self.wordWrap)    
+        self.textOb.setGeometry(*self.positionAdjust)
+        self.textOb.setFont(self.font)
+        self.textOb.setAlignment(self.textAlignment)
+        self.textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
+        self.textOb.hide()
+        return self.textOb      
+
+    def getVandHcenter(self):
+        self.Hcenter = self.positionAdjust[0] + self.positionAdjust[2]/2
+        self.Vcenter = self.positionAdjust[1] + self.positionAdjust[3]/2
+
+    def centerAlign_V(self):
+        self.positionAdjust[1] = int(self.positionAdjust[1] - self.positionAdjust[3]/2)
+
+    def centerAlign_H(self):
+        self.positionAdjust[0] = int(self.positionAdjust[0] - self.positionAdjust[2]/2)
+
+    def alignBottom(self):
+        self.positionAdjust[1] = int(self.positionAdjust[1] - self.positionAdjust[3])
+    
+    def showTextObject(self):
+        self.textOb.show()
+
+    def hideTextObject(self):
+        self.textOb.hide()
 
 class MakeTextWithMaxHeight:
-    def __init__(self, dep, fonts, fontSize, text, maxWidth, maxHeight):
-        # Inputs and default parameters
+    def __init__(self, dep, window, fonts, fontSize, text, position, maxHeight):
+        # Inputs
         self.dep = dep
+        self.window = window
         self.fonts = fonts
         self.fontSize = fontSize 
-        self.maxWidth = maxWidth
+        self.position = position
         self.maxHeight = maxHeight
+        self.maxWidth = position[2]  # Width from position tuple
+        # Default parameters
         self.textAlignment = dep.Qt.AlignLeft
         self.setWordWrap = True
         self.text = dep.softHyphenateLongWords(text)
         # Initializer methods
         self.makeFont()
-        self.makeDummyTextDoc()   
-        self.getHeightOfDummyTextDoc()     
-        self.makeTextObject()  
+        self.getTextHeight()   
+        self.makeScrollableText()     
         
     def makeFont(self):
         self.font = self.dep.QFont()
         fontSize = self.fonts.defaultFontSize * self.fonts.fontScalers[self.fontSize]
         self.font.setPointSizeF(fontSize) 
+        self.fontMetrics = self.dep.QFontMetrics(self.font)
+
+    def getTextHeight(self):
+        boundingRect = self.fontMetrics.boundingRect(0, 0, int(self.position[2]), 0, self.textAlignment | self.dep.Qt.TextWordWrap, self.text)     
+        self.textHeight = boundingRect.height()
         
-    def makeDummyTextDoc(self):      
-        self.doc = self.dep.QTextDocument()
-        text_option = self.dep.QTextOption(self.textAlignment)
-        text_option.setWrapMode(self.dep.QTextOption.WordWrap)
-        self.doc.setDefaultTextOption(text_option)
-        self.doc.setDefaultFont(self.font)
-        self.doc.setTextWidth(self.maxWidth)
-        self.doc.setPlainText(self.text)
-        
-    def getHeightOfDummyTextDoc(self):   
-        self.height = self.doc.size().height()  
-        
-    def makeTextObject(self):
-        fontScaler = self.fonts.fontScalers[self.fontSize]        
-        t = self.dep.StaticText(self.dep, self.fonts.defaultFontSize*fontScaler, self.text, self.textAlignment)     
-        self.t_wordOfDay = t.makeTextObject()
-        self.t_wordOfDay.setMaximumWidth(self.maxWidth)
-            
     def makeScrollableText(self):
-        if self.height > self.maxHeight:
+        if self.textHeight > self.maxHeight:
             self.makeVerticalScrollBar()
-            self.scroll_area.setWidget(self.t_wordOfDay)
+            self.makeTextObject(in_scroll_area=True)
+            self.scroll_area.setWidget(self.t_wordOfDay.textOb)
+            return self.scroll_area
         else:
-            self.scroll_area = self.t_wordOfDay
-        return self.scroll_area    
+            self.makeTextObject(in_scroll_area=False)
+            return self.t_wordOfDay.textOb
     
     def makeVerticalScrollBar(self):
-        self.scroll_area = self.dep.QScrollArea()
+        self.scroll_area = self.dep.QScrollArea(self.window)
         self.scroll_area.setWidgetResizable(True)             
         self.scroll_area.setHorizontalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOff)  
-        self.scroll_area.setVerticalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOn) 
-        self.scroll_area.setMaximumHeight(self.maxHeight)
-        self.scroll_area.show()                
-    
+        self.scroll_area.setVerticalScrollBarPolicy(self.dep.Qt.ScrollBarAlwaysOn)
+        # Set geometry for scroll area
+        x, y, width, _ = self.position
+        self.scroll_area.setGeometry(int(x), int(y), int(width), int(self.maxHeight))
+        self.scroll_area.hide()
+        
+    def makeTextObject(self, in_scroll_area):
+        if in_scroll_area:
+            # For scroll area, create widget that can be larger than visible area
+            position = [0, 0, self.maxWidth, self.textHeight]
+            parent = self.scroll_area
+        else:
+            # For normal display, use original position
+            position = self.position
+            parent = self.window
+            
+        self.t_wordOfDay = self.dep.StaticText(self.dep, parent, 
+                                              self.fonts.defaultFontSize*self.fonts.fontScalers[self.fontSize], 
+                                              self.text, self.textAlignment, position)
+
+    def showTextObject(self):
+        if self.textHeight > self.maxHeight:
+            self.scroll_area.show()
+        self.t_wordOfDay.showTextObject()
+
+
 def centerWindowOnScreen(window,QApplication):
     frameGm = window.frameGeometry()
     screen = QApplication.primaryScreen()
@@ -133,27 +188,33 @@ def centerWindowOnScreen(window,QApplication):
     frameGm.moveCenter(centerPoint)
     window.move(frameGm.topLeft())         
 
-class GetAppSizeUsingSentence:
-    def __init__(self,dep,fonts,sentence):
+class AppSize:
+    def __init__(self,dep,fonts,sentence,numLines):
         # Input values  
         self.dep = dep        
         self.fonts = fonts
         self.sentence = sentence
+        self.numLines = numLines
         # Constructor functions
         self.makeFont()
-        self.getSentenceWidth()
+        self.getSentenceWidthAndHeight()
+        self.getAppHeight()
         self.getScreenSize()
-        self.getAppWidth()
-
+        
     def makeFont(self):
         self.font = self.dep.QFont()
         fontSize = self.fonts.defaultFontSize * self.fonts.fontScalers["default"]
         self.font.setPointSizeF(fontSize)
 
-    def getSentenceWidth(self):
-        fontMetrics = self.dep.QFontMetrics(self.font)
-        boundingRect = fontMetrics.boundingRect(self.sentence)
+    def getSentenceWidthAndHeight(self):
+        self.fontMetrics = self.dep.QFontMetrics(self.font)
+        boundingRect = self.fontMetrics.boundingRect(self.sentence)
         self.sentenceWidth = boundingRect.width()
+        self.sentenceHeight = boundingRect.height()
+        
+    def getAppHeight(self):
+        self.lineSpacing = self.fontMetrics.lineSpacing() 
+        self.appHeight = self.lineSpacing * self.numLines
 
     def getScreenSize(self):
         screen = self.dep.QApplication.primaryScreen()
@@ -161,5 +222,3 @@ class GetAppSizeUsingSentence:
         self.screenWidth = self.screenSize.width()
         self.screenHeight = self.screenSize.height()
 
-    def getAppWidth(self):
-        self.appWidth = min(self.sentenceWidth,self.screenWidth)

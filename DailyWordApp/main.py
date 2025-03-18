@@ -26,7 +26,7 @@ from utils.utils import (
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
-    GetAppSizeUsingSentence
+    AppSize
 )
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
@@ -42,19 +42,21 @@ def runDailyWordApp():
     SetWindowTitle(window, datetime)
 
     fonts = DefineFontSizes(QApplication,dep)
-    UIsizes = DefineUIsizes()
+    
+    # Define size of app using sentence and number of lines
+    sentence = "0000000000000000000000000000000000000000000000000000000"
+    numLines = 20
+    appSizeOb = AppSize(dep,fonts,sentence,numLines)
 
-    # Define size of app using sentence
-    sentence = "There once was a man who lived in a boat, who then died"
-    appSizeOb = GetAppSizeUsingSentence(dep,fonts,sentence)
+    UIsizes = DefineUIsizes(appSizeOb)
 
     # Get daily word and daily priority word
     dailyWord = DailyWord(dep)
     dailyPriorityWord = DailyPriorityWord(dep)
 
-    # makeAppContents(dep, central_widget, fonts, UIsizes)   
+    makeAppContents(dep, window, fonts, UIsizes, appSizeOb)   
 
-    window.resize(appSizeOb.appWidth,appSizeOb.appWidth)
+    window.resize(appSizeOb.sentenceWidth,appSizeOb.appHeight)
 
     window.show()
     centerWindowOnScreen(window, QApplication)
