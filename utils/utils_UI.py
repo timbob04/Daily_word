@@ -8,16 +8,23 @@ class DefineFontSizes:
         self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
         # Constructor functions
         self.getSystemDefaultFont()
+        self.getBaseDPI()
         self.getScreenDPI()
         self.defineDefaultFontSize()
 
     def getSystemDefaultFont(self):
         self.default_font = self.QApplication.font()
 
+    def getBaseDPI(self):
+        if self.dep.sys.platform == "win32":
+            self.baseDPI = 96
+        else:
+            self.baseDPI = 72
+
     def getScreenDPI(self):    
         screen = self.QApplication.primaryScreen()
         dpi = screen.logicalDotsPerInch()
-        self.DPIscaleFactor = dpi / 96  # Normalize to 96 (standard) DPI
+        self.DPIscaleFactor = dpi / self.baseDPI  # Normalize to 96 (standard) DPI
         
     def defineDefaultFontSize(self):         
         self.defaultFontSize = self.default_font.pointSize()*self.DPIscaleFactor*self.extraScaleFactor
