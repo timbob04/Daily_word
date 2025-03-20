@@ -26,7 +26,7 @@ from utils.utils import (
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
-    AppSize
+    AppSize, AppBoundaries
 )
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents

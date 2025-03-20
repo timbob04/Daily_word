@@ -4,28 +4,28 @@ class DefineFontSizes:
         self.QApplication = QApplication
         self.dep = dep
         # Default values
-        self.extraScaleFactor = 1.33
         self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
         # Constructor functions
         self.getSystemDefaultFont()
         self.getBaseDPI()
         self.getScreenDPI()
+        self.getExtraScalingFactor()
         self.defineDefaultFontSize()
 
     def getSystemDefaultFont(self):
         self.default_font = self.QApplication.font()
 
     def getBaseDPI(self):
-        if self.dep.sys.platform == "win32":
-            self.baseDPI = 96
-        else:
-            self.baseDPI = 72
+        self.baseDPI = 96 if self.dep.sys.platform == "win32" else 72
 
     def getScreenDPI(self):    
         screen = self.QApplication.primaryScreen()
         dpi = screen.logicalDotsPerInch()
         self.DPIscaleFactor = dpi / self.baseDPI  # Normalize to 96 (standard) DPI
-        
+
+    def getExtraScalingFactor(self):        
+        self.extraScaleFactor = 1.67 if self.dep.sys.platform != "win32" else 1.33
+
     def defineDefaultFontSize(self):         
         self.defaultFontSize = self.default_font.pointSize()*self.DPIscaleFactor*self.extraScaleFactor
 
@@ -153,9 +153,14 @@ class MakeTextWithMaxHeight:
             self.makeVerticalScrollBar()
             self.makeTextObject(in_scroll_area=True)
             self.scroll_area.setWidget(self.t_wordOfDay.textOb)
+            # Update position for scroll area
+            self.position = [self.scroll_area.x(), self.scroll_area.y(), 
+                           self.scroll_area.width(), self.scroll_area.height()]
             return self.scroll_area
         else:
             self.makeTextObject(in_scroll_area=False)
+            # Update position for text object
+            self.position = self.t_wordOfDay.positionAdjust
             return self.t_wordOfDay.textOb
     
     def makeVerticalScrollBar(self):
@@ -229,3 +234,16 @@ class AppSize:
         self.screenWidth = self.screenSize.width()
         self.screenHeight = self.screenSize.height()
 
+class AppBoundaries:
+    def __init__(self):
+        self.bottom = 0
+        self.right = 0
+
+    def setNewBoundaries(self, bottom=None, right=None, store=None):
+        if bottom is not None:
+            self.bottom = max(self.bottom, bottom)
+        if right is not None:
+            self.right = max(self.right, right)
+        if store:
+            for key, value in store.items():
+                setattr(self, key, value)
