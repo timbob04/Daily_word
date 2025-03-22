@@ -23,14 +23,14 @@
     {
         "word": "Portent",
         "definition": "a sign or warning that something, especially something momentous or calamitous, is likely to happen",
-        "wordShown": false,
+        "wordShown": true,
         "isPriorityWord": true,
         "priorityWordShown": true
     },
     {
         "word": "Harbinger",
         "definition": "a person or thing that announces or signals the approach of another",
-        "wordShown": false,
+        "wordShown": true,
         "isPriorityWord": false,
         "priorityWordShown": false
     }

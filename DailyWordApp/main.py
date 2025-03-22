@@ -10,7 +10,7 @@ import re
 # Third-party imports
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, 
-    QVBoxLayout, QWidget, QScrollArea
+    QVBoxLayout, QWidget, QScrollArea, QPushButton
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
@@ -26,12 +26,14 @@ from utils.utils import (
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
-    AppSize, AppBoundaries
+    AppSize, AppBoundaries, PushButton
 )
+from utils.styles import buttonStyle
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 
+# Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
 def runDailyWordApp():
@@ -56,6 +58,9 @@ def runDailyWordApp():
 
     makeAppContents(dep, window, fonts, UIsizes, appSizeOb)   
 
+    # This is now in a function, that either 1) resizes smaller to the app's content boundaries,
+    # or 2) resizes to the size of the screen and adds a scroll area if the content is too large,
+    # separately for horizontal and vertical axes (only apply if actually needed)
     window.resize(appSizeOb.sentenceWidth,appSizeOb.appHeight)
 
     window.show()

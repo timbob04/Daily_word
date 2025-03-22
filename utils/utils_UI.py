@@ -56,9 +56,8 @@ class DefineUIsizes:
         for name, obj in self.sizesScaled.items():
             setattr(self, name, obj)
 
-
 class StaticText:
-    def __init__(self, dep, window, fontSize, text, textAlignment, textPos):
+    def __init__(self, dep, window, fontSize, text, textAlignment, textPos, italic=False, bold=False):
         # Input values
         self.dep = dep
         self.window = window
@@ -69,6 +68,8 @@ class StaticText:
         # Default values        
         self.color = 'black'    
         self.wordWrap = True    
+        self.italic = italic
+        self.bold = bold
         # Initialize some variables
         self.positionAdjust = None
         self.Vcenter = None
@@ -76,19 +77,21 @@ class StaticText:
         # Constructor functions
         self.makeFont()
         self.getActualPosition()
-        self.makeTextObject()
 
     def makeFont(self):
         self.font = self.dep.QFont()
         self.font.setPointSizeF(self.fontSize)
+        self.font.setItalic(self.italic)
+        self.font.setBold(self.bold)
         self.fontMetrics = self.dep.QFontMetrics(self.font) 
 
     def getActualPosition(self):
         if self.textPos[2] > 0:
             bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.textPos[2]),int(self.textPos[3]), self.textAlignment | self.dep.Qt.TextWordWrap, self.text)       
         else:
-            bounding_rect = self.fontMetrics.boundingRect(0,0,int(self.textPos[2]),int(self.textPos[3]), self.textAlignment, self.text)       
+            bounding_rect = self.fontMetrics.boundingRect(0,0,0,0, self.textAlignment, self.text)       
         self.positionAdjust = [int(self.textPos[0]), int(self.textPos[1]), int(bounding_rect.width()), int(bounding_rect.height())]
+    
 
     def makeTextObject(self):
         self.textOb = self.dep.QLabel(self.text, self.window)
@@ -98,7 +101,7 @@ class StaticText:
         self.textOb.setAlignment(self.textAlignment)
         self.textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
         self.textOb.hide()
-        return self.textOb      
+        return self.textOb   
 
     def getVandHcenter(self):
         self.Hcenter = self.positionAdjust[0] + self.positionAdjust[2]/2
@@ -120,28 +123,30 @@ class StaticText:
         self.textOb.hide()
 
 class MakeTextWithMaxHeight:
-    def __init__(self, dep, window, fonts, fontSize, text, position, maxHeight):
+    def __init__(self, dep, window, fontSize, text, position, maxHeight, italic=False, bold=False):
         # Inputs
         self.dep = dep
         self.window = window
-        self.fonts = fonts
-        self.fontSize = fontSize 
+        self.fontSize = fontSize  # This is already the calculated font size
         self.position = position
         self.maxHeight = maxHeight
-        self.maxWidth = position[2]  # Width from position tuple
+        self.maxWidth = position[2]
         # Default parameters
         self.textAlignment = dep.Qt.AlignLeft
         self.setWordWrap = True
         self.text = dep.softHyphenateLongWords(text)
+        # Font style defaults
+        self.italic_state = italic
+        self.bold_state = bold
         # Initializer methods
         self.makeFont()
-        self.getTextHeight()   
-        self.makeScrollableText()     
-        
+        self.getTextHeight()     
+
     def makeFont(self):
         self.font = self.dep.QFont()
-        fontSize = self.fonts.defaultFontSize * self.fonts.fontScalers[self.fontSize]
-        self.font.setPointSizeF(fontSize) 
+        self.font.setPointSizeF(self.fontSize)  # Use the direct font size
+        self.font.setItalic(self.italic_state)
+        self.font.setBold(self.bold_state)
         self.fontMetrics = self.dep.QFontMetrics(self.font)
 
     def getTextHeight(self):
@@ -156,7 +161,6 @@ class MakeTextWithMaxHeight:
             # Update position for scroll area
             self.position = [self.scroll_area.x(), self.scroll_area.y(), 
                            self.scroll_area.width(), self.scroll_area.height()]
-            return self.scroll_area
         else:
             self.makeTextObject(in_scroll_area=False)
             # Update position for text object
@@ -184,14 +188,19 @@ class MakeTextWithMaxHeight:
             parent = self.window
             
         self.t_wordOfDay = self.dep.StaticText(self.dep, parent, 
-                                              self.fonts.defaultFontSize*self.fonts.fontScalers[self.fontSize], 
-                                              self.text, self.textAlignment, position)
+                                              self.fontSize,  # Use fontSize directly
+                                              self.text, self.textAlignment, position, italic=self.italic_state, bold=self.bold_state)
+        self.t_wordOfDay.makeTextObject()
 
     def showTextObject(self):
         if self.textHeight > self.maxHeight:
             self.scroll_area.show()
         self.t_wordOfDay.showTextObject()
 
+    def hideTextObject(self):
+        if self.textHeight > self.maxHeight:
+            self.scroll_area.hide()
+        self.t_wordOfDay.hideTextObject()
 
 def centerWindowOnScreen(window,QApplication):
     frameGm = window.frameGeometry()
@@ -247,3 +256,99 @@ class AppBoundaries:
         if store:
             for key, value in store.items():
                 setattr(self, key, value)
+
+class PushButton:
+    def __init__(self, dep, window, fontSize, text, position, italic=False, bold=False):
+        # Input values
+        self.dep = dep
+        self.window = window
+        self.fontSize = fontSize
+        self.text = text        
+        self.position = position
+        self.italic = italic
+        self.bold = bold
+        # Default values
+        self.buttonPaddingPer = 0.5 # padding is determined as a percentage of a single letter's width              
+        # Constructor functions
+        self.makeFont()
+        self.getButtonPaddingSize()
+        self.getButtonPosition()
+
+    def makeFont(self):
+        self.font = self.dep.QFont()
+        self.font.setPointSizeF(self.fontSize)
+        self.font.setItalic(self.italic)
+        self.font.setBold(self.bold)
+        self.fontMetrics = self.dep.QFontMetrics(self.font) 
+
+    def getButtonPaddingSize(self):   
+        boundingRect = self.fontMetrics.boundingRect(0, 0, 0, 0, self.dep.Qt.AlignHCenter, "0") 
+        self.letterWidth = boundingRect.width()
+        self.padding = int(self.letterWidth * self.buttonPaddingPer)
+
+    def getButtonPosition(self):
+        # Calculate available width for text (total width minus padding)
+        if self.position[2] > 0:
+            # If width is constrained, account for padding in available space
+            available_width = int(self.position[2]) - (2 * self.padding)
+            bounding_rect = self.fontMetrics.boundingRect(
+                0, 0, available_width, 0, 
+                self.dep.Qt.AlignCenter | self.dep.Qt.TextWordWrap, 
+                self.text
+            )
+            # Use the constrained width for button
+            button_width = int(self.position[2])
+        else:
+            # If no width constraint, get natural text width
+            bounding_rect = self.fontMetrics.boundingRect(
+                0, 0, 0, 0, 
+                self.dep.Qt.AlignCenter, 
+                self.text
+            )
+            # Add padding to both sides of text width
+            button_width = bounding_rect.width() + (2 * self.padding)
+        
+        # Height always gets padding added
+        button_height = bounding_rect.height() + (2 * self.padding)
+        
+        # Set the button bounds
+        self.positionAdjust = [
+            int(self.position[0]),
+            int(self.position[1]),
+            int(button_width),
+            int(button_height)
+        ]
+
+    def getVandHcenter(self):
+        self.Hcenter = self.positionAdjust[0] + self.positionAdjust[2]/2
+        self.Vcenter = self.positionAdjust[1] + self.positionAdjust[3]/2
+
+    def centerAlign_V(self):
+        self.positionAdjust[1] = int(self.positionAdjust[1] - self.positionAdjust[3]/2)
+
+    def centerAlign_H(self):
+        self.positionAdjust[0] = int(self.positionAdjust[0] - self.positionAdjust[2]/2)
+
+    def rightAlign(self):
+        self.positionAdjust[0] = self.positionAdjust[0] - self.positionAdjust[2] 
+
+    def bottomAlign(self):
+        self.positionAdjust[1] = self.positionAdjust[1] - self.positionAdjust[3]
+
+    def makeButton(self):
+        self.button = self.dep.QPushButton(self.text, self.window)
+        self.button.setGeometry(*(int(x) for x in self.positionAdjust))    
+        self.button.setFont(self.font)
+        if self.position[2] > 0:
+            self.button.setWordWrap(True)
+        self.button.setStyleSheet(self.dep.buttonStyle(self.padding))
+        self.button.hide()
+        return self.button
+
+    def showButton(self):
+        if hasattr(self, 'button'):
+            self.button.show()
+
+    def hideButton(self):
+        if hasattr(self, 'button'):
+            self.button.hide()
