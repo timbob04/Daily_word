@@ -33,6 +33,8 @@ class DefineUIsizes:
     def __init__(self,appSizeOb):
         # Input values
         self.appSizeOb = appSizeOb
+        # Default values
+        self.toggleWidth = None
         # Initializer methods
         self.defineSizes()
         self.defineSizesRelToAppSize()

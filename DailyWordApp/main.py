@@ -10,7 +10,8 @@ import re
 # Third-party imports
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, 
-    QVBoxLayout, QWidget, QScrollArea, QPushButton
+    QVBoxLayout, QWidget, QScrollArea, 
+    QPushButton, QStyle, QCheckBox
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
