@@ -27,9 +27,11 @@ from utils.utils import (
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
-    AppSize, AppBoundaries, PushButton
+    AppSize, AppBoundaries, PushButton, Toggle
 )
-from utils.styles import buttonStyle
+from utils.styles import (
+    buttonStyle, toggleStyle
+) 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
@@ -57,12 +59,12 @@ def runDailyWordApp():
     dailyWord = DailyWord(dep)
     dailyPriorityWord = DailyPriorityWord(dep)
 
-    makeAppContents(dep, window, fonts, UIsizes, appSizeOb)   
+    appBoundaries = makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord)   
 
     # This is now in a function, that either 1) resizes smaller to the app's content boundaries,
     # or 2) resizes to the size of the screen and adds a scroll area if the content is too large,
     # separately for horizontal and vertical axes (only apply if actually needed)
-    window.resize(appSizeOb.sentenceWidth,appSizeOb.appHeight)
+    window.resize(appBoundaries.right + UIsizes.pad_medium,appBoundaries.bottom + UIsizes.pad_medium)
 
     window.show()
     centerWindowOnScreen(window, QApplication)

@@ -94,7 +94,6 @@ class StaticText:
             bounding_rect = self.fontMetrics.boundingRect(0,0,0,0, self.textAlignment, self.text)       
         self.positionAdjust = [int(self.textPos[0]), int(self.textPos[1]), int(bounding_rect.width()), int(bounding_rect.height())]
     
-
     def makeTextObject(self):
         self.textOb = self.dep.QLabel(self.text, self.window)
         self.textOb.setWordWrap(self.wordWrap)    
@@ -354,3 +353,49 @@ class PushButton:
     def hideButton(self):
         if hasattr(self, 'button'):
             self.button.hide()
+
+class Toggle:
+    def __init__(self,dep,window,sizes,center,middle,toggleStatus):
+        self.dep = dep
+        self.window = window
+        self.sizes = sizes
+        self.center = center
+        self.middle = middle
+        self.toggleStatus = toggleStatus
+        # Constructor functions
+        self.createToggle()
+        self.getToggleSize()
+        self.getXandYPoints()
+        self.setTogglePosition()
+        self.applyToggleStyle()
+
+    def createToggle(self):
+        self.toggle = self.dep.QCheckBox('',self.window)
+        self.setToggleStatus(self.toggleStatus)
+        self.toggle.hide()
+
+    def setToggleStatus(self,status):
+        self.toggle.setChecked(status)
+
+    def getToggleSize(self):
+        if self.sizes.toggleWidth is None:
+            style = self.toggle.style()
+            defaultSize = style.pixelMetric(self.dep.QStyle.PM_IndicatorWidth, None, self.toggle)
+            self.sizes.toggleWidth = defaultSize * 1
+
+    def getXandYPoints(self):
+        self.xPoint = self.center - self.sizes.toggleWidth/2
+        self.yPoint = self.middle - self.sizes.toggleWidth/2
+
+    def setTogglePosition(self):
+        self.position = [self.xPoint,self.yPoint,self.sizes.toggleWidth,self.sizes.toggleWidth]
+        self.toggle.setGeometry(*(int(x) for x in self.position))
+
+    def applyToggleStyle(self):
+        self.toggle.setStyleSheet(self.dep.toggleStyle(self.sizes.toggleWidth))
+
+    def showToggle(self):
+        self.toggle.show()
+
+    def hideToggle(self):
+        self.toggle.hide()            
