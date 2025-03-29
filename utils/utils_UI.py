@@ -4,12 +4,12 @@ class DefineFontSizes:
         self.QApplication = QApplication
         self.dep = dep
         # Default values
-        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }
+        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }        
         # Constructor functions
         self.getSystemDefaultFont()
         self.getBaseDPI()
         self.getScreenDPI()
-        self.getExtraScalingFactor()
+        self.getExtraScaleFactor()
         self.defineDefaultFontSize()
 
     def getSystemDefaultFont(self):
@@ -23,8 +23,8 @@ class DefineFontSizes:
         dpi = screen.logicalDotsPerInch()
         self.DPIscaleFactor = dpi / self.baseDPI  # Normalize to 96 (standard) DPI
 
-    def getExtraScalingFactor(self):        
-        self.extraScaleFactor = 1.67 if self.dep.sys.platform != "win32" else 1.33
+    def getExtraScaleFactor(self):
+        self.extraScaleFactor = 1.33 if self.dep.sys.platform != "win32" else 1.67
 
     def defineDefaultFontSize(self):         
         self.defaultFontSize = self.default_font.pointSize()*self.DPIscaleFactor*self.extraScaleFactor
@@ -97,7 +97,7 @@ class StaticText:
     def makeTextObject(self):
         self.textOb = self.dep.QLabel(self.text, self.window)
         self.textOb.setWordWrap(self.wordWrap)    
-        self.textOb.setGeometry(*self.positionAdjust)
+        self.textOb.setGeometry(*(int(x) for x in self.positionAdjust))
         self.textOb.setFont(self.font)
         self.textOb.setAlignment(self.textAlignment)
         self.textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
@@ -269,7 +269,7 @@ class PushButton:
         self.italic = italic
         self.bold = bold
         # Default values
-        self.buttonPaddingPer = 0.5 # padding is determined as a percentage of a single letter's width              
+        self.buttonPaddingPer = 0.8  # padding is determined as a multiplier of a single letter's width
         # Constructor functions
         self.makeFont()
         self.getButtonPaddingSize()

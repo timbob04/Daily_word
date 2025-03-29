@@ -42,32 +42,32 @@ dep = StoreDependencies(globals())
 def runDailyWordApp():
     
     # Make application
-    app = QApplication(sys.argv)
-    window = QMainWindow()
-    SetWindowTitle(window, datetime)
+    app = dep.QApplication(sys.argv)
+    window = dep.QMainWindow()
+    dep.SetWindowTitle(window, dep.datetime)
 
-    fonts = DefineFontSizes(QApplication,dep)
+    fonts = dep.DefineFontSizes(dep.QApplication,dep)
     
     # Define size of app using sentence and number of lines
     sentence = "0000000000000000000000000000000000000000000000000000000"
     numLines = 20
-    appSizeOb = AppSize(dep,fonts,sentence,numLines)
+    appSizeOb = dep.AppSize(dep,fonts,sentence,numLines)
 
-    UIsizes = DefineUIsizes(appSizeOb)
+    UIsizes = dep.DefineUIsizes(appSizeOb)
 
     # Get daily word and daily priority word
-    dailyWord = DailyWord(dep)
-    dailyPriorityWord = DailyPriorityWord(dep)
+    dailyWord = dep.DailyWord(dep)
+    dailyPriorityWord = dep.DailyPriorityWord(dep)
 
-    appBoundaries = makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord)   
+    appBoundaries = dep.makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord)   
 
     # This is now in a function, that either 1) resizes smaller to the app's content boundaries,
     # or 2) resizes to the size of the screen and adds a scroll area if the content is too large,
     # separately for horizontal and vertical axes (only apply if actually needed)
-    window.resize(appBoundaries.right + UIsizes.pad_medium,appBoundaries.bottom + UIsizes.pad_medium)
+    window.resize(int(appBoundaries.right + UIsizes.pad_medium),int(appBoundaries.bottom + UIsizes.pad_medium))
 
     window.show()
-    centerWindowOnScreen(window, QApplication)
+    dep.centerWindowOnScreen(window, QApplication)
 
     # Run application's event loop
     exit_code = app.exec_()
