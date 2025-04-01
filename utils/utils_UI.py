@@ -1,7 +1,7 @@
 class DefineFontSizes:
-    def __init__(self,QApplication,dep):
+    def __init__(self,app,dep):
         # Input values
-        self.QApplication = QApplication
+        self.app = app
         self.dep = dep
         # Default values
         self.fontScalers = { "small":0.8, "default":1, "large":1.3 }        
@@ -13,15 +13,15 @@ class DefineFontSizes:
         self.defineDefaultFontSize()
 
     def getSystemDefaultFont(self):
-        self.default_font = self.QApplication.font()
+        self.default_font = self.app.font()
 
     def getBaseDPI(self):
         self.baseDPI = 96 if self.dep.sys.platform == "win32" else 72
 
     def getScreenDPI(self):    
-        screen = self.QApplication.primaryScreen()
+        screen = self.app.primaryScreen()
         dpi = screen.logicalDotsPerInch()
-        self.DPIscaleFactor = dpi / self.baseDPI  # Normalize to 96 (standard) DPI
+        self.DPIscaleFactor = dpi / self.baseDPI  # Normalize to OS's standard dpi
 
     def getExtraScaleFactor(self):
         self.extraScaleFactor = 1.33 if self.dep.sys.platform != "win32" else 1.67
@@ -50,7 +50,7 @@ class DefineUIsizes:
     def defineSizesRelToAppSize(self):  
         # Create new dictionary with scaled values
         self.sizesScaled = {
-            name: obj * self.appSizeOb.sentenceWidth 
+            name: obj * min(self.appSizeOb.sentenceWidth,self.appSizeOb.screenWidth) 
             for name, obj in self.sizesInputs.items()
         }
 
@@ -203,16 +203,17 @@ class MakeTextWithMaxHeight:
             self.scroll_area.hide()
         self.t_wordOfDay.hideTextObject()
 
-def centerWindowOnScreen(window,QApplication):
+def centerWindowOnScreen(window,app):
     frameGm = window.frameGeometry()
-    screen = QApplication.primaryScreen()
+    screen = app.primaryScreen()
     centerPoint = screen.availableGeometry().center()
     frameGm.moveCenter(centerPoint)
     window.move(frameGm.topLeft())         
 
 class AppSize:
-    def __init__(self,dep,fonts,sentence,numLines):
+    def __init__(self,app,dep,fonts,sentence,numLines):
         # Input values  
+        self.app = app
         self.dep = dep        
         self.fonts = fonts
         self.sentence = sentence
@@ -239,10 +240,10 @@ class AppSize:
         self.appHeight = self.lineSpacing * self.numLines
 
     def getScreenSize(self):
-        screen = self.dep.QApplication.primaryScreen()
-        self.screenSize = screen.size()
-        self.screenWidth = self.screenSize.width()
-        self.screenHeight = self.screenSize.height()
+        screen = self.app.primaryScreen()
+        screenSize = screen.size()
+        self.screenWidth = screenSize.width()
+        self.screenHeight = screenSize.height()
 
 class AppBoundaries:
     def __init__(self):
@@ -269,7 +270,7 @@ class PushButton:
         self.italic = italic
         self.bold = bold
         # Default values
-        self.buttonPaddingPer = 0.8  # padding is determined as a multiplier of a single letter's width
+        self.buttonPaddingPer = 0.5  # padding is determined as a multiplier of a single letter's width
         # Constructor functions
         self.makeFont()
         self.getButtonPaddingSize()
@@ -306,11 +307,11 @@ class PushButton:
                 self.dep.Qt.AlignCenter, 
                 self.text
             )
-            # Add padding to both sides of text width
-            button_width = bounding_rect.width() + (2 * self.padding)
+            # Add padding to both sides of text width plus a small extra margin for anti-aliasing
+            button_width = bounding_rect.width() + (2 * self.padding) + 6  # Added 4px extra margin
         
-        # Height always gets padding added
-        button_height = bounding_rect.height() + (2 * self.padding)
+        # Height always gets padding added plus a small extra margin for anti-aliasing
+        button_height = bounding_rect.height() + (2 * self.padding) + 6  # Added 4px extra margin
         
         # Set the button bounds
         self.positionAdjust = [

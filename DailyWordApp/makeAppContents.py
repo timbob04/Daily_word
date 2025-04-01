@@ -1,6 +1,8 @@
 def makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord):
 
+    # App sizing variables
     appBoundaries = dep.AppBoundaries()
+    appWidth = min(appSizeOb.sentenceWidth,appSizeOb.screenWidth)
 
     # Title - "Word:"
     text = 'Word:'
@@ -20,7 +22,7 @@ def makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPrio
     text = "WordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWordWord"
     fontScaler = fonts.fontScalers["default"]
     startingYPosition = appBoundaries.bottom + UIsizes.pad_small
-    widthOfText = appSizeOb.sentenceWidth * 0.6
+    widthOfText = appWidth * 0.6
     position = [UIsizes.pad_medium,startingYPosition,widthOfText,0]
     maxHeight = appSizeOb.appHeight * 0.2
     ts_wordOfDay = dep.MakeTextWithMaxHeight(dep, window, fonts.defaultFontSize*fontScaler, text, position, maxHeight)
@@ -52,7 +54,7 @@ def makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPrio
     text = "DefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDef"
     fontScaler = fonts.fontScalers["default"]
     startingYPosition = appBoundaries.bottom + UIsizes.pad_small
-    widthOfText = appSizeOb.sentenceWidth * 0.6
+    widthOfText = appWidth * 0.6
     position = [UIsizes.pad_medium,startingYPosition,widthOfText,0]
     maxHeight = appSizeOb.appHeight * 0.2
     ts_definition = dep.MakeTextWithMaxHeight(dep, window, fonts.defaultFontSize*fontScaler, text, position, maxHeight)
@@ -83,7 +85,7 @@ def makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPrio
     text = "DefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDefDef"
     fontScaler = fonts.fontScalers["small"]
     startingYPosition = appBoundaries.bottom + UIsizes.pad_small
-    widthOfText = appSizeOb.sentenceWidth * 0.6
+    widthOfText = appWidth * 0.6
     position = [UIsizes.pad_medium,startingYPosition,widthOfText,0]
     maxHeight = appSizeOb.appHeight * 0.12
     ts_definition = dep.MakeTextWithMaxHeight(dep, window, fonts.defaultFontSize*fontScaler, text, position, maxHeight, italic=True)

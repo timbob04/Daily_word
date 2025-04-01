@@ -32,6 +32,7 @@ def softHyphenateLongWords(text, max_word_length=15):
             wrapped_words.append(word)
     # Join words back with spaces
     return ' '.join(wrapped_words)
+
 class StoreDependencies:
     def __init__(self,globalScope):
         self.globalScope = globalScope
