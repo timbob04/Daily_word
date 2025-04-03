@@ -6,6 +6,7 @@ import json
 import platform
 import inspect
 import re
+import time
 
 # Third-party imports
 from PyQt5.QtWidgets import (
@@ -15,7 +16,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import (
     Qt, QObject, pyqtSignal, pyqtSlot,
-    QTimer
+    QTimer, QThread
 )
 from PyQt5.QtGui import (
     QFont, QFontMetrics, QCursor, 
@@ -38,49 +39,54 @@ from utils.styles import (
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
-
 from DailyWordApp.main import runDailyWordApp
+from Timer.main import runTimer
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
 class Controller(QObject):
     
-    # Define signals
-    startTask = pyqtSignal(str) # signal to start worker (str)
-    shutdownTask = pyqtSignal(str) # signal to shut down worker (str)
-    sendMessage = pyqtSignal(str, str) # signal to receive a message from a worker (str)
+    # Define the signals in which the controller will send messages to workers (the channels)
+    startTask = pyqtSignal(str)
+    shutdownTask = pyqtSignal(str)
 
     def __init__(self, app, dep):
         super().__init__()
+        self.app = app
+        self.dep = dep
 
-        # Initializeworkers
-        self.workers = {
-            'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep)
-        }
-
-        # Connect general signals to routing methods
+        # Connect the signals (channels) to the slots (methods) that will be send down the channels
         self.startTask.connect(self.route_start)
         self.shutdownTask.connect(self.route_shutdown)
-        self.sendMessage.connect(self.route_send_message)
 
+        # Define the workers: the wrappers around a particular part of a program, that define specific actions
+        self.workers = {
+            'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
+            'timer': TimerWrapper('Timer', dep)
+        }
+
+        # Connect internal signals to controller's slots
+        self.workers['timer'].request_start.connect(self.route_start)
+        self.workers['timer'].request_shutdown.connect(self.route_shutdown)
+
+        # --- NEW: Create a QThread, move TimerWrapper to that thread ---
+        self.timer_thread = QThread()
+        self.workers['timer'].moveToThread(self.timer_thread)
+        self.timer_thread.start()
+        self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
+        # --------------------------------------------------------------
+
+    # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
     def route_start(self, name):
         if name in self.workers:
-            print(f"Starting {name}")
             self.workers[name].start()
 
     @pyqtSlot(str)
     def route_shutdown(self, name):
         if name in self.workers:
-            print(f"Shutting down {name}")
             self.workers[name].shutdown()
-
-    @pyqtSlot(str, str)
-    def route_send_message(self, name, message):
-        if name in self.workers:
-            print(f"Sending to {name}: {message}")
-            self.workers[name].receive_message(message)
 
 class DailyWordAppWrapper(QObject):
     def __init__(self, name, app, dep):
@@ -88,29 +94,53 @@ class DailyWordAppWrapper(QObject):
         self.name = name
         self.app = app
         self.dep = dep
+        self.dailyWordAppRunning = False
 
     def start(self):
         print(f"{self.name}: running app...")
         self.window = runDailyWordApp(self.app, self.dep)
+        self.dailyWordAppRunning = True
         
     def shutdown(self):
-        print(f"{self.name}: shutdown called (no-op or implement if needed)")
+        self.window.close()
+        self.dailyWordAppRunning = False
 
-    def receive_message(self, msg):
-        print(f"{self.name} received message: {msg} (no-op or handle if needed)")
+class TimerWrapper(QObject):
+   
+    request_start = pyqtSignal(str)
+    request_shutdown = pyqtSignal(str)
+    trigger_start = pyqtSignal()
+
+    def __init__(self, name, dep):
+        super().__init__()
+        self.name = name
+        self.dep = dep
+        self.timerRunning = False
+
+    @pyqtSlot()
+    def start(self):
+        runTimer(self, self.dep)
+        self.timerRunning = True    
+
+    def shutdown(self):
+        self.timerRunning = False
+
+
+
+
+
 
 if __name__ == "__main__":
 
-    
-
     app = QApplication(sys.argv)
     
-    dep.QTimer.singleShot(10000, app.quit)  # quits after 2 seconds
+    dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
 
     # window = runDailyWordApp(app, dep)
 
     controller = Controller(app, dep)
-    controller.startTask.emit('dailyWordApp') 
+    controller.workers['timer'].trigger_start.emit()
+    
 
     # Start the event loop and get the exit code
     exit_code = app.exec_()
