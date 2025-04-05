@@ -7,6 +7,8 @@ import platform
 import inspect
 import re
 import time
+import socket
+import threading
 
 # Third-party imports
 from PyQt5.QtWidgets import (
@@ -56,6 +58,9 @@ class Controller(QObject):
         self.app = app
         self.dep = dep
 
+        # Start the listener to listen for messages from other processes
+        self.startPortListener()
+
         # Connect the signals (channels) to the slots (methods) that will be send down the channels
         self.startTask.connect(self.route_start)
         self.shutdownTask.connect(self.route_shutdown)
@@ -76,6 +81,10 @@ class Controller(QObject):
         self.timer_thread.start()
         self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
         # --------------------------------------------------------------
+
+    # Listener function - to listen for messages from other processes
+    def startPortListener(self):
+        threading.Thread(target=portListener, daemon=True).start()    
 
     # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
@@ -126,9 +135,20 @@ class TimerWrapper(QObject):
         self.timerRunning = False
 
 
-
-
-
+def portListener():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(('127.0.0.1', 12345))
+    server.listen(1)
+    print("Listening for pings on port 12345...")
+    while True:
+        conn, addr = server.accept()
+        msg = conn.recv(1024).decode()
+        print(f"Received message: {msg}")
+        if msg == "ping":
+            print("Ping received!")
+            # TODO: add logic
+        conn.close()
 
 if __name__ == "__main__":
 
@@ -141,7 +161,6 @@ if __name__ == "__main__":
     controller = Controller(app, dep)
     controller.workers['timer'].trigger_start.emit()
     
-
     # Start the event loop and get the exit code
     exit_code = app.exec_()
     sys.exit(exit_code)
