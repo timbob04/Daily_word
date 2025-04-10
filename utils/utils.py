@@ -10,7 +10,6 @@ def getBaseDir(sys,os):
     else:
         return os.getcwd()  # Default to current working directory if __file__ is missing
     
-
 def readJSONfile(json,filepath):
     try:
         with open(filepath, 'r') as file:

@@ -82,9 +82,12 @@ class Controller(QObject):
         self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
         # --------------------------------------------------------------
 
-    # Listener function - to listen for messages from other processes
+    # Commuication with other executables; listener function - to listen for messages from port
     def startPortListener(self):
-        threading.Thread(target=portListener, daemon=True).start()    
+        portNum = findOpenPort()
+        savePortNumberToFile(portNum)
+        if portNum is not None:
+            threading.Thread(target=portListener, args=(portNum,), daemon=True).start()    
 
     # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
@@ -134,32 +137,48 @@ class TimerWrapper(QObject):
     def shutdown(self):
         self.timerRunning = False
 
+def findOpenPort(startingPort=5000, maxTries=5000):
+    port = None
+    for port in range(startingPort, startingPort + maxTries):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(("127.0.0.1", port))
+                return port
+            except OSError:
+                continue
 
-def portListener():
+def savePortNumberToFile(portNum):
+    # Get path to text file in accessoryFiles folder to save port number
+    baseDir = getBaseDir(sys, os)
+    accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
+    curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
+    with open(curFilePath, "w") as f:
+        f.write(str(portNum))
+
+def portListener(portNum):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('127.0.0.1', 12345))
+    server.bind(('127.0.0.1', portNum))
     server.listen(1)
-    print("Listening for pings on port 12345...")
+    print(f"Listening for pings on port {portNum}...")
     while True:
         conn, addr = server.accept()
         msg = conn.recv(1024).decode()
         print(f"Received message: {msg}")
         if msg == "ping":
             print("Ping received!")
-            # TODO: add logic
+            # do stuff: namely, send a message to the controller, to start stuff, send a message back to sender, etc
         conn.close()
 
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     
-    dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+    # controller = Controller(app, dep)
+    # controller.workers['timer'].trigger_start.emit()
 
-    # window = runDailyWordApp(app, dep)
-
-    controller = Controller(app, dep)
-    controller.workers['timer'].trigger_start.emit()
+    window = runDailyWordApp(app, dep)
     
     # Start the event loop and get the exit code
     exit_code = app.exec_()

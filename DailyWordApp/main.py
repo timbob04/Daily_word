@@ -1,7 +1,7 @@
 def runDailyWordApp(app, dep):
 
     # Set the app to not quit when the last window is closed
-    app.setQuitOnLastWindowClosed(False)
+    app.setQuitOnLastWindowClosed(True)
    
     # Make main window
     window = dep.QMainWindow()
@@ -20,21 +20,36 @@ def runDailyWordApp(app, dep):
     dailyWord = dep.DailyWord(dep)
     dailyPriorityWord = dep.DailyPriorityWord(dep)
 
-    appBoundaries = dep.makeAppContents(dep, window, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord)   
-
-    # To do:
-    # This is now in a function, that either 1) resizes smaller to the app's content boundaries,
-    # or 2) resizes to the size of the screen and adds a scroll area if the content is too large,
-    # separately for horizontal and vertical axes (only apply if actually needed)
-    window.resize(int(appBoundaries.right + UIsizes.pad_medium),int(appBoundaries.bottom + UIsizes.pad_medium))
+    # Make app contents (in central widget)
+    container = dep.QWidget()
+    width, height = dep.makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord) 
+    makeScrollAreaForCentralWidget(dep, window, container)
+    
+    # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
+    resizeWindow(window, width, height, appSizeOb)
 
     window.show()
 
     dep.centerWindowOnScreen(window, app)
 
     return window
-    
-    # print("Window geometry:", window.geometry())
-    # print("Is visible?", window.isVisible())
-    # window.raise_()
-    # window.activateWindow()
+
+def makeScrollAreaForCentralWidget(dep, window, container):
+    scrollArea = dep.QScrollArea()
+    scrollArea.setWidget(container)
+    scrollArea.setHorizontalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
+    scrollArea.setVerticalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
+    scrollArea.setAlignment(dep.Qt.AlignCenter)
+    scrollArea.setContentsMargins(0, 0, 0, 0)
+    window.setCentralWidget(scrollArea)
+   
+def resizeWindow(window, width, height, appSizeOb, percentage=0.03):
+    # Determine desired window size, which is a litte bigger than the contents
+    widthOfWindowWithContents = width + width * percentage
+    heightOfWindowWithContents = height + height * percentage
+
+    # Make sure the window is not bigger than the screen
+    windowFinalWidth = min(widthOfWindowWithContents,appSizeOb.screenWidth)
+    windowFinalHeight = min(heightOfWindowWithContents,appSizeOb.screenHeight)
+
+    window.resize(int(windowFinalWidth),int(windowFinalHeight))
