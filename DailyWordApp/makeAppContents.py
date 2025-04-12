@@ -130,6 +130,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     toggleCenterPos = t_priorityWord.positionAdjust[0] + t_priorityWord.positionAdjust[2]/2
     toggleMiddlePos = appBoundaries.wordOfDayMiddle
     toggle_priorityWord = dep.Toggle(dep,container,UIsizes,toggleCenterPos,toggleMiddlePos,toggleStatus)
+    toggle_priorityWord.toggle.clicked.connect(lambda: saveToggleChoice(dep,toggle_priorityWord,dailyWord.word,dailyWord.definition))
 
     # Readjust toggle text position and show
     t_priorityWord.positionAdjust[1] = toggle_priorityWord.position[1] + UIsizes.toggleWidth * 1.2
@@ -164,14 +165,34 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
 
     container.resize(appContentsWidth,appContentsHeight)
 
-    print(appContentsWidth)
-    print(appContentsHeight)
-
     # Return the app boundaries
     return appContentsWidth, appContentsHeight
 
-    
 
+def saveToggleChoice(dep, h_toggle, word, definition): 
+
+    # Get Json file path
+    baseDir = dep.getBaseDir(dep)
+    accessoryFiles_dir = dep.os.path.join(baseDir, '..', 'accessoryFiles')
+    jsonFilePath = dep.os.path.join(accessoryFiles_dir, 'WordsDefsCodes.json')
+
+    # Read json file
+    wordList = dep.readJSONfile(dep.json, jsonFilePath)
+
+    # Get position of word
+    pos = None
+    for i, curWord in enumerate(wordList):
+        if curWord['word'] == word and curWord['definition'] == definition:
+            pos = i
+            break
+
+    # Update priority word toggle status in word list (isPriorityWord)
+    if pos is not None:
+        wordList[pos]['isPriorityWord'] = h_toggle.toggle.isChecked()
+
+    # Save data
+    with open(jsonFilePath, 'w') as file:
+        dep.json.dump(wordList, file, indent=4)    
 
         
         

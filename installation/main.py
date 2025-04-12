@@ -6,8 +6,8 @@ import subprocess
 import sys
 
 from utils.utils import storeDependencies, getBaseDir
-from installation.makeExecutables import makeExecutables
-from installation.arrangeExecutableFiles import organizeExecutableFiles
+from Installation.makeExecutables import makeExecutables
+from Installation.arrangeExecutableFiles import organizeExecutableFiles
 
 dep = storeDependencies(ast, importlib, os, shutil, getBaseDir, subprocess, sys)
 

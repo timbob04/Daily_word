@@ -1,14 +1,14 @@
-def getBaseDir(sys,os):
+def getBaseDir(dep):
     # Check if the program is running as an executable
-    if getattr(sys, 'frozen', False):                
-        return os.path.dirname(sys.executable)
+    if getattr(dep.sys, 'frozen', False):                
+        return dep.os.path.dirname(dep.sys.executable)
     
     # If not, find where this python function is being called from, not where this function actually is
-    caller_file = sys._getframe(1).f_globals.get("__file__", "")
+    caller_file = dep.sys._getframe(1).f_globals.get("__file__", "")
     if caller_file:  
-        return os.path.dirname(os.path.abspath(caller_file))  # Use the caller script's location
+        return dep.os.path.dirname(dep.os.path.abspath(caller_file))  # Use the caller script's location
     else:
-        return os.getcwd()  # Default to current working directory if __file__ is missing
+        return dep.os.getcwd()  # Default to current working directory if __file__ is missing
     
 def readJSONfile(json,filepath):
     try:
@@ -16,7 +16,7 @@ def readJSONfile(json,filepath):
             data = json.load(file)
             return data
     except (json.JSONDecodeError, FileNotFoundError, IOError):
-        return None   
+        return None
     
 def softHyphenateLongWords(text, max_word_length=15):
     # Add soft hyphens to long words, which are only used if the word needs to be wrapped

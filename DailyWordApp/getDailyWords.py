@@ -26,12 +26,12 @@ class DailyWord():
             self.updateWordList()
 
     def getWordListFilePath(self):    
-        base_dir = self.dep.getBaseDir(self.dep.sys,self.dep.os)
+        base_dir = self.dep.getBaseDir(self.dep)
         dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
 
     def getWordList(self):    
-        self.WordList = self.dep.readJSONfile(self.dep.json, self.filePath)     
+        self.WordList = self.dep.readJSONfile(self.dep, self.filePath)     
 
     def doesDataExist(self):    
         self.dataExists = not (self.WordList is None) and len(self.WordList) > 0
@@ -107,12 +107,12 @@ class DailyPriorityWord():
             self.makePriorityWordWithDefText()      
 
     def getWordListFilePath(self):    
-        base_dir = self.dep.getBaseDir(self.dep.sys,self.dep.os)
+        base_dir = self.dep.getBaseDir(self.dep)
         dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
 
     def getWordList(self):    
-        self.wordList = self.dep.readJSONfile(self.dep.json, self.filePath)     
+        self.wordList = self.dep.readJSONfile(self.dep, self.filePath)     
 
     def doesDataExist(self):    
         self.dataExists = not (self.wordList is None) and len(self.wordList) > 0   

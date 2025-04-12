@@ -3,11 +3,14 @@ import sys
 import os
 
 from utils.utils import getBaseDir
+from utils.utils import StoreDependencies
+
+dep = StoreDependencies(globals())
 
 def getPortNumber():
     portNum = None
     # Get path to text file in accessoryFiles folder that has port number to communicate with controller
-    baseDir = getBaseDir(sys, os)
+    baseDir = getBaseDir(dep)
     accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
     curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
     # Read port number from file

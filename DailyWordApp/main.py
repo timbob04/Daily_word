@@ -23,33 +23,13 @@ def runDailyWordApp(app, dep):
     # Make app contents (in central widget)
     container = dep.QWidget()
     width, height = dep.makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord) 
-    makeScrollAreaForCentralWidget(dep, window, container)
+    dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
-    resizeWindow(window, width, height, appSizeOb)
+    dep.resizeWindow(window, width, height, appSizeOb)
 
     window.show()
 
     dep.centerWindowOnScreen(window, app)
 
     return window
-
-def makeScrollAreaForCentralWidget(dep, window, container):
-    scrollArea = dep.QScrollArea()
-    scrollArea.setWidget(container)
-    scrollArea.setHorizontalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
-    scrollArea.setVerticalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
-    scrollArea.setAlignment(dep.Qt.AlignCenter)
-    scrollArea.setContentsMargins(0, 0, 0, 0)
-    window.setCentralWidget(scrollArea)
-   
-def resizeWindow(window, width, height, appSizeOb, percentage=0.03):
-    # Determine desired window size, which is a litte bigger than the contents
-    widthOfWindowWithContents = width + width * percentage
-    heightOfWindowWithContents = height + height * percentage
-
-    # Make sure the window is not bigger than the screen
-    windowFinalWidth = min(widthOfWindowWithContents,appSizeOb.screenWidth)
-    windowFinalHeight = min(heightOfWindowWithContents,appSizeOb.screenHeight)
-
-    window.resize(int(windowFinalWidth),int(windowFinalHeight))

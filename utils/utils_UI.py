@@ -399,4 +399,25 @@ class Toggle:
         self.toggle.show()
 
     def hideToggle(self):
-        self.toggle.hide()            
+        self.toggle.hide() 
+
+def makeScrollAreaForCentralWidget(dep, window, container):
+    scrollArea = dep.QScrollArea()
+    scrollArea.setWidget(container)
+    scrollArea.setHorizontalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
+    scrollArea.setVerticalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
+    scrollArea.setAlignment(dep.Qt.AlignCenter)
+    scrollArea.setContentsMargins(0, 0, 0, 0)
+    window.setCentralWidget(scrollArea)
+   
+def resizeWindow(window, width, height, appSizeOb, percentage=0.03):
+    # Determine desired window size, which is a litte bigger than the contents
+    widthOfWindowWithContents = width + width * percentage
+    heightOfWindowWithContents = height + height * percentage
+
+    # Make sure the window is not bigger than the screen
+    windowFinalWidth = min(widthOfWindowWithContents,appSizeOb.screenWidth)
+    windowFinalHeight = min(heightOfWindowWithContents,appSizeOb.screenHeight)
+
+    window.resize(int(windowFinalWidth),int(windowFinalHeight))
+           

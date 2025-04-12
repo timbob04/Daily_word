@@ -33,7 +33,8 @@ from utils.utils import (
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
-    AppSize, AppBoundaries, PushButton, Toggle
+    AppSize, AppBoundaries, PushButton, Toggle,
+    makeScrollAreaForCentralWidget, resizeWindow
 )
 from utils.styles import (
     buttonStyle, toggleStyle
@@ -46,6 +47,8 @@ from Timer.main import runTimer
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
+
+print(dep)
 
 class Controller(QObject):
     
@@ -149,7 +152,7 @@ def findOpenPort(startingPort=5000, maxTries=5000):
 
 def savePortNumberToFile(portNum):
     # Get path to text file in accessoryFiles folder to save port number
-    baseDir = getBaseDir(sys, os)
+    baseDir = getBaseDir(dep)
     accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
     curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
     with open(curFilePath, "w") as f:
