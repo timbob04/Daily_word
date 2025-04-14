@@ -6,7 +6,7 @@ def organizeExecutableFiles(dep):
     nameOfDepFolder = "_internal" # the location where PyInstaller puts each executable's dependencies
     
     # Make paths
-    curDir = dep.getBaseDir(dep.sys,dep.os)
+    curDir = dep.getBaseDir(dep.sys, dep.os)
     dir_bin = dep.os.path.join(curDir,'..', nameOfBinFolder)
     dir_targetDepFolder = dep.os.path.join(dir_bin,nameOfDepFolder)
 

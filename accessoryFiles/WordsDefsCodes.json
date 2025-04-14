@@ -10,20 +10,20 @@
         "word": "Esoteric",
         "definition": "intended for or likely to be understood by only a small number of people with a specialized knowledge or interest.",
         "wordShown": true,
-        "isPriorityWord": false,
+        "isPriorityWord": true,
         "priorityWordShown": true
     },
     {
         "word": "Inexorable",
         "definition": "impossible to stop or prevent",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": true
     },
     {
         "word": "Portent",
         "definition": "a sign or warning that something, especially something momentous or calamitous, is likely to happen",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": true
     },

@@ -1,4 +1,4 @@
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord):
+def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord, worker_dailyWordApp):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -148,7 +148,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     startingYPosition = appBoundaries.revealButtonStartingYPos
     position = [startingXPosition,startingYPosition,0,0]
     pb_editWordList = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
-    
+
     # Update app boundaries
     lowestPoint = pb_editWordList.positionAdjust[1] + pb_editWordList.positionAdjust[3]
     rightMostPoint = pb_editWordList.positionAdjust[0] + pb_editWordList.positionAdjust[2]
@@ -159,6 +159,9 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     pb_editWordList.rightAlign()
     pb_editWordList.makeButton()
     pb_editWordList.showButton()
+
+    # Connect to the Controller's button_clicked signal in the dailyWordApp worker
+    pb_editWordList.button.clicked.connect(lambda: worker_dailyWordApp.button_clicked.emit('editWordList')) # Connect to the Controller's button_clicked signal in the dailyWordApp worker
 
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium
@@ -172,7 +175,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
 def saveToggleChoice(dep, h_toggle, word, definition): 
 
     # Get Json file path
-    baseDir = dep.getBaseDir(dep)
+    baseDir = dep.getBaseDir(dep.sys, dep.os)
     accessoryFiles_dir = dep.os.path.join(baseDir, '..', 'accessoryFiles')
     jsonFilePath = dep.os.path.join(accessoryFiles_dir, 'WordsDefsCodes.json')
 

@@ -5,7 +5,7 @@ class makeExecutables():
         self.fileName = fileName    
         self.consoleNeeded = consoleNeeded    
         # Fixed parameters
-        self.projectRoot = dep.os.path.abspath(dep.os.path.join(dep.getBaseDir(dep), ".."))
+        self.projectRoot = dep.os.path.abspath(dep.os.path.join(dep.getBaseDir(dep.sys, dep.os), ".."))
         self.executableName = self.fileName.split(".")[-1]
         # Initializer methods
         self.deleteBinAndBuildFolders()

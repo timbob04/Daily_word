@@ -1,4 +1,4 @@
-def runDailyWordApp(app, dep):
+def runDailyWordApp(app, dep, worker_dailyWordApp):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(True)
@@ -22,7 +22,7 @@ def runDailyWordApp(app, dep):
 
     # Make app contents (in central widget)
     container = dep.QWidget()
-    width, height = dep.makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord) 
+    width, height = dep.makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord, worker_dailyWordApp) 
     dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen

@@ -10,7 +10,7 @@ dep = StoreDependencies(globals())
 def getPortNumber():
     portNum = None
     # Get path to text file in accessoryFiles folder that has port number to communicate with controller
-    baseDir = getBaseDir(dep)
+    baseDir = getBaseDir(dep.sys, dep.os)
     accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
     curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
     # Read port number from file
@@ -18,7 +18,6 @@ def getPortNumber():
         with open(curFilePath, "r") as f:
             portNum = int(f.read().strip())  # Convert to integer and strip any whitespace
     return portNum
-
 
 def sendPing(portNum):
     if portNum is not None:

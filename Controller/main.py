@@ -44,6 +44,7 @@ from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 from DailyWordApp.main import runDailyWordApp
 from Timer.main import runTimer
+from EditWordList.main import makeEditWordListApp
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -61,20 +62,22 @@ class Controller(QObject):
         self.app = app
         self.dep = dep
 
-        # Start the listener to listen for messages from other processes
+        # Start the listener to listen for messages from other processes (e.g., other binaries)
         self.startPortListener()
 
-        # Connect the signals (channels) to the slots (methods) that will be send down the channels
+        # Connect the signals (channels) to the slots (methods) that will be sent down the channels
         self.startTask.connect(self.route_start)
         self.shutdownTask.connect(self.route_shutdown)
 
         # Define the workers: the wrappers around a particular part of a program, that define specific actions
         self.workers = {
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
-            'timer': TimerWrapper('Timer', dep)
+            'timer': TimerWrapper('Timer', dep),
+            'editWordList': EditWordListWrapper('EditWordList', dep)
         }
 
-        # Connect internal signals to controller's slots
+        # Connect internal signals to controller's slots - if I want a worker to interact with another worker
+        self.workers['dailyWordApp'].button_clicked.connect(self.route_start)
         self.workers['timer'].request_start.connect(self.route_start)
         self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
@@ -88,7 +91,7 @@ class Controller(QObject):
     # Commuication with other executables; listener function - to listen for messages from port
     def startPortListener(self):
         portNum = findOpenPort()
-        savePortNumberToFile(portNum)
+        savePortNumberToFile(portNum, self.dep)
         if portNum is not None:
             threading.Thread(target=portListener, args=(portNum,), daemon=True).start()    
 
@@ -104,6 +107,10 @@ class Controller(QObject):
             self.workers[name].shutdown()
 
 class DailyWordAppWrapper(QObject):
+
+    button_clicked = pyqtSignal(str)
+
+    # Define the constructor
     def __init__(self, name, app, dep):
         super().__init__()
         self.name = name
@@ -113,7 +120,7 @@ class DailyWordAppWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        self.window = runDailyWordApp(self.app, self.dep)
+        self.window = runDailyWordApp(self.app, self.dep, self) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
         self.dailyWordAppRunning = True
         
     def shutdown(self):
@@ -140,6 +147,24 @@ class TimerWrapper(QObject):
     def shutdown(self):
         self.timerRunning = False
 
+class EditWordListWrapper(QObject):
+    def __init__(self, name, dep):
+        super().__init__()
+        self.name = name
+        self.dep = dep
+        self.EditWordListOpen = False
+
+    def start(self):
+        print(f"{self.name}: running app...")
+        makeEditWordListApp()
+        # self.window = makeEditWordListApp()
+        self.EditWordListOpen = True # this should actually confirm that the window is open (maybe above use something like 'if self.window is not None:')
+        
+    def shutdown(self):
+        self.window.close()
+        self.EditWordListOpen = False # this should actually confirm that the window is closed
+
+
 def findOpenPort(startingPort=5000, maxTries=5000):
     port = None
     for port in range(startingPort, startingPort + maxTries):
@@ -150,9 +175,9 @@ def findOpenPort(startingPort=5000, maxTries=5000):
             except OSError:
                 continue
 
-def savePortNumberToFile(portNum):
+def savePortNumberToFile(portNum, dep):
     # Get path to text file in accessoryFiles folder to save port number
-    baseDir = getBaseDir(dep)
+    baseDir = getBaseDir(dep.sys, dep.os)
     accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
     curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
     with open(curFilePath, "w") as f:
@@ -177,11 +202,11 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     
-    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
-    # controller = Controller(app, dep)
-    # controller.workers['timer'].trigger_start.emit()
+    dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+    controller = Controller(app, dep)
+    controller.workers['timer'].trigger_start.emit()
 
-    window = runDailyWordApp(app, dep)
+    # window = runDailyWordApp(app, dep)
     
     # Start the event loop and get the exit code
     exit_code = app.exec_()

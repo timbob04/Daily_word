@@ -34,7 +34,7 @@ class ReadProgramRunTime():
         
     def getTimeFilePath(self):
         # Get path of accessory files
-        base_dir = getBaseDir(sys,os)
+        base_dir = getBaseDir(sys, os)
         accessoryFiles_dir = os.path.join(base_dir, '..', 'accessoryFiles')
         # Path to json file for words and definitions
         return os.path.join(accessoryFiles_dir, 'timeToRunApplication.txt')                      

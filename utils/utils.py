@@ -1,16 +1,16 @@
-def getBaseDir(dep):
+def getBaseDir(sys, os):
     # Check if the program is running as an executable
-    if getattr(dep.sys, 'frozen', False):                
-        return dep.os.path.dirname(dep.sys.executable)
+    if getattr(sys, 'frozen', False):                
+        return os.path.dirname(sys.executable)
     
     # If not, find where this python function is being called from, not where this function actually is
-    caller_file = dep.sys._getframe(1).f_globals.get("__file__", "")
+    caller_file = sys._getframe(1).f_globals.get("__file__", "")
     if caller_file:  
-        return dep.os.path.dirname(dep.os.path.abspath(caller_file))  # Use the caller script's location
+        return os.path.dirname(os.path.abspath(caller_file))  # Use the caller script's location
     else:
-        return dep.os.getcwd()  # Default to current working directory if __file__ is missing
+        return os.getcwd()  # Default to current working directory if __file__ is missing
     
-def readJSONfile(json,filepath):
+def readJSONfile(json, filepath):
     try:
         with open(filepath, 'r') as file:
             data = json.load(file)
