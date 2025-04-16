@@ -8,22 +8,15 @@ class makeExecutables():
         self.projectRoot = dep.os.path.abspath(dep.os.path.join(dep.getBaseDir(dep.sys, dep.os), ".."))
         self.executableName = self.fileName.split(".")[-1]
         # Initializer methods
-        self.deleteBinAndBuildFolders()
         self.getPythonFilePath()
         self.getModuleDependencies()
         self.makeCommandsToAddDependencies()
         self.makeCommandsToAddNeededFolders()
         self.makeCommandForTerminalOpenOrClosed()
         self.createPyInstallerCommand()
-        self.runPyInstallerCommand()
+        self.runPyInstallerCommand()                  
 
-    # To start afresh
-    def deleteBinAndBuildFolders(self):
-        for folder in ["bin", "build"]:
-            if self.dep.os.path.exists(folder) and self.dep.os.path.isdir(folder):
-                self.dep.shutil.rmtree(folder)                       
-
-    def getPythonFilePath(self):     
+    def getPythonFilePath(self):
         self.pythonFile = self.dep.os.path.join(self.projectRoot, self.fileName.replace(".", self.dep.os.sep)) + ".py"              
 
     def getModuleDependencies(self):  

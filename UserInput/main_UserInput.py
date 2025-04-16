@@ -22,10 +22,11 @@ def getPortNumber():
 def sendPing(portNum):
     if portNum is not None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            print("Trying to send ping...")
+            # Need some stuff to handle exceptions here
             s.connect(('127.0.0.1', portNum))
             s.sendall(b'ping')
             print("Message sent!")
-
 
 if __name__ == "__main__":
     portNum = getPortNumber()

@@ -62,7 +62,7 @@ def moveDependencies(dep, folder_source, folder_dest):
             if not dep.os.path.exists(curItemPath_dest):  # If folder doesn't exist in destination, copy it
                 dep.shutil.copytree(curItemPath_source, curItemPath_dest)
             else:  # If folder does exist in destination, recurse inside (so can now copy new files inside)
-                moveDependencies(curItemPath_source, curItemPath_dest)
+                moveDependencies(dep, curItemPath_source, curItemPath_dest)
         
         # If it's a file, copy over, but only if it doesn't exist in destination
         elif dep.os.path.isfile(curItemPath_source) and not dep.os.path.exists(curItemPath_dest):

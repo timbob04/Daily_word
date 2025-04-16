@@ -42,9 +42,9 @@ from utils.styles import (
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
-from DailyWordApp.main import runDailyWordApp
-from Timer.main import runTimer
-from EditWordList.main import makeEditWordListApp
+from DailyWordApp.main_DailyWordApp import runDailyWordApp
+from Timer.main_Timer import runTimer
+from EditWordList.main_EditWordList import makeEditWordListApp
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -200,9 +200,11 @@ def portListener(portNum):
 
 if __name__ == "__main__":
 
+    print('Inside the Controller executable')
+
     app = QApplication(sys.argv)
     
-    dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
     controller = Controller(app, dep)
     controller.workers['timer'].trigger_start.emit()
 
