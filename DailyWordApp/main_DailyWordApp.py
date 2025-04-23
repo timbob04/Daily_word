@@ -9,7 +9,7 @@ def runDailyWordApp(app, dep, worker_dailyWordApp):
 
     fonts = dep.DefineFontSizes(app,dep)
     
-    # Define size of app using sentence and number of lines
+    # Define size of app using sentence width and number of lines
     sentence = "0000000000000000000000000000000000000000000000000000000"
     numLines = 20
     appSizeOb = dep.AppSize(app,dep,fonts,sentence,numLines)

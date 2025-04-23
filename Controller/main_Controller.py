@@ -14,7 +14,8 @@ import threading
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, 
     QVBoxLayout, QWidget, QScrollArea, 
-    QPushButton, QStyle, QCheckBox
+    QPushButton, QStyle, QCheckBox,
+    QLineEdit
 )
 from PyQt5.QtCore import (
     Qt, QObject, pyqtSignal, pyqtSlot,
@@ -22,7 +23,8 @@ from PyQt5.QtCore import (
 )
 from PyQt5.QtGui import (
     QFont, QFontMetrics, QCursor, 
-    QTextDocument, QTextOption
+    QTextDocument, QTextOption,
+    QPainter, QPen
 )
 
 # Local imports
@@ -49,7 +51,20 @@ from EditWordList.main_EditWordList import makeEditWordListApp
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
-print(dep)
+def startController():
+    print('Inside the Controller executable')
+
+    app = QApplication(sys.argv)
+    
+    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+    controller = Controller(app, dep)
+    controller.workers['timer'].trigger_start.emit()
+
+    # window = runDailyWordApp(app, dep)
+    
+    # Start the event loop and get the exit code
+    exit_code = app.exec_()
+    sys.exit(exit_code)
 
 class Controller(QObject):
     
@@ -73,7 +88,7 @@ class Controller(QObject):
         self.workers = {
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
             'timer': TimerWrapper('Timer', dep),
-            'editWordList': EditWordListWrapper('EditWordList', dep)
+            'editWordList': EditWordListWrapper('EditWordList', app, dep)
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
@@ -148,15 +163,16 @@ class TimerWrapper(QObject):
         self.timerRunning = False
 
 class EditWordListWrapper(QObject):
-    def __init__(self, name, dep):
+    def __init__(self, name, app, dep):
         super().__init__()
         self.name = name
+        self.app = app
         self.dep = dep
         self.EditWordListOpen = False
 
     def start(self):
         print(f"{self.name}: running app...")
-        makeEditWordListApp()
+        self.window = makeEditWordListApp(self.app, self.dep)
         # self.window = makeEditWordListApp()
         self.EditWordListOpen = True # this should actually confirm that the window is open (maybe above use something like 'if self.window is not None:')
         
@@ -193,23 +209,12 @@ def portListener(portNum):
         conn, addr = server.accept()
         msg = conn.recv(1024).decode()
         print(f"Received message: {msg}")
-        if msg == "ping":
+        if msg == "pingFromUserInputExecutable":
             print("Ping received!")
+            # Send message back to UserInput
+            conn.sendall(b'pingFromController') 
             # do stuff: namely, send a message to the controller, to start stuff, send a message back to sender, etc
         conn.close()
 
 if __name__ == "__main__":
-
-    print('Inside the Controller executable')
-
-    app = QApplication(sys.argv)
-    
-    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
-    controller = Controller(app, dep)
-    controller.workers['timer'].trigger_start.emit()
-
-    # window = runDailyWordApp(app, dep)
-    
-    # Start the event loop and get the exit code
-    exit_code = app.exec_()
-    sys.exit(exit_code)
+    startController()

@@ -42,6 +42,7 @@ class DefineUIsizes:
 
     def defineSizes(self):    
         self.sizesInputs = {
+        "pad_xsmall": 0.005,
         "pad_small": 0.01,
         "pad_medium": 0.02,
         "pad_large": 0.04,
@@ -406,7 +407,6 @@ def makeScrollAreaForCentralWidget(dep, window, container):
     scrollArea.setWidget(container)
     scrollArea.setHorizontalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
     scrollArea.setVerticalScrollBarPolicy(dep.Qt.ScrollBarAsNeeded)
-    scrollArea.setAlignment(dep.Qt.AlignCenter)
     scrollArea.setContentsMargins(0, 0, 0, 0)
     window.setCentralWidget(scrollArea)
    
