@@ -166,7 +166,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium
 
-    container.resize(appContentsWidth,appContentsHeight)
+    container.resize(int(appContentsWidth),int(appContentsHeight))
 
     # Return the app boundaries
     return appContentsWidth, appContentsHeight

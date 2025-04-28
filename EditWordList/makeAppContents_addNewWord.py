@@ -76,7 +76,7 @@ def makeAppContents_AddNewWord(dep, container, fonts, UIsizes, appSizeOb):
     lowestPoint = yPoint + lineThickness
     appBoundaries.setNewBoundaries(right=appBoundaries.right + UIsizes.pad_medium,bottom=lowestPoint)
     
-    container.resize(appBoundaries.right, appBoundaries.bottom)
+    container.resize(int(appBoundaries.right), int(appBoundaries.bottom))
 
     # Return the app boundaries
     return appBoundaries

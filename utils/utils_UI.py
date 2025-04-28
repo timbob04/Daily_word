@@ -4,7 +4,7 @@ class DefineFontSizes:
         self.app = app
         self.dep = dep
         # Default values
-        self.fontScalers = { "small":0.8, "default":1, "large":1.3 }        
+        self.fontScalers = {"tiny":0.5, "small":0.8, "default":1, "large":1.3 }        
         # Constructor functions
         self.getSystemDefaultFont()
         self.getBaseDPI()
