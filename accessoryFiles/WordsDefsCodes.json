@@ -3,20 +3,6 @@
         "word": "Esoteric",
         "definition": "intended for or likely to be understood by only a small number of people with a specialized knowledge or interest.",
         "wordShown": true,
-        "isPriorityWord": true,
-        "priorityWordShown": true
-    },
-    {
-        "word": "Harbinger",
-        "definition": "a person or thing that announces or signals the approach of another",
-        "wordShown": false,
-        "isPriorityWord": true,
-        "priorityWordShown": true
-    },
-    {
-        "word": "Inexorable",
-        "definition": "impossible to stop or prevent",
-        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": true
     },

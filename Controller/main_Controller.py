@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, 
     QVBoxLayout, QWidget, QScrollArea, 
     QPushButton, QStyle, QCheckBox,
-    QLineEdit
+    QLineEdit, QMessageBox
 )
 from PyQt5.QtCore import (
     Qt, QObject, pyqtSignal, pyqtSlot,

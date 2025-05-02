@@ -111,7 +111,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb):
     wordList = MakeWordList(dep, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes)
     appBoundaries = wordList.appBoundaries
 
-    container.resize(int(appBoundaries.right), int(appBoundaries.bottom))
+    container.resize(int(appBoundaries.right), int(appBoundaries.bottom+UIsizes.pad_medium))
 
     # Return the app boundaries
     return appBoundaries

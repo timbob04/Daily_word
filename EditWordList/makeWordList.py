@@ -9,7 +9,7 @@ class MakeWordList():
         self.editTextBoxes = editTextBoxes
         # Default values
         self.wordListFontSize = "small"
-        self.editDelButonFontSize = "small"
+        self.delButonFontSize = "small"
         self.hSpacer = self.UIsizes.pad_small # horizontal spacer between elements in word list
         self.vSpacer = self.UIsizes.pad_large # vertical spacer between rows in word list
         # Constructor functions - make initial word list
@@ -31,9 +31,8 @@ class MakeWordList():
         self.t_priorityWord.makeTextObject()
         self.t_priorityWord.showTextObject()
         # Update app boundaries
-        lowestPoint = self.t_priorityWord.positionAdjust[1] + self.t_priorityWord.positionAdjust[3]
-        rightMostPoint = self.t_priorityWord.positionAdjust[0] + self.t_priorityWord.positionAdjust[2]
-        self.appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint)
+        lowestPoint = self.t_priorityWord.positionAdjust[1] + self.t_priorityWord.positionAdjust[3]        
+        self.appBoundaries.setNewBoundaries(bottom=lowestPoint)
 
     def findListElementPositionsAndSizes(self):   
         # Priority word toggle title width and center point
@@ -43,19 +42,14 @@ class MakeWordList():
         self.listStartingPos_y = self.appBoundaries.bottom
         # Delete button width
         curText = "Delete"
-        b_deleteButton = self.dep.PushButton(self.dep, self.container, self.fonts.defaultFontSize*self.fonts.fontScalers[self.editDelButonFontSize], curText, [0, 0, 0, 0])
+        b_deleteButton = self.dep.PushButton(self.dep, self.container, self.fonts.defaultFontSize*self.fonts.fontScalers[self.delButonFontSize], curText, [0, 0, 0, 0])
         b_deleteButton.makeButton()
         self.width_deleteButton = b_deleteButton.button.width()
-        # Edit button width
-        curText = "Edit"
-        b_editButton = self.dep.PushButton(self.dep, self.container, self.fonts.defaultFontSize*self.fonts.fontScalers[self.editDelButonFontSize], curText, [0, 0, 0, 0])
-        b_editButton.makeButton()
-        self.width_editButton = b_editButton.button.width()
         # Button height
         self.height_button = b_deleteButton.button.height()
         # Width of everything apart from word and definition
         width_excludeWordDef = self.UIsizes.pad_medium + self.width_priorityWord + \
-            self.hSpacer + self.width_deleteButton + self.hSpacer + self.width_editButton + \
+            self.hSpacer + self.width_deleteButton + \
             self.hSpacer + self.UIsizes.pad_medium                       
         # Width of the word and definition area
         self.width_wordDef = self.appBoundaries.right - width_excludeWordDef
@@ -73,7 +67,6 @@ class MakeWordList():
         self.findIncrements_y()
         # Delete things not needed anymore
         b_deleteButton.button.deleteLater()
-        b_editButton.button.deleteLater()
         toggle.toggle.deleteLater()
 
     def getFontMetrics(self, fontSize):
@@ -85,8 +78,7 @@ class MakeWordList():
     def findStartPositions_x(self):
         self.xPos_toggle_center = self.UIsizes.pad_medium + self.width_priorityWord / 2
         self.xPos_deleteButton_start = self.UIsizes.pad_medium + self.width_priorityWord + self.hSpacer
-        self.xPos_editButton_start = self.xPos_deleteButton_start + self.width_deleteButton + self.hSpacer
-        self.xPos_text_start = self.xPos_editButton_start + self.width_editButton + self.hSpacer
+        self.xPos_text_start = self.xPos_deleteButton_start + self.width_deleteButton + self.hSpacer
    
     def findIncrements_y(self): 
         # Finds the distance needed to push down each list element (text, buttonm toggle) to get them all centered on the same line/row
@@ -148,8 +140,7 @@ class MakeWordList():
         # Also reset the app boundaries (bottom) to self.listStartingPos_y - to do
         for ind in range(len(self.wordList)):
             self.makeToggle(ind)
-            self.makeDeleteButton(ind)
-            self.makeEditButton(ind)
+            self.makeDeleteButton(ind)            
             self.printWord(ind)
         # After making list elements (above), update the scroll area - to do
             
@@ -157,10 +148,13 @@ class MakeWordList():
         toggleMiddle = self.wordList[ind]["startPos_y"] + self.increment_toggle + self.height_toggle/2
         toggle = self.dep.Toggle(self.dep, self.container, self.UIsizes, self.centerPoint_priorityWord, toggleMiddle, False)
         toggle.showToggle()
+        # Set toggle's initial state
+        if self.wordList[ind]["isPriorityWord"]:
+            toggle.toggle.setChecked(True)
         # Connect toggle to function storing the toggle choice in wordList
         def _storeToggleState(toggleState, i=ind): # ind=i is 'Default-value capture'
             self.wordList[i]['isPriorityWord'] = toggleState
-            # print(f"wordList[{i}]['isPriorityWord']: {self.wordList[i]['isPriorityWord']}")
+            self.saveWordListToJson() # save the json to save the new toggle state           
         toggle.toggle.clicked.connect(_storeToggleState) # clicked.connect sends one input (the toggle state) to the function (slot) in the parentheses
         # Store toggle object in wordList
         self.wordList[ind]["toggle"] = toggle
@@ -168,7 +162,7 @@ class MakeWordList():
     def makeDeleteButton(self, ind):
         buttonTop = self.wordList[ind]["startPos_y"] + self.increment_button
         deleteButton = self.dep.PushButton( self.dep, self.container, \
-            self.fonts.defaultFontSize*self.fonts.fontScalers[self.editDelButonFontSize], \
+            self.fonts.defaultFontSize*self.fonts.fontScalers[self.delButonFontSize], \
             'Delete', [self.xPos_deleteButton_start, buttonTop, 0, 0] )
         deleteButton.makeButton()
         deleteButton.showButton()
@@ -178,20 +172,6 @@ class MakeWordList():
         deleteButton.button.clicked.connect(_deleteButtonPressed) # clicked.connect sends one input (which for a button, is always 'False') to the function (slot) in the parentheses
         # Store delete button object in wordList
         self.wordList[ind]["deleteButton"] = deleteButton
-
-    def makeEditButton(self, ind):
-        buttonTop = self.wordList[ind]["startPos_y"] + self.increment_button
-        editButton = self.dep.PushButton( self.dep, self.container, \
-            self.fonts.defaultFontSize*self.fonts.fontScalers[self.editDelButonFontSize], \
-            'Edit', [self.xPos_editButton_start, buttonTop, 0, 0] )
-        editButton.makeButton()
-        editButton.showButton()
-        # Connect button to function dealing with the edit button being pressed
-        def _editButtonPressed(_unusedSlotArgument, i=ind):
-            self.editWord(i)
-        editButton.button.clicked.connect(_editButtonPressed) # clicked.connect sends one input (which for a button, is always 'False') to the function (slot) in the parentheses
-        # Store edit button object in wordList
-        self.wordList[ind]["editButton"] = editButton
 
     def printWord(self, ind):
         textTop = self.wordList[ind]["startPos_y"] + self.increment_text
@@ -228,60 +208,55 @@ class MakeWordList():
         for ind in range(len(self.wordList)):
             self.wordList[ind]["toggle"].toggle.deleteLater()
             self.wordList[ind]["deleteButton"].button.deleteLater()
-            self.wordList[ind]["editButton"].button.deleteLater()
             self.wordList[ind]["text"].textOb.deleteLater()
 
     def wordAdded(self):
-        # Delete the widgets (to completely remake the list)
-        self.deleteListElements()
-        # Append new word and definition to wordList
-        self.wordList.append({
-            "word": self.editTextBoxes.newWord,
-            "definition": self.editTextBoxes.newDefinition,
-            "wordShown": False,
-            "isPriorityWord": False,
-            "priorityWordShown": False
-        })
-        # Reset the app boundaries
-        self.appBoundaries.setNewBoundaries(bottom=self.listStartingPos_y)
-        # Re-make word list
-        self.getWordsWithDefinitons()
-        self.sortWordListAlphabetically()
-        self.getHeightOfEachWordDef()
-        self.getStartPositions_y()
-        self.makeWordList()
-        # Re-adjust the size of the container
-        self.container.adjustSize()
-        self.container.update()
-        # No need to save the wordList to json file, as this is done in the addNewWordTextBoxes class
+        if self.editTextBoxes.newWord != "" or self.editTextBoxes.newDefinition != "":
+            # Delete the widgets (to completely remake the list)
+            self.deleteListElements()
+            # Append new word and definition to wordList
+            self.wordList.append({
+                "word": self.editTextBoxes.newWord,
+                "definition": self.editTextBoxes.newDefinition,
+                "wordShown": False,
+                "isPriorityWord": False,
+                "priorityWordShown": False
+            })
+            # Reset the app boundaries
+            self.appBoundaries.setNewBoundaries(bottom=self.listStartingPos_y)
+            # Re-make word list
+            self.getWordsWithDefinitons()
+            self.sortWordListAlphabetically()
+            self.getHeightOfEachWordDef()
+            self.getStartPositions_y()
+            self.makeWordList()
+            # Re-adjust the size of the container
+            self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom)+self.UIsizes.pad_medium)
+            self.container.update()
+            # No need to save the wordList to json file, as this is done in the addNewWordTextBoxes class
 
     def deleteWord(self, ind):
-        # Delete the widgets
-        self.deleteListElements()
-        # Delete the word from wordList
-        print(f"deleting word at ind: {ind}")
-        self.wordList.pop(ind)
-        # Reset the app boundaries
-        self.appBoundaries.setNewBoundaries(bottom=self.listStartingPos_y)
-        # Re-make word list
-        self.getWordsWithDefinitons()
-        self.sortWordListAlphabetically()
-        self.getHeightOfEachWordDef()
-        self.getStartPositions_y()
-        self.makeWordList()
-        # Re-adjust the size of the container
-        self.container.adjustSize()
-        self.container.update()
-        # Save the edited wordList to json file
-        self.saveWordListToJson()
-
-    def editWord(self, ind):
-        print('to do')
-        # Run dialog box to get newly edited word and definition
-        # If the user clicks 'Ok', do the following.  If the user clicks 'Cancel', skip all the rest
-        # Delete the widgets
-        # Add the new word and definition to wordList
-        # Reset the app boundaries
-        # Re-make word list
-        # Re-adjust the size of the container
-        # Save the edited wordList to json file
+        # Confirm delete dialog
+        reply = self.dep.QMessageBox.question(self.container, 'Delete Word',
+            f"Are you sure you want to delete '{self.wordList[ind]['word']}'?",
+            self.dep.QMessageBox.Yes | self.dep.QMessageBox.No, self.dep.QMessageBox.Yes)
+        # If user clicks 'Yes'
+        if reply == self.dep.QMessageBox.Yes:
+            # Delete the widgets
+            self.deleteListElements()
+            # Delete the word from wordList
+            print(f"deleting word at ind: {ind}")
+            self.wordList.pop(ind)
+            # Reset the app boundaries
+            self.appBoundaries.setNewBoundaries(bottom=self.listStartingPos_y)
+            # Re-make word list
+            self.getWordsWithDefinitons()
+            self.sortWordListAlphabetically()
+            self.getHeightOfEachWordDef()
+            self.getStartPositions_y()
+            self.makeWordList()
+            # Re-adjust the size of the container
+            self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom)+self.UIsizes.pad_medium)
+            self.container.update()
+            # Save the edited wordList to json file
+            self.saveWordListToJson()

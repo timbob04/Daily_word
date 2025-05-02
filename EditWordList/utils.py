@@ -44,7 +44,8 @@ class addNewWordTextBoxes:
   
     def AddButtonPressed(self):
         self.getNewWordDef()
-        self.addWordToJSONfile()        
+        if self.newWord != "" or self.newDefinition != "":
+            self.addWordToJSONfile()        
         self.clearEditTextBoxes()   
 
     def getNewWordDef(self):
