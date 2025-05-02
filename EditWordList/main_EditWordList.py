@@ -1,5 +1,4 @@
-from EditWordList.makeAppContents_addNewWord import makeAppContents_AddNewWord
-from EditWordList.makeAppContents_editWordList import makeAppContents_EditWordList
+from EditWordList.makeAppContents import makeAppContents
 
 def makeEditWordListApp(app, dep):
 
@@ -17,8 +16,7 @@ def makeEditWordListApp(app, dep):
 
     container = dep.QWidget()
     
-    appBoundaries = makeAppContents_AddNewWord(dep, container, fonts, UIsizes, appSizeOb) 
-    appBoundaries = makeAppContents_EditWordList(dep, container, fonts, UIsizes, appSizeOb, appBoundaries)
+    appBoundaries = makeAppContents(dep, container, fonts, UIsizes, appSizeOb) 
     
     dep.makeScrollAreaForCentralWidget(dep, window, container)
 

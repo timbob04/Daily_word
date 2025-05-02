@@ -58,10 +58,11 @@ class addNewWordTextBoxes:
         new_entry = {
             "word": self.newWord,
             "definition": self.newDefinition,
-            "WOD_shown": False,
-            "is_POD": False,
-            "POD_shown": False
-            }
+            "wordShown": False,
+            "isPriorityWord": False,
+            "priorityWordShown": False
+            }        
+
         # Append new word/def to current word/def json list
         if self.dataIn is not None:
             self.dataIn.append(new_entry)
@@ -77,7 +78,7 @@ class addNewWordTextBoxes:
 
 def getWordListPath(dep):
     # Get path of accessory files
-    base_dir = dep.getBaseDir()
+    base_dir = dep.getBaseDir(dep.sys, dep.os)
     accessoryFiles_dir = dep.os.path.join(base_dir, '..', 'accessoryFiles')
     # Path to json file for words and definitions
     return dep.os.path.join(accessoryFiles_dir, 'WordsDefsCodes.json')   

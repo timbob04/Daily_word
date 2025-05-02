@@ -1,6 +1,7 @@
 from EditWordList.utils import addNewWordTextBoxes
+from EditWordList.makeWordList import MakeWordList
 
-def makeAppContents_AddNewWord(dep, container, fonts, UIsizes, appSizeOb):
+def makeAppContents(dep, container, fonts, UIsizes, appSizeOb):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -58,6 +59,22 @@ def makeAppContents_AddNewWord(dep, container, fonts, UIsizes, appSizeOb):
     t_definitionTitle.makeTextObject()
     t_definitionTitle.showTextObject()
 
+    # Button - "Add"
+    text = "Add"
+    fontScaler = fonts.fontScalers["default"]
+    startingYPosition = appBoundaries.bottom + UIsizes.pad_medium
+    position = [UIsizes.pad_medium,startingYPosition,0,0]
+    pb_add = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
+    pb_add.makeButton()
+    pb_add.showButton()
+    # Run the functions required to add the new word and definition to the word list (json and GUI)
+    pb_add.button.clicked.connect(lambda: editTextBoxes.AddButtonPressed()) # add to json
+    pb_add.button.clicked.connect(lambda: wordList.wordAdded()) # add to GUI
+
+    # Update app boundaries
+    lowestPoint = pb_add.positionAdjust[1] + pb_add.positionAdjust[3]
+    appBoundaries.setNewBoundaries(bottom=lowestPoint)
+
     # Draw a line to separate the 'Add words' and 'Edit words' main sections
     # Define the function to implement in the window's paintEvent attribute
     def drawLine(event, xStart, xEnd, yPoint, window, dep, lineThickness=10):
@@ -75,7 +92,25 @@ def makeAppContents_AddNewWord(dep, container, fonts, UIsizes, appSizeOb):
     # Update app boundaries
     lowestPoint = yPoint + lineThickness
     appBoundaries.setNewBoundaries(right=appBoundaries.right + UIsizes.pad_medium,bottom=lowestPoint)
-    
+
+    # Title - "Edit word list"
+    text = 'Edit word list'
+    textAlignment = dep.Qt.AlignLeft
+    fontScaler = fonts.fontScalers["large"]
+    startPos_y = appBoundaries.bottom + UIsizes.pad_medium
+    position = [UIsizes.pad_medium,startPos_y,0,0]
+    t_editWordListTitle = dep.StaticText(dep, container, fonts.defaultFontSize*fontScaler, text, textAlignment, position, bold=True)     
+    t_editWordListTitle.makeTextObject()
+    t_editWordListTitle.showTextObject()
+
+    # Update app boundaries
+    lowestPoint = t_editWordListTitle.positionAdjust[1] + t_editWordListTitle.positionAdjust[3]
+    rightMostPoint = t_editWordListTitle.positionAdjust[0] + t_editWordListTitle.positionAdjust[2]
+    appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint)
+
+    wordList = MakeWordList(dep, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes)
+    appBoundaries = wordList.appBoundaries
+
     container.resize(int(appBoundaries.right), int(appBoundaries.bottom))
 
     # Return the app boundaries
