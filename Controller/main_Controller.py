@@ -36,17 +36,18 @@ from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
     centerWindowOnScreen, MakeTextWithMaxHeight,
     AppSize, AppBoundaries, PushButton, Toggle,
-    makeScrollAreaForCentralWidget, resizeWindow
+    makeScrollAreaForCentralWidget, resizeWindow,
+    EditTextBox
 )
 from utils.styles import (
     buttonStyle, toggleStyle
 ) 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
-from DailyWordApp.makeAppContents import makeAppContents
 from DailyWordApp.utils import SetWindowTitle
 from DailyWordApp.main_DailyWordApp import runDailyWordApp
 from Timer.main_Timer import runTimer
 from EditWordList.main_EditWordList import makeEditWordListApp
+from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -57,11 +58,13 @@ def startController():
     app = QApplication(sys.argv)
     
     # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
-    controller = Controller(app, dep)
-    controller.workers['timer'].trigger_start.emit()
-
-    # window = runDailyWordApp(app, dep)
     
+    controller = Controller(app, dep)
+    
+    # Testing - run certain workers to run certain apps
+    # controller.workers['timer'].trigger_start.emit()
+    controller.workers['startProgram'].start()  # Start the StartProgramApp
+
     # Start the event loop and get the exit code
     exit_code = app.exec_()
     sys.exit(exit_code)
@@ -88,13 +91,14 @@ class Controller(QObject):
         self.workers = {
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
             'timer': TimerWrapper('Timer', dep),
-            'editWordList': EditWordListWrapper('EditWordList', app, dep)
+            'editWordList': EditWordListWrapper('EditWordList', app, dep),
+            'startProgram': StartProgramWrapper('StartProgram', app, dep)  # Added StartProgramApp worker
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
-        self.workers['dailyWordApp'].button_clicked.connect(self.route_start)
-        self.workers['timer'].request_start.connect(self.route_start)
-        self.workers['timer'].request_shutdown.connect(self.route_shutdown)
+        self.workers['dailyWordApp'].button_clicked.connect(self.route_start) # to allow the dailyWordApp to start the EditWordList
+        self.workers['timer'].request_start.connect(self.route_start) # to all the timer to start the dailyWordApp
+        # self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
         # --- NEW: Create a QThread, move TimerWrapper to that thread ---
         self.timer_thread = QThread()
@@ -173,12 +177,28 @@ class EditWordListWrapper(QObject):
     def start(self):
         print(f"{self.name}: running app...")
         self.window = makeEditWordListApp(self.app, self.dep)
-        # self.window = makeEditWordListApp()
         self.EditWordListOpen = True # this should actually confirm that the window is open (maybe above use something like 'if self.window is not None:')
         
     def shutdown(self):
         self.window.close()
         self.EditWordListOpen = False # this should actually confirm that the window is closed
+
+class StartProgramWrapper(QObject):
+    def __init__(self, name, app, dep):
+        super().__init__()
+        self.name = name
+        self.app = app
+        self.dep = dep
+        self.StartProgramOpen = False
+
+    def start(self):
+        print(f"{self.name}: running app...")
+        self.window = runStartProgramApp(self.app, self.dep, self)
+        self.StartProgramOpen = True 
+        
+    def shutdown(self):
+        self.window.close()
+        self.EditWordListOpen = False
 
 
 def findOpenPort(startingPort=5000, maxTries=5000):

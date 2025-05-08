@@ -420,4 +420,45 @@ def resizeWindow(window, width, height, appSizeOb, percentage=0.03):
     windowFinalHeight = min(heightOfWindowWithContents,appSizeOb.screenHeight)
 
     window.resize(int(windowFinalWidth),int(windowFinalHeight))
+
+class EditTextBox:
+    def __init__(self, dep, window, fonts):
+        self.dep = dep
+        self.window = window
+        self.fonts = fonts
+        # Default values
+        self.fontSizeToUse = self.fonts.fontScalers["default"]   
+        self.numDigits = None # if this is not None, define width by number of this number of digits             
+
+    def makeEditTextBox(self, left, top, width):    
+        self.tb = self.dep.QLineEdit(self.window)  
+        self.getFont()  
+        self.tb.setFont(self.font)
+        if self.numDigits is not None: # define box width by number of digits if numDigits is not None
+            width = self.getTextWidth()
+        self.tb.setGeometry(int(left), int(top), int(width), int(self.getTextHeight()))
+        self.tb.setAlignment(self.dep.Qt.AlignCenter | self.dep.Qt.AlignVCenter)
+        self.tb.setStyleSheet("QLineEdit { border: 1px solid black; }")
+    
+    def getFont(self):
+        self.font = self.dep.QFont()
+        self.font.setPointSizeF(int(self.fonts.defaultFontSize * self.fontSizeToUse))
+        self.fontMetrics = self.dep.QFontMetrics(self.font)
+
+    def getTextWidth(self):
+        text = "0" * self.numDigits
+        boundingRect = self.fontMetrics.boundingRect(0,0,0,0, self.dep.Qt.AlignLeft | self.dep.Qt.AlignVCenter, text)
+        width = boundingRect.width()
+        return width
+    
+    def getTextHeight(self):
+        bounding_rect = self.fontMetrics.boundingRect(0,0,0,0, self.dep.Qt.AlignLeft | self.dep.Qt.AlignVCenter, "0") 
+        height = bounding_rect.height()
+        heightBox = height + height*0.1
+        return heightBox
+    
+    def rightAlign(self):
+        geometry = self.tb.geometry()        
+        new_left = geometry.left() - geometry.width()        
+        self.tb.setGeometry(new_left, geometry.top(), geometry.width(), geometry.height())
            

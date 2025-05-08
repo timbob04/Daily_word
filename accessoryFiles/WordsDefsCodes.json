@@ -9,15 +9,22 @@
     {
         "word": "Intransigent",
         "definition": "unwilling or refusing to change one's views or to agree about something",
-        "wordShown": false,
+        "wordShown": true,
         "isPriorityWord": true,
         "priorityWordShown": true
     },
     {
         "word": "Portent",
         "definition": "a sign or warning that something, especially something momentous or calamitous, is likely to happen",
-        "wordShown": false,
+        "wordShown": true,
         "isPriorityWord": false,
         "priorityWordShown": true
+    },
+    {
+        "word": "Big ol",
+        "definition": "bag",
+        "wordShown": false,
+        "isPriorityWord": false,
+        "priorityWordShown": false
     }
 ]

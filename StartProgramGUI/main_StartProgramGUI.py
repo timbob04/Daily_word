@@ -1,30 +1,26 @@
-from DailyWordApp.makeAppContents import makeAppContents
+from StartProgramGUI.makeAppContents import makeAppContents
 
-def runDailyWordApp(app, dep, worker_dailyWordApp):
+def runStartProgramApp(app, dep, worker_startProgramApp):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(True)
    
     # Make main window
     window = dep.QMainWindow()
-    dep.SetWindowTitle(window, dep.datetime)
+    window.setWindowTitle("Start program")
 
     fonts = dep.DefineFontSizes(app,dep)
     
     # Define size of app using sentence width and number of lines
-    sentence = "0000000000000000000000000000000000000000000000000000000"
-    numLines = 20
+    sentence = "000000000000000000000000000000000000000000"
+    numLines = 15
     appSizeOb = dep.AppSize(app,dep,fonts,sentence,numLines)
 
     UIsizes = dep.DefineUIsizes(appSizeOb)
 
-    # Get daily word and daily priority word
-    dailyWord = dep.DailyWord(dep)
-    dailyPriorityWord = dep.DailyPriorityWord(dep)
-
     # Make app contents (in central widget)
     container = dep.QWidget()
-    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord, worker_dailyWordApp) 
+    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgramApp) 
     dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
