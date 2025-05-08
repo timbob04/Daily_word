@@ -3,7 +3,7 @@ from StartProgramGUI.makeAppContents import makeAppContents
 def runStartProgramApp(app, dep, worker_startProgramApp):
 
     # Set the app to not quit when the last window is closed
-    app.setQuitOnLastWindowClosed(True)
+    app.setQuitOnLastWindowClosed(False)
    
     # Make main window
     window = dep.QMainWindow()
@@ -29,5 +29,7 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
     window.show()
 
     dep.centerWindowOnScreen(window, app)
+
+    window.startTimeOb = container.checkTimeEntered
 
     return window

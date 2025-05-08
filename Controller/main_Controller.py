@@ -48,6 +48,7 @@ from DailyWordApp.main_DailyWordApp import runDailyWordApp
 from Timer.main_Timer import runTimer
 from EditWordList.main_EditWordList import makeEditWordListApp
 from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
+from consoleMessages.programStarting import consoleMessage_startProgram
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -92,12 +93,15 @@ class Controller(QObject):
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
             'timer': TimerWrapper('Timer', dep),
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
-            'startProgram': StartProgramWrapper('StartProgram', app, dep)  # Added StartProgramApp worker
+            'startProgram': StartProgramWrapper('StartProgram', app, dep),
+            'consoleMessages': ConsoleMessagesWrapper('ConsoleMessages', dep)
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
-        self.workers['dailyWordApp'].button_clicked.connect(self.route_start) # to allow the dailyWordApp to start the EditWordList
-        self.workers['timer'].request_start.connect(self.route_start) # to all the timer to start the dailyWordApp
+        self.workers['dailyWordApp'].button_clicked.connect(self.route_start) # to allow the dailyWordApp worker to start the EditWordList
+        self.workers['startProgram'].button_clicked.connect(self.route_start) # to allow the startProgram worker to start the EditWordList
+        self.workers['timer'].request_start.connect(self.route_start) # to allow the timer worker to start the dailyWordApp
+        self.workers['startProgram'].request_start.connect(self.route_start) # to allow the startProgram worker to start the timer, and the consoleMessage
         # self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
         # --- NEW: Create a QThread, move TimerWrapper to that thread ---
@@ -184,6 +188,10 @@ class EditWordListWrapper(QObject):
         self.EditWordListOpen = False # this should actually confirm that the window is closed
 
 class StartProgramWrapper(QObject):
+
+    request_start = pyqtSignal(str)
+    button_clicked = pyqtSignal(str)
+
     def __init__(self, name, app, dep):
         super().__init__()
         self.name = name
@@ -197,8 +205,30 @@ class StartProgramWrapper(QObject):
         self.StartProgramOpen = True 
         
     def shutdown(self):
+        print('\n\nController to start main app here')
+        # Save the time to run the main app
+        print(f'Time to save is {self.window.startTimeOb.timeEntered}')
+        self.request_start.emit("consoleMessages") 
         self.window.close()
-        self.EditWordListOpen = False
+        self.StartProgramOpen = False
+        self.request_start.emit("timer")    
+
+
+class ConsoleMessagesWrapper(QObject):
+    def __init__(self, name, dep):
+        super().__init__()
+        self.name = name
+        self.dep = dep
+
+    def start(self):
+        print(f"{self.name}: running app...")
+        # This needs to figure out if this script is an executable or not, and run the appropriate thing (below is the function)
+        # If running the exectutable, it needs to make sure to run it using a new open console
+        self.dep.consoleMessage_startProgram()
+
+    def shutdown(self):
+        pass
+        # Here, have the console message be a messag to let the user know that the program has now been shut down, and removed from startup folder (etc)
 
 
 def findOpenPort(startingPort=5000, maxTries=5000):

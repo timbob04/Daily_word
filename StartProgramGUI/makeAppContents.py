@@ -6,6 +6,10 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
     appBoundaries = dep.AppBoundaries()
     appWidth = min(appSizeOb.sentenceWidth,appSizeOb.screenWidth)
 
+    # For launching the main app when the start button is pressed, and the time is entered correctly
+    def launchMainApp():
+        worker_startProgramApp.shutdown()  
+
     # Text - "Choose time for daily word to appear"
     text = 'Choose time for daily word to appear'
     textAlignment = dep.Qt.AlignLeft
@@ -121,26 +125,45 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
     lowestPoint = t_timeEnteredIncorrectly.positionAdjust[1] + t_timeEnteredIncorrectly.positionAdjust[3]
     appBoundaries.setNewBoundaries(bottom=lowestPoint)
 
+    # Push Button - 'Edit word list'
+    text = "Edit word list"
+    fontScaler = fonts.fontScalers["default"]
+    startingYPosition = appBoundaries.bottom + UIsizes.pad_large
+    position = [UIsizes.pad_medium,startingYPosition,0,0]
+    pb_editWordList = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
+    pb_editWordList.makeButton()
+    pb_editWordList.showButton()
+    pb_editWordList.button.clicked.connect(lambda: worker_startProgramApp.button_clicked.emit('editWordList')) #
+
+    # Update app boundaries
+    lowestPoint = pb_editWordList.positionAdjust[1] + pb_editWordList.positionAdjust[3]
+    appBoundaries.setNewBoundaries(bottom=lowestPoint)
+
     # Push button - 'Start'
     text = "Start"
     fontScaler = fonts.fontScalers["default"]
-    startingYPosition = appBoundaries.bottom + UIsizes.pad_large
     position = [appBoundaries.right,startingYPosition,0,0]
     pb_start = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
     pb_start.rightAlign()
     pb_start.makeButton()
+    # Shift button right if overlapping with edit button
+    startButton_left = pb_start.positionAdjust[0]
+    editButton_right = pb_editWordList.positionAdjust[0] + pb_editWordList.positionAdjust[2]
+    if startButton_left < editButton_right + UIsizes.pad_large:
+        pb_start.positionAdjust[0] = editButton_right + UIsizes.pad_large
+    # Show button
     pb_start.showButton()
 
-    # Object to check if time is entered correctly, and show/hide the 'Time entered incorrectly' text if not
-    container.checkTimeEntered = CheckIfTimeEnteredCorrectly(dep, editTextBox_hours, editTextBox_minutes, t_timeEnteredIncorrectly)
+    # Update app boundaries
+    rightMostPoint = pb_start.positionAdjust[0] + pb_start.positionAdjust[2]
+    appBoundaries.setNewBoundaries(right=rightMostPoint)
+
+    # Object to check if time is entered correctly, and lanch main app, if the start time is entered correctly
+    container.checkTimeEntered = CheckIfTimeEnteredCorrectly(dep, editTextBox_hours, 
+                editTextBox_minutes, t_timeEnteredIncorrectly, launchMainApp)
     editTextBox_hours.tb.textChanged.connect(container.checkTimeEntered.checkTime_HH)
     editTextBox_minutes.tb.textChanged.connect(container.checkTimeEntered.checkTime_MM)
     pb_start.button.clicked.connect(container.checkTimeEntered.startButtonPressed)
-
-
-    # Update app boundaries
-    lowestPoint = pb_start.positionAdjust[1] + pb_start.positionAdjust[3]
-    appBoundaries.setNewBoundaries(bottom=lowestPoint)
 
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium
