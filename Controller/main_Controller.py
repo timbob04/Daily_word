@@ -56,6 +56,10 @@ dep = StoreDependencies(globals())
 def startController():
     print('Inside the Controller executable')
 
+    # This is where the Mutex checking will go.
+    # If not already running, then start the things below, including 'app' and 'controller'
+    # If already running, then send a ping to the already running controller (I guess on the relevant port), then quit
+
     app = QApplication(sys.argv)
     
     # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
@@ -110,6 +114,12 @@ class Controller(QObject):
         self.timer_thread.start()
         self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
         # --------------------------------------------------------------
+
+    def __del__(self):
+        # Clean up the timer thread when the controller is destroyed
+        if hasattr(self, 'timer_thread') and self.timer_thread.isRunning():
+            self.timer_thread.quit()
+            self.timer_thread.wait()
 
     # Commuication with other executables; listener function - to listen for messages from port
     def startPortListener(self):
@@ -206,13 +216,19 @@ class StartProgramWrapper(QObject):
         
     def shutdown(self):
         print('\n\nController to start main app here')
-        # Save the time to run the main app
-        print(f'Time to save is {self.window.startTimeOb.timeEntered}')
-        self.request_start.emit("consoleMessages") 
-        self.window.close()
         self.StartProgramOpen = False
-        self.request_start.emit("timer")    
+        self.saveTimeToRunMainApp()
+        self.request_start.emit("consoleMessages") # run console message to let the user know that the main program is now running in the background
+        self.window.close()
+        self.request_start.emit("timer") # start timer script   
 
+    def saveTimeToRunMainApp(self):
+        timeToSave = self.window.startTimeOb.timeEntered  
+        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
+        with open(self.filePath, 'w') as f:
+            f.write(timeToSave)
 
 class ConsoleMessagesWrapper(QObject):
     def __init__(self, name, dep):
@@ -262,6 +278,7 @@ def portListener(portNum):
         if msg == "pingFromUserInputExecutable":
             print("Ping received!")
             # Send message back to UserInput
+            time.sleep(1)  # Wait 1 second before responding, to allow the UserInput script to start listening
             conn.sendall(b'pingFromController') 
             # do stuff: namely, send a message to the controller, to start stuff, send a message back to sender, etc
         conn.close()

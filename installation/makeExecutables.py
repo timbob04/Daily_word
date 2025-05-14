@@ -20,7 +20,7 @@ class makeExecutables():
         self.pythonFile = self.dep.os.path.join(self.projectRoot, self.fileName.replace(".", self.dep.os.sep)) + ".py"              
 
     def getModuleDependencies(self):  
-        getModuleImports = GetModuleImports(self.dep,self.fileName)
+        getModuleImports = GetModuleImports(self.dep, self.fileName)
         self.dependencies = getModuleImports.imports
     
     def makeCommandsToAddDependencies(self):

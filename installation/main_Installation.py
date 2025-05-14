@@ -13,7 +13,7 @@ dep = StoreDependencies(globals())
 
 # Inputs
 fileNames = ["consoleMessages.programStarting", "UserInput.main_UserInput", "Controller.main_Controller"]
-consoleNeeded = [True, True, True]
+consoleNeeded = [False, False, False]
 
 def makeAndOrganizeExecutables(fileNames, consoleNeeded):
     deleteBinAndBuildFolders() # to start afresh
