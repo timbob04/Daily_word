@@ -96,8 +96,8 @@ class MakeWordList():
         self.wordList = self.dep.readJSONfile(self.dep.json, self.filePath)  
     
     def getWordListFilePath(self):    
-        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
 
     def getWordsWithDefinitons(self):
@@ -196,8 +196,8 @@ class MakeWordList():
                 "priorityWordShown": self.wordList[ind]["priorityWordShown"]
             })
         # Get save file path
-        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
         # Save wordListToSave to json file
         with open(self.filePath, 'w') as file:

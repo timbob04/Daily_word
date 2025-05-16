@@ -7,21 +7,17 @@ import sys
 
 from utils.utils import StoreDependencies, getBaseDir
 from Installation.makeExecutables import makeExecutables
-from Installation.arrangeExecutableFiles import organizeExecutableFiles
 
 dep = StoreDependencies(globals())
 
 # Inputs
 fileNames = ["consoleMessages.programStarting", "UserInput.main_UserInput", "Controller.main_Controller"]
-consoleNeeded = [False, False, False]
 
-def makeAndOrganizeExecutables(fileNames, consoleNeeded):
+def makeAndOrganizeExecutables(fileNames):
     deleteBinAndBuildFolders() # to start afresh
     for i in range(len(fileNames)):
         print(f"Making executable for {fileNames[i]}")
-        makeExecutables(dep, fileNames[i], consoleNeeded[i])
-    print("Organizing executables in bin folder")
-    organizeExecutableFiles(dep)   
+        makeExecutables(dep, fileNames[i])
 
 def deleteBinAndBuildFolders():
     for folder in ["bin", "build"]:
@@ -29,4 +25,4 @@ def deleteBinAndBuildFolders():
             shutil.rmtree(folder)  
 
 if __name__ == "__main__":
-    makeAndOrganizeExecutables(fileNames, consoleNeeded)
+    makeAndOrganizeExecutables(fileNames)

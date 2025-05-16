@@ -1,18 +1,16 @@
 class makeExecutables():
-    def __init__(self,dep,fileName,consoleNeeded):
+    def __init__(self,dep, fileName):
         # Input parameters
         self.dep = dep
         self.fileName = fileName    
-        self.consoleNeeded = consoleNeeded    
         # Fixed parameters
-        self.projectRoot = dep.os.path.abspath(dep.os.path.join(dep.getBaseDir(dep.sys, dep.os), ".."))
+        self.projectRoot, _ = dep.getBaseDir(dep.sys, dep.os)
         self.executableName = self.fileName.split(".")[-1]
         # Initializer methods
         self.getPythonFilePath()
         self.getModuleDependencies()
         self.makeCommandsToAddDependencies()
         self.makeCommandsToAddNeededFolders()
-        self.makeCommandForTerminalOpenOrClosed()
         self.createPyInstallerCommand()
         self.runPyInstallerCommand()                  
 
@@ -35,17 +33,11 @@ class makeExecutables():
         self.neededFoldersCmd = [
             f'--add-data={self.dep.os.path.join(self.projectRoot, folder)}{separator}{folder}'
             for folder in folders
-        ]
-
-    def makeCommandForTerminalOpenOrClosed(self):
-        if self.consoleNeeded:
-            self.consoleCommand = "--console"
-        else:
-            self.consoleCommand = "--windowed"    
+        ] 
 
     def createPyInstallerCommand(self):    
         self.pyInstallerCommand = [
-            "pyinstaller", "--onedir", "--noupx", "--clean", self.consoleCommand,
+            "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed",
             "--name", self.executableName,
             "--distpath", "bin",
             self.pythonFile,

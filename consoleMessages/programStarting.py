@@ -2,12 +2,19 @@ import time
 import sys
 from datetime import datetime
 import os
-from utils.utils import getBaseDir
+from utils.utils import getBaseDir, setupLogging, StoreDependencies
+import logging
 
 # So installed executables can find their dependencies
 # sys.path.insert(0, os.path.join(os.path.dirname(__file__), "_internal"))
 
+dep = StoreDependencies(globals())
+
+# setupLogging(dep, "programStarting")
+
 def consoleMessage_startProgram():
+
+    # logging.info("....starting program....")
 
     programRunTimeOb = ReadProgramRunTime()
 
@@ -34,8 +41,8 @@ class ReadProgramRunTime():
         
     def getTimeFilePath(self):
         # Get path of accessory files
-        base_dir = getBaseDir(sys, os)
-        accessoryFiles_dir = os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = getBaseDir(sys, os)
+        accessoryFiles_dir = os.path.join(root_dir, 'accessoryFiles')
         # Path to json file for words and definitions
         return os.path.join(accessoryFiles_dir, 'timeToRunApplication.txt')                      
 

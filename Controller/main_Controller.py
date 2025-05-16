@@ -224,8 +224,8 @@ class StartProgramWrapper(QObject):
 
     def saveTimeToRunMainApp(self):
         timeToSave = self.window.startTimeOb.timeEntered  
-        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
@@ -259,9 +259,9 @@ def findOpenPort(startingPort=5000, maxTries=5000):
 
 def savePortNumberToFile(portNum, dep):
     # Get path to text file in accessoryFiles folder to save port number
-    baseDir = getBaseDir(dep.sys, dep.os)
-    accessoryFiles_dir = os.path.join(baseDir, '..', 'accessoryFiles')
-    curFilePath = os.path.join(accessoryFiles_dir, 'portNum_1.txt')
+    root_dir, _ = getBaseDir(dep.sys, dep.os)
+    accessoryFiles_dir = os.path.join(root_dir, 'accessoryFiles')
+    curFilePath = os.path.join(accessoryFiles_dir, 'portNum_Controller.txt')
     with open(curFilePath, "w") as f:
         f.write(str(portNum))
 

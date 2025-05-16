@@ -175,8 +175,8 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
 def saveToggleChoice(dep, h_toggle, word, definition): 
 
     # Get Json file path
-    baseDir = dep.getBaseDir(dep.sys, dep.os)
-    accessoryFiles_dir = dep.os.path.join(baseDir, '..', 'accessoryFiles')
+    root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
+    accessoryFiles_dir = dep.os.path.join(root_dir, 'accessoryFiles')
     jsonFilePath = dep.os.path.join(accessoryFiles_dir, 'WordsDefsCodes.json')
 
     # Read json file

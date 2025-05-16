@@ -26,8 +26,8 @@ class DailyWord():
             self.updateWordList()
 
     def getWordListFilePath(self):    
-        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
 
     def getWordList(self):    
@@ -107,8 +107,8 @@ class DailyPriorityWord():
             self.makePriorityWordWithDefText()      
 
     def getWordListFilePath(self):    
-        base_dir = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        dir_accessoryFiles = self.dep.os.path.join(base_dir, '..', 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'WordsDefsCodes.json')
 
     def getWordList(self):    
