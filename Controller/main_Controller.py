@@ -30,7 +30,8 @@ from PyQt5.QtGui import (
 # Local imports
 from utils.utils import (
     readJSONfile, getBaseDir, 
-    StoreDependencies, softHyphenateLongWords
+    StoreDependencies, softHyphenateLongWords,
+    PortListener, PortSender
 )
 from utils.utils_UI import (
     DefineUIsizes, DefineFontSizes, StaticText,
@@ -85,9 +86,6 @@ class Controller(QObject):
         self.app = app
         self.dep = dep
 
-        # Start the listener to listen for messages from other processes (e.g., other binaries)
-        self.startPortListener()
-
         # Connect the signals (channels) to the slots (methods) that will be sent down the channels
         self.startTask.connect(self.route_start)
         self.shutdownTask.connect(self.route_shutdown)
@@ -97,8 +95,7 @@ class Controller(QObject):
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
             'timer': TimerWrapper('Timer', dep),
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
-            'startProgram': StartProgramWrapper('StartProgram', app, dep),
-            'consoleMessages': ConsoleMessagesWrapper('ConsoleMessages', dep)
+            'startProgram': StartProgramWrapper('StartProgram', app, dep)
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
@@ -108,25 +105,39 @@ class Controller(QObject):
         self.workers['startProgram'].request_start.connect(self.route_start) # to allow the startProgram worker to start the timer, and the consoleMessage
         # self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
-        # --- NEW: Create a QThread, move TimerWrapper to that thread ---
+        # Initialize the port listener and sender objects - to talk to the UserInput executable
+        self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_UserInput.txt')
+        threading.Thread(target=self.portListener.listenIndefinitely, args=(self.pingReceivedFromUser,), daemon=True).start() # start listening
+        self.portSender = PortSender(self.dep, 'portNum_UserInput.txt')   
+        threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to UserInput
+
+        # Create a QThread for the TimerWrapper - it needs to be QThread rather than threading.Thread because it starts another worker using PyQt5 stuff
         self.timer_thread = QThread()
         self.workers['timer'].moveToThread(self.timer_thread)
         self.timer_thread.start()
         self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
-        # --------------------------------------------------------------
+
+        # Connect cleanup to application quit
+        self.app.aboutToQuit.connect(self.cleanUp)
+
+    def cleanUp(self):
+        self.portListener.closeSocket()
+        self.portListener.clearPortNumber()
 
     def __del__(self):
-        # Clean up the timer thread when the controller is destroyed
+        # Clean up the timer QThread when the Controller is destroyed
         if hasattr(self, 'timer_thread') and self.timer_thread.isRunning():
             self.timer_thread.quit()
             self.timer_thread.wait()
 
-    # Commuication with other executables; listener function - to listen for messages from port
-    def startPortListener(self):
-        portNum = findOpenPort()
-        savePortNumberToFile(portNum, self.dep)
-        if portNum is not None:
-            threading.Thread(target=portListener, args=(portNum,), daemon=True).start()    
+    def pingReceivedFromUser(self):
+        # here is where I run the logic to do:
+        # 1. send ping to UserInput, so it knows its ping has been received
+        threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start()
+        # 2. figure out if the app is already running:
+        # 2a. if it is, then run the startProgram stuff
+        # 2b. if it is not, then run the startProgram stuff
+        pass  # Do nothing when ping received
 
     # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
@@ -229,59 +240,6 @@ class StartProgramWrapper(QObject):
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
-
-class ConsoleMessagesWrapper(QObject):
-    def __init__(self, name, dep):
-        super().__init__()
-        self.name = name
-        self.dep = dep
-
-    def start(self):
-        print(f"{self.name}: running app...")
-        # This needs to figure out if this script is an executable or not, and run the appropriate thing (below is the function)
-        # If running the exectutable, it needs to make sure to run it using a new open console
-        self.dep.consoleMessage_startProgram()
-
-    def shutdown(self):
-        pass
-        # Here, have the console message be a messag to let the user know that the program has now been shut down, and removed from startup folder (etc)
-
-
-def findOpenPort(startingPort=5000, maxTries=5000):
-    port = None
-    for port in range(startingPort, startingPort + maxTries):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            try:
-                s.bind(("127.0.0.1", port))
-                return port
-            except OSError:
-                continue
-
-def savePortNumberToFile(portNum, dep):
-    # Get path to text file in accessoryFiles folder to save port number
-    root_dir, _ = getBaseDir(dep.sys, dep.os)
-    accessoryFiles_dir = os.path.join(root_dir, 'accessoryFiles')
-    curFilePath = os.path.join(accessoryFiles_dir, 'portNum_Controller.txt')
-    with open(curFilePath, "w") as f:
-        f.write(str(portNum))
-
-def portListener(portNum):
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('127.0.0.1', portNum))
-    server.listen(1)
-    print(f"Listening for pings on port {portNum}...")
-    while True:
-        conn, addr = server.accept()
-        msg = conn.recv(1024).decode()
-        print(f"Received message: {msg}")
-        if msg == "pingFromUserInputExecutable":
-            print("Ping received!")
-            # Send message back to UserInput
-            time.sleep(1)  # Wait 1 second before responding, to allow the UserInput script to start listening
-            conn.sendall(b'pingFromController') 
-            # do stuff: namely, send a message to the controller, to start stuff, send a message back to sender, etc
-        conn.close()
 
 if __name__ == "__main__":
     startController()

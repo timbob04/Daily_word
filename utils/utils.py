@@ -84,3 +84,141 @@ def setupLogging(dep, app_name="MyApp"):
     )
 
     dep.logging.info(f"{app_name} started")
+
+class PortListener:
+    def __init__(self, dep, fileWithPortNumber, fileWithPortNumberToAvoid):
+        # Parameters
+        self.portNum = None
+        self.portNumFileName = fileWithPortNumber
+        self.portNumFileNameToAvoid = fileWithPortNumberToAvoid
+        self.dep = dep
+        # Default variables
+        self.responseReceived = False
+
+    def listenIndefinitely(self, functionToCallWhenResponseReceived):
+        self.closeSocket()   
+        self.portNum = self.findOpenPort()
+        self.savePortNumberToFile(self.portNum)
+        self.portListener()
+        if self.portNum is not None:
+            try:
+                while True:
+                    conn, addr = self.socket.accept()
+                    data = conn.recv(1024)
+                    if data:
+                        functionToCallWhenResponseReceived()
+                    conn.close()
+            except OSError:
+                pass 
+        
+    def listenForCertainTime(self, timeout=5):
+        self.closeSocket()   
+        self.portNum = self.findOpenPort()
+        self.savePortNumberToFile(self.portNum)
+        self.portListener()
+        # Check for message for certain time
+        self.socket.settimeout(timeout)
+        try:
+            conn, addr = self.socket.accept()  # Blocks until ping received or timeout
+            data = conn.recv(1024)
+            if data:
+                self.responseReceived = True
+            else:
+                self.responseReceived = False
+            conn.close()
+        except self.dep.socket.timeout:
+            self.responseReceived = False
+        finally:
+            self.socket.close()
+
+    def closeSocket(self):
+        self.portNum = None
+        if hasattr(self, 'socket'):
+            try:
+                self.socket.close()
+            except OSError:
+                pass  # Socket was already closed
+
+    def findOpenPort(self, startingPort=5000, maxTries=5000):
+        # First read self.portNumFileNameToAvoid's port number to avoid it
+        portToAvoid = readPortNumber(self.dep, self.portNumFileNameToAvoid)
+        # Then get an open port
+        for port in range(startingPort, startingPort + maxTries):
+            # Skip if this is the Controller's port
+            if port == portToAvoid:
+                continue
+            with self.dep.socket.socket(self.dep.socket.AF_INET, self.dep.socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("127.0.0.1", port))
+                    return port
+                except OSError:
+                    continue              
+
+    def savePortNumberToFile(self, portNum):
+        # Get path to text file in accessoryFiles folder to save port number
+        root_dir, _ = getBaseDir(self.dep.sys, self.dep.os)
+        accessoryFiles_dir = self.dep.os.path.join(root_dir, 'accessoryFiles')
+        curFilePath = self.dep.os.path.join(accessoryFiles_dir, self.portNumFileName)
+        with open(curFilePath, "w") as f:
+            f.write(str(portNum))     
+
+    def portListener(self):
+        if self.portNum is not None:
+            print(f"Listening on port {self.portNum}")
+            self.socket = self.dep.socket.socket(self.dep.socket.AF_INET, self.dep.socket.SOCK_STREAM)
+            self.socket.bind(('127.0.0.1', self.portNum))
+            self.socket.listen(1)
+            print(f"Listening on port {self.portNum}")
+        else:
+            print('Port number not found')
+
+    def clearPortNumber(self):
+        root_dir, _ = getBaseDir(self.dep.sys, self.dep.os)
+        accessoryFiles_dir = self.dep.os.path.join(root_dir, 'accessoryFiles')
+        curFilePath = self.dep.os.path.join(accessoryFiles_dir, self.portNumFileName)
+        with open(curFilePath, "w") as f:
+            f.write('')     
+
+class PortSender:
+    def __init__(self, dep, fileWithPortNumToSendPings):
+        # Parameters
+        self.messageSent = False  
+        self.fileWithPortNumToSendPings = fileWithPortNumToSendPings     
+        self.dep = dep
+        # Constructor methods    
+
+    def sendPing(self, delay=0):
+        self.portNum = readPortNumber(self.dep, self.fileWithPortNumToSendPings)
+        if self.portNum is None:
+            return
+        
+        self.socket = self.dep.socket.socket(self.dep.socket.AF_INET, self.dep.socket.SOCK_STREAM)
+        try:    
+            # print("Trying to send ping...")
+            self.socket.connect(('127.0.0.1', self.portNum))
+            self.dep.time.sleep(delay)
+            self.socket.sendall(b'ping')
+            self.messageSent = True
+            # print("Message sent!")
+        except Exception:
+            pass
+        finally:
+            self.socket.close()
+
+def readPortNumber(dep, fileWithPortNumToSendPings):
+    # Get path to text file in accessoryFiles folder to save port number
+    root_dir, _ = getBaseDir(dep.sys, dep.os)
+    accessoryFiles_dir = dep.os.path.join(root_dir, 'accessoryFiles')
+    curFilePath = dep.os.path.join(accessoryFiles_dir, fileWithPortNumToSendPings)
+    # Return if file does not exist
+    if not dep.os.path.exists(curFilePath):
+        return None
+    # Read port number from file
+    with open(curFilePath, "r") as f:
+        content = f.read().strip()
+    try:
+        port = int(content)
+        if 1024 <= port <= 65535:  # Valid port range
+            return port
+    except (ValueError, OSError):
+        return None
