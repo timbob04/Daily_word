@@ -46,20 +46,23 @@ if __name__ == "__main__":
     # Set up a port sender for sending messages to the Controller
     portSender = PortSender(dep, 'portNum_Controller.txt')
     # Send ping to Controller
+    print("Sending ping to Controller")
     portSender.sendPing(0)
     # Start listening for a response from the Controller
+    print("Listening for response from Controller")
     portListener.listenForCertainTime(5)
     # Wait for response from Controller
     if portListener.responseReceived:
         print("Response received from Controller after first ping")
     else:
-        print("No response received from Controller.  Running its executable...")
+        print("No response received from Controller after first ping.  Running its executable...")
         runControllerExecutable()
         portListener.listenForCertainTime(10) # instead of pinging the Controller again, just have the Controller ping this executable once it starts up
+        print("Listening for response from Controller after running its executable")
         if portListener.responseReceived:
-            print("Response received from Controller after second ping (and running its executable)")
+            print("Response received from Controller after running its executable")
         else:
-            print("No response received from Controller.  Exiting...")
+            print("No response received from Controller after running its executable.  Exiting...")
     # Clean up (clear) the port number in portNum_UserInput.txt
     portListener.clearPortNumber()
 

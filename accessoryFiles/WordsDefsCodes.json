@@ -11,7 +11,7 @@
         "definition": "intended for or likely to be understood by only a small number of people with a specialized knowledge or interest.",
         "wordShown": true,
         "isPriorityWord": true,
-        "priorityWordShown": false
+        "priorityWordShown": true
     },
     {
         "word": "Intransigent",
@@ -30,8 +30,8 @@
     {
         "word": "Pork",
         "definition": "Store",
-        "wordShown": false,
-        "isPriorityWord": false,
+        "wordShown": true,
+        "isPriorityWord": true,
         "priorityWordShown": false
     }
 ]

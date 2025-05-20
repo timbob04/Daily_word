@@ -108,7 +108,8 @@ class Controller(QObject):
         # Initialize the port listener and sender objects - to talk to the UserInput executable
         self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_UserInput.txt')
         threading.Thread(target=self.portListener.listenIndefinitely, args=(self.pingReceivedFromUser,), daemon=True).start() # start listening
-        self.portSender = PortSender(self.dep, 'portNum_UserInput.txt')   
+        self.portSender = PortSender(self.dep, 'portNum_UserInput.txt')  
+        print("CON. Sending ping to UserInput on startup")
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to UserInput
 
         # Create a QThread for the TimerWrapper - it needs to be QThread rather than threading.Thread because it starts another worker using PyQt5 stuff
@@ -134,6 +135,7 @@ class Controller(QObject):
         # here is where I run the logic to do:
         # 1. send ping to UserInput, so it knows its ping has been received
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start()
+        print("Con.  Inside pingReceivedFromUser.  Sending ping back to UserInput")
         # 2. figure out if the app is already running:
         # 2a. if it is, then run the startProgram stuff
         # 2b. if it is not, then run the startProgram stuff
