@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 from utils.utils import StoreDependencies, getBaseDir
-from Installation.makeExecutables import makeExecutables
+from Installation.makeExecutables import makeExecutables, makeLauncherFile
 
 dep = StoreDependencies(globals())
 
@@ -18,6 +18,7 @@ def makeAndOrganizeExecutables(fileNames):
     for i in range(len(fileNames)):
         print(f"Making executable for {fileNames[i]}")
         makeExecutables(dep, fileNames[i])
+    makeLauncherFile(dep)    
 
 def deleteBinAndBuildFolders():
     for folder in ["bin", "build"]:

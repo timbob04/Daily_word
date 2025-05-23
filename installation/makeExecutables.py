@@ -12,7 +12,7 @@ class makeExecutables():
         self.makeCommandsToAddDependencies()
         self.makeCommandsToAddNeededFolders()
         self.createPyInstallerCommand()
-        self.runPyInstallerCommand()                  
+        self.runPyInstallerCommand()              
 
     def getPythonFilePath(self):
         self.pythonFile = self.dep.os.path.join(self.projectRoot, self.fileName.replace(".", self.dep.os.sep)) + ".py"              
@@ -77,3 +77,36 @@ class GetModuleImports():
                 if node.module:  # Ignore relative imports with None
                     self.imports.add(node.module)
         self.imports = list(self.imports)  # Convert back to a list          
+
+def makeLauncherFile(dep):
+    if dep.sys.platform != 'darwin':
+        return
+
+    # Where to save the launcher (as "DailyWord.command")
+    projectRoot, _ = dep.getBaseDir(dep.sys, dep.os)
+    launcher_path = dep.os.path.join(projectRoot, "DailyWord.command")
+
+    # Delete any existing launcher file
+    if dep.os.path.exists(launcher_path):
+        dep.os.remove(launcher_path)
+
+    # Write the self-resolving .command file with force-close logic
+    with open(launcher_path, "w") as f:
+        f.write("""#!/bin/bash
+            DIR="$(cd "$(dirname "$0")" && pwd)"
+            osascript <<EOF
+            tell application "Terminal"
+                set newTab to do script "$DIR/bin/main_UserInput.app/Contents/MacOS/main_UserInput; exit"
+                delay 1
+                repeat while busy of window 1
+                    delay 0.5
+                end repeat
+                close window 1
+            end tell
+            EOF
+            """)
+
+    # Make it executable
+    dep.os.chmod(launcher_path, 0o755)
+
+    print(f"✅ Created launcher: {launcher_path}")

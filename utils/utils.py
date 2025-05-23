@@ -17,7 +17,7 @@ def getBaseDir(sys, os):
             baseDir = os.getcwd()  # Default to current working directory if __file__ is missing
         rootDir = os.path.abspath(os.path.join(baseDir, ".."))    
 
-    return rootDir,baseDir
+    return rootDir, baseDir
     
 def readJSONfile(json, filepath):
     try:
