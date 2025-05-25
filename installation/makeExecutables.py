@@ -78,35 +78,45 @@ class GetModuleImports():
                     self.imports.add(node.module)
         self.imports = list(self.imports)  # Convert back to a list          
 
-def makeLauncherFile(dep):
+import time
+
+def makeLauncher(dep, app_name="UserInput", binary_name="PingController"):
+
     if dep.sys.platform != 'darwin':
         return
+    
+    print("Making launcher for mac")
 
-    # Where to save the launcher (as "DailyWord.command")
-    projectRoot, _ = dep.getBaseDir(dep.sys, dep.os)
-    launcher_path = dep.os.path.join(projectRoot, "DailyWord.command")
+    project_dir, _ = dep.getBaseDir(dep.sys, dep.os)
+    script_path = dep.os.path.join(project_dir, f"{app_name}.applescript")
+    app_path = dep.os.path.join(project_dir, f"{app_name}.app")
 
-    # Delete any existing launcher file
-    if dep.os.path.exists(launcher_path):
-        dep.os.remove(launcher_path)
+    # Start afresh
+    if dep.os.path.exists(app_path):
+        dep.subprocess.run(["rm", "-rf", app_path], check=True)
 
-    # Write the self-resolving .command file with force-close logic
-    with open(launcher_path, "w") as f:
-        f.write("""#!/bin/bash
-            DIR="$(cd "$(dirname "$0")" && pwd)"
-            osascript <<EOF
-            tell application "Terminal"
-                set newTab to do script "$DIR/bin/main_UserInput.app/Contents/MacOS/main_UserInput; exit"
-                delay 1
-                repeat while busy of window 1
-                    delay 0.5
-                end repeat
-                close window 1
-            end tell
-            EOF
-            """)
+    applescript = f'''\
+        tell application "Terminal"
+            set appPath to POSIX path of (path to me)
+            set binPath to appPath & "../bin/{binary_name}.app/Contents/MacOS/{binary_name}"
+            do script binPath
+            delay 0.5
+            repeat while busy of window 1
+                delay 0.2
+            end repeat
+            close window 1
+        end tell
+        '''
 
-    # Make it executable
-    dep.os.chmod(launcher_path, 0o755)
 
-    print(f"✅ Created launcher: {launcher_path}")
+    # Write the AppleScript to file
+    with open(script_path, 'w') as f:
+        f.write(applescript)
+
+    # Compile into a .app
+    dep.subprocess.run(["osacompile", "-o", app_path, script_path], check=True)
+
+    # Remove temporary .applescript
+    dep.os.remove(script_path)
+
+    print(f"✅ Created .app launcher at: {app_path}")

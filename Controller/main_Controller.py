@@ -105,12 +105,12 @@ class Controller(QObject):
         self.workers['startProgram'].request_start.connect(self.route_start) # to allow the startProgram worker to start the timer, and the consoleMessage
         # self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
-        # Initialize the port listener and sender objects - to talk to the UserInput executable
-        self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_UserInput.txt')
+        # Initialize the port listener and sender objects - to talk to the PingController executable
+        self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_PingController.txt')
         threading.Thread(target=self.portListener.listenIndefinitely, args=(self.pingReceivedFromUser,), daemon=True).start() # start listening
-        self.portSender = PortSender(self.dep, 'portNum_UserInput.txt')  
-        print("CON. Sending ping to UserInput on startup")
-        threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to UserInput
+        self.portSender = PortSender(self.dep, 'portNum_PingController.txt')  
+        print("CON. Sending ping to PingController on startup")
+        threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
 
         # Create a QThread for the TimerWrapper - it needs to be QThread rather than threading.Thread because it starts another worker using PyQt5 stuff
         self.timer_thread = QThread()
@@ -133,9 +133,9 @@ class Controller(QObject):
 
     def pingReceivedFromUser(self):
         # here is where I run the logic to do:
-        # 1. send ping to UserInput, so it knows its ping has been received
+        # 1. send ping to PingController, so it knows its ping has been received
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start()
-        print("Con.  Inside pingReceivedFromUser.  Sending ping back to UserInput")
+        print("Con.  Inside pingReceivedFromUser.  Sending ping back to PingController")
         # 2. figure out if the app is already running:
         # 2a. if it is, then run the startProgram stuff
         # 2b. if it is not, then run the startProgram stuff

@@ -31,22 +31,32 @@ def runControllerExecutable():
         print("Running as main_Controller.py")
 
 def loadingMessage():
-    print("Loading")
+    print("\n")
+
+    # print("Loading ")
+    # while True:
+    #     print(".", end="", flush=True)
+    #     time.sleep(1)
+
+    # Option 2: Revolving dash
+    chars = ['-', '\\', '|', '/']
+    i = 0
     while True:
-        print(".", end="", flush=True)
-        time.sleep(1)
+        print(f"\rLoading {chars[i]}", end="", flush=True)
+        i = (i + 1) % len(chars)
+        time.sleep(0.2)
 
 if __name__ == "__main__":
 
-    print('Inside UserInout and now waiting...')
+    threading.Thread(target=loadingMessage, daemon=True).start()
+
     time.sleep(4)
-    print('Done waiting')
 
     # # # Start loading message in a daemon thread
     # # threading.Thread(target=loadingMessage, daemon=True).start()
 
     # # Set up a port listener for receiving messages from the Controller
-    # portListener = PortListener(dep, 'portNum_UserInput.txt', 'portNum_Controller.txt')
+    # portListener = PortListener(dep, 'portNum_PingController.txt', 'portNum_Controller.txt')
     # # Set up a port sender for sending messages to the Controller
     # portSender = PortSender(dep, 'portNum_Controller.txt')
     # # Send ping to Controller
@@ -61,14 +71,11 @@ if __name__ == "__main__":
     # else:
     #     print("No response received from Controller after first ping.  Running its executable...")
     #     runControllerExecutable()
-    #     portListener.listenForCertainTime(10) # instead of pinging the Controller again, just have the Controller ping this executable once it starts up
+    #     portListener.listenForCertainTime(20) # instead of pinging the Controller again, just have the Controller ping this executable once it starts up
     #     print("Listening for response from Controller after running its executable")
     #     if portListener.responseReceived:
     #         print("Response received from Controller after running its executable")
     #     else:
     #         print("No response received from Controller after running its executable.  Exiting...")
-    # # Clean up (clear) the port number in portNum_UserInput.txt
+    # # Clean up (clear) the port number in portNum_PingController.txt
     # portListener.clearPortNumber()
-
-
-    
