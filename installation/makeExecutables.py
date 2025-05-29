@@ -37,7 +37,7 @@ class makeExecutables():
 
     def createPyInstallerCommand(self):    
         self.pyInstallerCommand = [
-            "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed",
+            "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed", "--noconsole",
             "--name", self.executableName,
             "--distpath", "bin",
             self.pythonFile,
@@ -78,7 +78,6 @@ class GetModuleImports():
                     self.imports.add(node.module)
         self.imports = list(self.imports)  # Convert back to a list          
 
-import time
 
 def makeLauncher(dep, app_name="UserInput", binary_name="PingController"):
 
@@ -120,3 +119,6 @@ def makeLauncher(dep, app_name="UserInput", binary_name="PingController"):
     dep.os.remove(script_path)
 
     print(f"✅ Created .app launcher at: {app_path}")
+
+
+

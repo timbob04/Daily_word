@@ -2,6 +2,7 @@ def getBaseDir(sys, os):
     # Check if the program is running as an executable
     if getattr(sys, 'frozen', False):                
         baseDir = os.path.dirname(sys.executable)
+        # rootDir = os.path.abspath(os.path.join(baseDir, ".."))
         if sys.platform == 'darwin':
             # macOS: .../YourApp.app/Contents/MacOS → go up 3 (.app), then 1 (bin)
             rootDir = os.path.abspath(os.path.join(baseDir, "../../../.."))
@@ -106,7 +107,7 @@ class PortListener:
                     conn, addr = self.socket.accept()
                     data = conn.recv(1024)
                     if data:
-                        functionToCallWhenResponseReceived()
+                        functionToCallWhenResponseReceived(data.decode())
                     conn.close()
             except OSError:
                 pass 
@@ -187,7 +188,7 @@ class PortSender:
         self.dep = dep
         # Constructor methods    
 
-    def sendPing(self, delay=0):
+    def sendPing(self, delay=0, pingMessage='bag'):
         self.portNum = readPortNumber(self.dep, self.fileWithPortNumToSendPings)
         if self.portNum is None:
             return
@@ -197,7 +198,7 @@ class PortSender:
             # print("Trying to send ping...")
             self.socket.connect(('127.0.0.1', self.portNum))
             self.dep.time.sleep(delay)
-            self.socket.sendall(b'ping')
+            self.socket.sendall(pingMessage.encode())
             self.messageSent = True
             # print("Message sent!")
         except Exception:

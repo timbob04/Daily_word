@@ -81,7 +81,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb):
         painter = dep.QPainter(window)
         pen = dep.QPen(dep.Qt.gray, lineThickness)  # Set the color and thickness of the line
         painter.setPen(pen)
-        painter.drawLine(xStart,yPoint,xEnd,yPoint)  # Draw the line
+        painter.drawLine(int(xStart),int(yPoint),int(xEnd),int(yPoint))  # Draw the line
     # Run the function
     xStart = UIsizes.pad_medium
     xEnd = appBoundaries.right

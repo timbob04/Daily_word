@@ -256,7 +256,7 @@ class MakeWordList():
             self.getStartPositions_y()
             self.makeWordList()
             # Re-adjust the size of the container
-            self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom)+self.UIsizes.pad_medium)
+            self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom+self.UIsizes.pad_medium))
             self.container.update()
             # Save the edited wordList to json file
             self.saveWordListToJson()

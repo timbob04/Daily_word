@@ -9,22 +9,24 @@ import re
 import time
 import socket
 import threading
+import ctypes
 
 # Third-party imports
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, 
     QVBoxLayout, QWidget, QScrollArea, 
     QPushButton, QStyle, QCheckBox,
-    QLineEdit, QMessageBox
+    QLineEdit, QMessageBox, QSystemTrayIcon,
+    QMenu, QAction
 )
 from PyQt5.QtCore import (
     Qt, QObject, pyqtSignal, pyqtSlot,
-    QTimer, QThread
+    QTimer, QThread, QCoreApplication
 )
 from PyQt5.QtGui import (
     QFont, QFontMetrics, QCursor, 
     QTextDocument, QTextOption,
-    QPainter, QPen
+    QPainter, QPen, QIcon
 )
 
 # Local imports
@@ -54,6 +56,14 @@ from consoleMessages.programStarting import consoleMessage_startProgram
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
+# This is to hide the icon in the dock on macOS
+# macOS specific imports
+if platform.system() == 'Darwin':
+    from Foundation import NSBundle
+    bundle = NSBundle.mainBundle()
+    info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+    info['LSUIElement'] = 1
+
 def startController():
     print('Inside the Controller executable')
 
@@ -64,12 +74,11 @@ def startController():
     app = QApplication(sys.argv)
     
     # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
+
+    makeMenuIcon(dep, app)
     
     controller = Controller(app, dep)
-    
-    # Testing - run certain workers to run certain apps
     # controller.workers['timer'].trigger_start.emit()
-    controller.workers['startProgram'].start()  # Start the StartProgramApp
 
     # Start the event loop and get the exit code
     exit_code = app.exec_()
@@ -131,15 +140,21 @@ class Controller(QObject):
             self.timer_thread.quit()
             self.timer_thread.wait()
 
-    def pingReceivedFromUser(self):
-        # here is where I run the logic to do:
-        # 1. send ping to PingController, so it knows its ping has been received
+    def pingReceivedFromUser(self, message):
+        print(f"Received blah message in pingReceivedFromUser: {message}")
+        # Send ping to PingController, so it knows its ping has been received
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start()
-        print("Con.  Inside pingReceivedFromUser.  Sending ping back to PingController")
-        # 2. figure out if the app is already running:
-        # 2a. if it is, then run the startProgram stuff
-        # 2b. if it is not, then run the startProgram stuff
-        pass  # Do nothing when ping received
+
+        ####
+        # Here, before the below if statement, I will check what the message is ('message'), and either run the timer directly (startup folder executable), or the start or stop program stuff
+        ####
+        
+        # Run the start or stop program stuff
+        if not self.workers['timer'].timerRunning:
+            print("Running the start program stuff from pingReceivedFromUser")
+            self.startTask.emit('startProgram') 
+        else:
+            print("Here run the stop program stuff")
 
     # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
@@ -187,8 +202,8 @@ class TimerWrapper(QObject):
 
     @pyqtSlot()
     def start(self):
+        self.timerRunning = True
         runTimer(self, self.dep)
-        self.timerRunning = True    
 
     def shutdown(self):
         self.timerRunning = False
@@ -242,6 +257,26 @@ class StartProgramWrapper(QObject):
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
+
+def makeMenuIcon(dep, app):
+    # 1. tiny tray-icon (becomes a menu-bar icon on macOS)
+
+    root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
+    dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
+    icon_path = dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
+
+    tray = dep.QSystemTrayIcon(QIcon(icon_path), parent=app)
+    tray.setToolTip("My background helper")
+
+    # 2. simple menu with only "Quit"
+    menu = dep.QMenu()
+    quit_action = dep.QAction("Quit", triggered=app.quit)
+    menu.addAction(quit_action)
+    tray.setContextMenu(menu)
+
+    tray.show()  
+      
+    app.tray = tray   
 
 if __name__ == "__main__":
     startController()
