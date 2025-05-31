@@ -1,13 +1,13 @@
-from StartProgramGUI.makeAppContents import makeAppContents
+from StopProgramGUI.makeAppContents import makeAppContents
 
-def runStartProgramApp(app, dep, worker_startProgramApp):
+def runStopProgramApp(app, dep, worker_stopProgramApp):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(False)
    
     # Make main window
     window = dep.QMainWindow()
-    window.setWindowTitle("Start program")
+    window.setWindowTitle("Stop program")
 
     fonts = dep.DefineFontSizes(app,dep)
     
@@ -20,7 +20,7 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
 
     # Make app contents (in central widget)
     container = dep.QWidget()
-    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgramApp) 
+    width, height = makeAppContents(dep, container, fonts, UIsizes, worker_stopProgramApp) 
     dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
@@ -29,7 +29,5 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
     window.show()
 
     dep.centerWindowOnScreen(window, app)
-
-    window.startTimeOb = container.checkTimeEntered
 
     return window

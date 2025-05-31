@@ -10,6 +10,10 @@ import time
 import socket
 import threading
 import ctypes
+import subprocess
+import pathlib
+import textwrap
+import stat
 
 # Third-party imports
 from PyQt5.QtWidgets import (
@@ -52,6 +56,9 @@ from Timer.main_Timer import runTimer
 from EditWordList.main_EditWordList import makeEditWordListApp
 from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
 from consoleMessages.programStarting import consoleMessage_startProgram
+from Controller.createLaunchAgent import CreateLaunchAgent
+from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
+
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -78,7 +85,7 @@ def startController():
     makeMenuIcon(dep, app)
     
     controller = Controller(app, dep)
-    # controller.workers['timer'].trigger_start.emit()
+    controller.workers['startProgram'].start()
 
     # Start the event loop and get the exit code
     exit_code = app.exec_()
@@ -94,6 +101,8 @@ class Controller(QObject):
         super().__init__()
         self.app = app
         self.dep = dep
+        # Default values
+        self.launchAgent = None
 
         # Connect the signals (channels) to the slots (methods) that will be sent down the channels
         self.startTask.connect(self.route_start)
@@ -104,7 +113,8 @@ class Controller(QObject):
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
             'timer': TimerWrapper('Timer', dep),
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
-            'startProgram': StartProgramWrapper('StartProgram', app, dep)
+            'startProgram': StartProgramWrapper('StartProgram', app, dep),
+            'stopProgram': StopProgramWrapper('StopProgram', app, dep)
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
@@ -112,7 +122,6 @@ class Controller(QObject):
         self.workers['startProgram'].button_clicked.connect(self.route_start) # to allow the startProgram worker to start the EditWordList
         self.workers['timer'].request_start.connect(self.route_start) # to allow the timer worker to start the dailyWordApp
         self.workers['startProgram'].request_start.connect(self.route_start) # to allow the startProgram worker to start the timer, and the consoleMessage
-        # self.workers['timer'].request_shutdown.connect(self.route_shutdown)
 
         # Initialize the port listener and sender objects - to talk to the PingController executable
         self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_PingController.txt')
@@ -121,40 +130,29 @@ class Controller(QObject):
         print("CON. Sending ping to PingController on startup")
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
 
-        # Create a QThread for the TimerWrapper - it needs to be QThread rather than threading.Thread because it starts another worker using PyQt5 stuff
-        self.timer_thread = QThread()
-        self.workers['timer'].moveToThread(self.timer_thread)
-        self.timer_thread.start()
-        self.workers['timer'].trigger_start.connect(self.workers['timer'].start)
-
         # Connect cleanup to application quit
         self.app.aboutToQuit.connect(self.cleanUp)
 
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
+        if self.launchAgent:
+            self.launchAgent.unlinkPlist()
+        # Shutdown timer if running
+        if self.workers['timer'].timerRunning:
+            self.workers['timer'].shutdown()
 
-    def __del__(self):
-        # Clean up the timer QThread when the Controller is destroyed
-        if hasattr(self, 'timer_thread') and self.timer_thread.isRunning():
-            self.timer_thread.quit()
-            self.timer_thread.wait()
+
 
     def pingReceivedFromUser(self, message):
-        print(f"Received blah message in pingReceivedFromUser: {message}")
+        print(f"pingReceivedFromUser: {message}")
         # Send ping to PingController, so it knows its ping has been received
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start()
-
-        ####
-        # Here, before the below if statement, I will check what the message is ('message'), and either run the timer directly (startup folder executable), or the start or stop program stuff
-        ####
-        
         # Run the start or stop program stuff
         if not self.workers['timer'].timerRunning:
-            print("Running the start program stuff from pingReceivedFromUser")
             self.startTask.emit('startProgram') 
         else:
-            print("Here run the stop program stuff")
+            self.startTask.emit('stopProgram')
 
     # Define the slots behavior that will be sent down the signals/channels
     @pyqtSlot(str)
@@ -191,22 +189,23 @@ class DailyWordAppWrapper(QObject):
 class TimerWrapper(QObject):
    
     request_start = pyqtSignal(str)
-    request_shutdown = pyqtSignal(str)
-    trigger_start = pyqtSignal()
 
     def __init__(self, name, dep):
         super().__init__()
         self.name = name
         self.dep = dep
         self.timerRunning = False
+        self.timer_thread = None
 
-    @pyqtSlot()
     def start(self):
         self.timerRunning = True
-        runTimer(self, self.dep)
+        self.timer_thread = self.dep.threading.Thread(target=runTimer, args=(self, self.dep), daemon=True)
+        self.timer_thread.start()
 
     def shutdown(self):
         self.timerRunning = False
+        if self.timer_thread and self.timer_thread.is_alive():
+            self.timer_thread.join(timeout=1.0)  # Wait up to 1 second for thread to finish
 
 class EditWordListWrapper(QObject):
     def __init__(self, name, app, dep):
@@ -243,12 +242,12 @@ class StartProgramWrapper(QObject):
         self.StartProgramOpen = True 
         
     def shutdown(self):
-        print('\n\nController to start main app here')
+        print('\n\nThe user has clicked the Start button')
         self.StartProgramOpen = False
         self.saveTimeToRunMainApp()
-        self.request_start.emit("consoleMessages") # run console message to let the user know that the main program is now running in the background
         self.window.close()
         self.request_start.emit("timer") # start timer script   
+        self.launchAgent = CreateLaunchAgent(self.dep, 'main_Controller') # create a lanch agent for this program, so it now starts up on login
 
     def saveTimeToRunMainApp(self):
         timeToSave = self.window.startTimeOb.timeEntered  
@@ -258,25 +257,57 @@ class StartProgramWrapper(QObject):
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
 
+class StopProgramWrapper(QObject):
+
+    def __init__(self, name, app, dep):
+        super().__init__()
+        self.name = name
+        self.app = app
+        self.dep = dep
+        self.StopProgramOpen = False
+
+    def start(self):
+        print(f"{self.name}: running app...")
+        self.window = runStopProgramApp(self.app, self.dep, self)
+        self.StopProgramOpen = True 
+        
+    def shutdown(self):
+        print('\n\nController to stop main app here')
+        self.StopProgramOpen = False
+        self.window.close()
+        self.app.quit()  # This will trigger cleanup and exit the application
+
 def makeMenuIcon(dep, app):
     # 1. tiny tray-icon (becomes a menu-bar icon on macOS)
-
     root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
     dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
     icon_path = dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
 
-    tray = dep.QSystemTrayIcon(QIcon(icon_path), parent=app)
-    tray.setToolTip("My background helper")
-
-    # 2. simple menu with only "Quit"
+    # Create the system tray icon
+    tray = dep.QSystemTrayIcon(dep.QIcon(icon_path), parent=app)
+    tray.setToolTip("Daily Word Definition")
+    
+    # Create the menu
     menu = dep.QMenu()
-    quit_action = dep.QAction("Quit", triggered=app.quit)
+    
+    # Add the Quit action
+    quit_action = dep.QAction("Quit", menu)
+    quit_action.triggered.connect(app.quit)
     menu.addAction(quit_action)
-    tray.setContextMenu(menu)
 
-    tray.show()  
-      
-    app.tray = tray   
+    # # Add a separator
+    # menu.addSeparator()
+    
+    # Set the menu as the tray icon's context menu
+    tray.setContextMenu(menu)
+    
+    # Make sure the icon is visible
+    tray.show()
+    
+    # Store the tray icon in the app for later reference
+    app.tray = tray
+
+
 
 if __name__ == "__main__":
     startController()
