@@ -3,7 +3,7 @@ from DailyWordApp.makeAppContents import makeAppContents
 def runDailyWordApp(app, dep, worker_dailyWordApp):
 
     # Set the app to not quit when the last window is closed
-    app.setQuitOnLastWindowClosed(True)
+    app.setQuitOnLastWindowClosed(False)
    
     # Make main window
     window = dep.QMainWindow()

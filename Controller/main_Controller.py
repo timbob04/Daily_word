@@ -80,12 +80,13 @@ def startController():
 
     app = QApplication(sys.argv)
     
-    # dep.QTimer.singleShot(20000, app.quit)  # quits after 2 seconds
-
-    makeMenuIcon(dep, app)
-    
     controller = Controller(app, dep)
-    controller.workers['startProgram'].start()
+
+    # Start the startProgram app
+    controller.workers['dailyWordApp'].start()
+
+    # Make the menu icon
+    makeMenuIcon(dep, app, controller)
 
     # Start the event loop and get the exit code
     exit_code = app.exec_()
@@ -136,13 +137,9 @@ class Controller(QObject):
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
+        # remove the launch agent so the program doesn't start on login
         if self.launchAgent:
-            self.launchAgent.unlinkPlist()
-        # Shutdown timer if running
-        if self.workers['timer'].timerRunning:
-            self.workers['timer'].shutdown()
-
-
+            self.launchAgent.unlinkPlist() 
 
     def pingReceivedFromUser(self, message):
         print(f"pingReceivedFromUser: {message}")
@@ -179,6 +176,10 @@ class DailyWordAppWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
+        # Close any previous instances of the dailyWordApp
+        if hasattr(self, 'window') and self.window:
+            self.window.close()
+        # Now run the dailyWordApp
         self.window = runDailyWordApp(self.app, self.dep, self) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
         self.dailyWordAppRunning = True
         
@@ -202,11 +203,6 @@ class TimerWrapper(QObject):
         self.timer_thread = self.dep.threading.Thread(target=runTimer, args=(self, self.dep), daemon=True)
         self.timer_thread.start()
 
-    def shutdown(self):
-        self.timerRunning = False
-        if self.timer_thread and self.timer_thread.is_alive():
-            self.timer_thread.join(timeout=1.0)  # Wait up to 1 second for thread to finish
-
 class EditWordListWrapper(QObject):
     def __init__(self, name, app, dep):
         super().__init__()
@@ -219,10 +215,6 @@ class EditWordListWrapper(QObject):
         print(f"{self.name}: running app...")
         self.window = makeEditWordListApp(self.app, self.dep)
         self.EditWordListOpen = True # this should actually confirm that the window is open (maybe above use something like 'if self.window is not None:')
-        
-    def shutdown(self):
-        self.window.close()
-        self.EditWordListOpen = False # this should actually confirm that the window is closed
 
 class StartProgramWrapper(QObject):
 
@@ -277,7 +269,7 @@ class StopProgramWrapper(QObject):
         self.window.close()
         self.app.quit()  # This will trigger cleanup and exit the application
 
-def makeMenuIcon(dep, app):
+def makeMenuIcon(dep, app, controller):
     # 1. tiny tray-icon (becomes a menu-bar icon on macOS)
     root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
     dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
@@ -295,8 +287,13 @@ def makeMenuIcon(dep, app):
     quit_action.triggered.connect(app.quit)
     menu.addAction(quit_action)
 
-    # # Add a separator
-    # menu.addSeparator()
+    # Add a separator
+    menu.addSeparator()
+
+    # Add the Edit word list action
+    edit_word_list_action = dep.QAction("Edit word list", menu)
+    edit_word_list_action.triggered.connect(controller.workers['editWordList'].start)
+    menu.addAction(edit_word_list_action)
     
     # Set the menu as the tray icon's context menu
     tray.setContextMenu(menu)
@@ -306,8 +303,6 @@ def makeMenuIcon(dep, app):
     
     # Store the tray icon in the app for later reference
     app.tray = tray
-
-
 
 if __name__ == "__main__":
     startController()

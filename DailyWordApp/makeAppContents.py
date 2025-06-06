@@ -141,28 +141,6 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     rightMostPoint = t_priorityWord.positionAdjust[0] + t_priorityWord.positionAdjust[2]
     appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint)
 
-    # Button - "Edit word list"
-    text = "Edit word list"
-    fontScaler = fonts.fontScalers["default"]
-    startingXPosition = appBoundaries.revealButtonRightmostPoint + UIsizes.pad_large
-    startingYPosition = appBoundaries.revealButtonStartingYPos
-    position = [startingXPosition,startingYPosition,0,0]
-    pb_editWordList = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
-
-    # Update app boundaries
-    lowestPoint = pb_editWordList.positionAdjust[1] + pb_editWordList.positionAdjust[3]
-    rightMostPoint = pb_editWordList.positionAdjust[0] + pb_editWordList.positionAdjust[2]
-    appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint)
-
-    # Reposition and make Edit word list button
-    pb_editWordList.positionAdjust[0] = appBoundaries.right
-    pb_editWordList.rightAlign()
-    pb_editWordList.makeButton()
-    pb_editWordList.showButton()
-
-    # Connect to the Controller's button_clicked signal in the dailyWordApp worker
-    pb_editWordList.button.clicked.connect(lambda: worker_dailyWordApp.button_clicked.emit('editWordList')) # Connect to the Controller's button_clicked signal in the dailyWordApp worker
-
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium
 

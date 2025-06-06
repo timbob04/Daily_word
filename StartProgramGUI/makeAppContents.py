@@ -125,38 +125,20 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
     lowestPoint = t_timeEnteredIncorrectly.positionAdjust[1] + t_timeEnteredIncorrectly.positionAdjust[3]
     appBoundaries.setNewBoundaries(bottom=lowestPoint)
 
-    # Push Button - 'Edit word list'
-    text = "Edit word list"
-    fontScaler = fonts.fontScalers["default"]
-    startingYPosition = appBoundaries.bottom + UIsizes.pad_large
-    position = [UIsizes.pad_medium,startingYPosition,0,0]
-    pb_editWordList = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
-    pb_editWordList.makeButton()
-    pb_editWordList.showButton()
-    pb_editWordList.button.clicked.connect(lambda: worker_startProgramApp.button_clicked.emit('editWordList')) #
-
-    # Update app boundaries
-    lowestPoint = pb_editWordList.positionAdjust[1] + pb_editWordList.positionAdjust[3]
-    appBoundaries.setNewBoundaries(bottom=lowestPoint)
-
     # Push button - 'Start'
     text = "Start"
     fontScaler = fonts.fontScalers["default"]
+    startingYPosition = appBoundaries.bottom + UIsizes.pad_large
     position = [appBoundaries.right,startingYPosition,0,0]
     pb_start = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
     pb_start.rightAlign()
     pb_start.makeButton()
-    # Shift button right if overlapping with edit button
-    startButton_left = pb_start.positionAdjust[0]
-    editButton_right = pb_editWordList.positionAdjust[0] + pb_editWordList.positionAdjust[2]
-    if startButton_left < editButton_right + UIsizes.pad_large:
-        pb_start.positionAdjust[0] = editButton_right + UIsizes.pad_large
-    # Show button
     pb_start.showButton()
 
     # Update app boundaries
     rightMostPoint = pb_start.positionAdjust[0] + pb_start.positionAdjust[2]
-    appBoundaries.setNewBoundaries(right=rightMostPoint)
+    lowestPoint = pb_start.positionAdjust[1] + pb_start.positionAdjust[3]
+    appBoundaries.setNewBoundaries(right=rightMostPoint,bottom=lowestPoint)
 
     # Object to check if time is entered correctly, and lanch main app, if the start time is entered correctly
     container.checkTimeEntered = CheckIfTimeEnteredCorrectly(dep, editTextBox_hours, 
