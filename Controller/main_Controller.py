@@ -33,6 +33,10 @@ from PyQt5.QtGui import (
     QPainter, QPen, QIcon
 )
 
+from PyQt5.QtNetwork  import (
+    QLocalServer, QLocalSocket
+)
+
 # Local imports
 from utils.utils import (
     readJSONfile, getBaseDir, 
@@ -58,13 +62,13 @@ from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
 from consoleMessages.programStarting import consoleMessage_startProgram
 from Controller.createLaunchAgent import CreateLaunchAgent
 from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
-
+from Controller.makeMenuIcon import makeMenuIcon
+from Controller.utils import isProgramAlreadyRunning
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
-# This is to hide the icon in the dock on macOS
-# macOS specific imports
+# This is to stop the icon from appearing in the dock on macOS
 if platform.system() == 'Darwin':
     from Foundation import NSBundle
     bundle = NSBundle.mainBundle()
@@ -74,16 +78,25 @@ if platform.system() == 'Darwin':
 def startController():
     print('Inside the Controller executable')
 
-    # This is where the Mutex checking will go.
-    # If not already running, then start the things below, including 'app' and 'controller'
-    # If already running, then send a ping to the already running controller (I guess on the relevant port), then quit
+    executableName = 'DailyWordDefinitionController'
 
     app = QApplication(sys.argv)
-    
+
+    # Shut down script if a previous instance is already running
+    if isProgramAlreadyRunning(executableName, dep):
+        print('DailyWordDefinitionController is already running')
+        return
+
+    # Create a named local socket so other copies can check if this one is running (to prevent multiple instances)
+    server = QLocalServer()
+    server.listen(executableName)
+    app.server = server # Store it on the app to prevent it from being garbage collected
+
+    # Create the controller object
     controller = Controller(app, dep)
 
-    # Start the startProgram app
-    controller.workers['dailyWordApp'].start()
+    # Start the startProgram app (this will also start the timer)
+    controller.workers['startProgram'].start()
 
     # Make the menu icon
     makeMenuIcon(dep, app, controller)
@@ -213,8 +226,12 @@ class EditWordListWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        self.window = makeEditWordListApp(self.app, self.dep)
-        self.EditWordListOpen = True # this should actually confirm that the window is open (maybe above use something like 'if self.window is not None:')
+        if hasattr(self, 'window') and self.window:
+            self.window.raise_()  # Bring window to front
+            self.window.activateWindow()  # Make it the active window
+        else:
+            self.window = makeEditWordListApp(self.app, self.dep)
+            self.EditWordListOpen = True
 
 class StartProgramWrapper(QObject):
 
@@ -230,9 +247,14 @@ class StartProgramWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        self.window = runStartProgramApp(self.app, self.dep, self)
-        self.StartProgramOpen = True 
-        
+        if hasattr(self, 'window') and self.window:
+            self.window.raise_()  # Bring window to front
+            self.window.activateWindow()  # Make it the active window
+        else:
+            self.window = runStartProgramApp(self.app, self.dep, self)
+            self.window.closeEvent = lambda event: self.app.quit()  # Quit app when window is closed
+            self.StartProgramOpen = True
+
     def shutdown(self):
         print('\n\nThe user has clicked the Start button')
         self.StartProgramOpen = False
@@ -260,49 +282,18 @@ class StopProgramWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        self.window = runStopProgramApp(self.app, self.dep, self)
-        self.StopProgramOpen = True 
-        
+        if hasattr(self, 'window') and self.window:
+            self.window.raise_()  # Bring window to front
+            self.window.activateWindow()  # Make it the active window
+        else:
+            self.window = runStopProgramApp(self.app, self.dep, self)
+            self.StopProgramOpen = True
+
     def shutdown(self):
         print('\n\nController to stop main app here')
         self.StopProgramOpen = False
         self.window.close()
         self.app.quit()  # This will trigger cleanup and exit the application
-
-def makeMenuIcon(dep, app, controller):
-    # 1. tiny tray-icon (becomes a menu-bar icon on macOS)
-    root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
-    dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
-    icon_path = dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
-
-    # Create the system tray icon
-    tray = dep.QSystemTrayIcon(dep.QIcon(icon_path), parent=app)
-    tray.setToolTip("Daily Word Definition")
-    
-    # Create the menu
-    menu = dep.QMenu()
-    
-    # Add the Quit action
-    quit_action = dep.QAction("Quit", menu)
-    quit_action.triggered.connect(app.quit)
-    menu.addAction(quit_action)
-
-    # Add a separator
-    menu.addSeparator()
-
-    # Add the Edit word list action
-    edit_word_list_action = dep.QAction("Edit word list", menu)
-    edit_word_list_action.triggered.connect(controller.workers['editWordList'].start)
-    menu.addAction(edit_word_list_action)
-    
-    # Set the menu as the tray icon's context menu
-    tray.setContextMenu(menu)
-    
-    # Make sure the icon is visible
-    tray.show()
-    
-    # Store the tray icon in the app for later reference
-    app.tray = tray
 
 if __name__ == "__main__":
     startController()

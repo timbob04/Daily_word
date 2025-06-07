@@ -5,6 +5,7 @@ markdown-it-py==3.0.0
 mdurl==0.1.2
 packaging==24.2
 pefile==2023.2.7
+pillow==11.2.1
 pyasn1==0.6.1
 Pygments==2.19.1
 pyinstaller==6.12.0

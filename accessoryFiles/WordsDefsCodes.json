@@ -16,22 +16,22 @@
     {
         "word": "Intransigent",
         "definition": "unwilling or refusing to change one's views or to agree about something",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": true
     },
     {
         "word": "Portent",
         "definition": "a sign or warning that something, especially something momentous or calamitous, is likely to happen",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": true
     },
     {
         "word": "Pork",
         "definition": "Store",
-        "wordShown": true,
+        "wordShown": false,
         "isPriorityWord": true,
-        "priorityWordShown": true
+        "priorityWordShown": false
     }
 ]
