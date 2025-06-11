@@ -13,7 +13,7 @@ def makeMenuIcon(dep, app, controller):
     
     # Add the Quit action
     quit_action = dep.QAction("Quit", menu)
-    quit_action.triggered.connect(app.quit)
+    quit_action.triggered.connect(controller.userInitiatedQuit)
     menu.addAction(quit_action)
 
     # Add a separator

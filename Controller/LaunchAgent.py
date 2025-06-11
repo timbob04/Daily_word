@@ -6,8 +6,16 @@ class CreateLaunchAgent():
     # Default values
     self.plist_file = None
     self.domain_target = None
-    # Constructor methods
-    self.createPlist()
+    
+    # Always set up paths, even if just for cleanup
+    user_uid = self.dep.os.getuid()
+    self.domain_target = f"gui/{user_uid}"
+    launch_agents = self.dep.pathlib.Path.home() / "Library" / "LaunchAgents"
+    self.plist_file = launch_agents / f"com.myapp.{self.executable_name}.plist"
+    
+    # Only create plist if running as executable
+    if getattr(self.dep.sys, 'frozen', False):
+      self.createPlist()
 
   def createPlist(self):
     
@@ -67,10 +75,39 @@ class CreateLaunchAgent():
 
   def unlinkPlist(self):
     # Return if not running as an executable
-    if not getattr(self.dep.sys, 'frozen', False):
-      return
+    print(f"\nAttempting to unlink plist:")
+    print(f"Running as executable: {getattr(self.dep.sys, 'frozen', False)}")
+    print(f"Plist file: {self.plist_file}")
     
     if self.plist_file.exists():
+      print("Found plist file, attempting to unlink")
       self.dep.subprocess.run(["launchctl", "bootout", self.domain_target, str(self.plist_file)],
                     check=False)          # ignore if not loaded
       self.plist_file.unlink()
+      print("Plist unlinked")
+    else:
+      print("No plist file found to unlink")
+
+def checkIfRunningFromLaunchAgent(dep, executable_name):
+    user_uid = dep.os.getuid()
+    domain_target = f"gui/{user_uid}"
+    launch_agents = dep.pathlib.Path.home() / "Library" / "LaunchAgents"
+    plist_file = launch_agents / f"com.myapp.{executable_name}.plist"
+    
+    print(f"\nChecking launch agent status:")
+    print(f"Looking for plist file at: {plist_file}")
+    print(f"Running as executable: {getattr(dep.sys, 'frozen', False)}")
+    
+    # Check if plist exists and is loaded
+    if plist_file.exists():
+        print("✓ Plist file exists")
+        # Check if the launch agent is actually loaded
+        result = dep.subprocess.run(["launchctl", "print", domain_target], 
+                                  capture_output=True, text=True, check=False)
+        print(f"Launch agent status output:\n{result.stdout}")
+        is_loaded = f"com.myapp.{executable_name}" in result.stdout
+        print(f"Launch agent is {'loaded' if is_loaded else 'not loaded'}")
+        return is_loaded
+    else:
+        print("✗ Plist file does not exist")
+        return False      

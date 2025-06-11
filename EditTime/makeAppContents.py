@@ -1,6 +1,6 @@
 from StartProgramGUI.utils import CheckIfTimeEnteredCorrectly
 
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgramApp):
+def makeAppContents(dep, container, fonts, UIsizes, worker_editTimeApp):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -9,23 +9,23 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
     def launchMainApp():
         worker_startProgramApp.shutdown()  
 
-    # Text - "Choose time for daily word to appear"
-    text = 'Choose time for daily word to appear'
-    textAlignment = dep.Qt.AlignLeft
+    # Text
+    text = 'Edit time for daily word to appear'
+    textAlignment = dep.Qt.AlignCenter
     fontScaler = fonts.fontScalers["default"]
     position = [UIsizes.pad_medium,UIsizes.pad_medium,0,0]
-    t_chooseTimeTitle = dep.StaticText(dep, container, fonts.defaultFontSize*fontScaler, text, textAlignment, position)     
-    t_chooseTimeTitle.makeTextObject()
-    t_chooseTimeTitle.showTextObject()
+    t_editTimeTitle = dep.StaticText(dep, container, fonts.defaultFontSize*fontScaler, text, textAlignment, position)     
+    t_editTimeTitle.makeTextObject()
+    t_editTimeTitle.showTextObject()
 
     # Update app boundaries
-    lowestPoint = t_chooseTimeTitle.positionAdjust[1] + t_chooseTimeTitle.positionAdjust[3]
-    rightMostPoint = t_chooseTimeTitle.positionAdjust[0] + t_chooseTimeTitle.positionAdjust[2]
-    centerTopText = t_chooseTimeTitle.positionAdjust[0] + t_chooseTimeTitle.positionAdjust[2]/2
+    lowestPoint = t_editTimeTitle.positionAdjust[1] + t_editTimeTitle.positionAdjust[3]
+    rightMostPoint = t_editTimeTitle.positionAdjust[0] + t_editTimeTitle.positionAdjust[2]
+    centerTopText = t_editTimeTitle.positionAdjust[0] + t_editTimeTitle.positionAdjust[2]/2
     appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint,store={'centerTopText': centerTopText})
 
     # Width of one digit
-    bounding_rect = t_chooseTimeTitle.fontMetrics.boundingRect(0,0,0,0, dep.Qt.AlignCenter, "0") 
+    bounding_rect = t_editTimeTitle.fontMetrics.boundingRect(0,0,0,0, dep.Qt.AlignCenter, "0") 
     widthOneDigit = bounding_rect.width()    
 
     # Edit text box - hours field
@@ -124,19 +124,19 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
     lowestPoint = t_timeEnteredIncorrectly.positionAdjust[1] + t_timeEnteredIncorrectly.positionAdjust[3]
     appBoundaries.setNewBoundaries(bottom=lowestPoint)
 
-    # Push button - 'Start'
-    text = "Start"
+    # Push button - 'Change'
+    text = "Change"
     fontScaler = fonts.fontScalers["default"]
     startingYPosition = appBoundaries.bottom + UIsizes.pad_large
     position = [appBoundaries.right,startingYPosition,0,0]
-    pb_start = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
-    pb_start.rightAlign()
-    pb_start.makeButton()
-    pb_start.showButton()
+    pb_change = dep.PushButton(dep, container, fonts.defaultFontSize*fontScaler, text, position)
+    pb_change.rightAlign()
+    pb_change.makeButton()
+    pb_change.showButton()
 
     # Update app boundaries
-    rightMostPoint = pb_start.positionAdjust[0] + pb_start.positionAdjust[2]
-    lowestPoint = pb_start.positionAdjust[1] + pb_start.positionAdjust[3]
+    rightMostPoint = pb_change.positionAdjust[0] + pb_change.positionAdjust[2]
+    lowestPoint = pb_change.positionAdjust[1] + pb_change.positionAdjust[3]
     appBoundaries.setNewBoundaries(right=rightMostPoint,bottom=lowestPoint)
 
     # Object to check if time is entered correctly, and lanch main app, if the start time is entered correctly

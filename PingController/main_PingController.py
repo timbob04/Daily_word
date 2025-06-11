@@ -8,51 +8,25 @@ import time
 import threading
 from Controller.main_Controller import startController
 from utils.utils import PortListener, PortSender, StoreDependencies
+from utils.utils import isProgramAlreadyRunning
+from PyQt5.QtNetwork  import (
+    QLocalServer, QLocalSocket
+)
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
-def runControllerExecutable():
-    # First check to see if this script is running as a .py or executable
-    runingCodeFromExecutable = getattr(sys, 'frozen', False) # The 'frozen' attribute in sys is set to True if the script is running as an executable
-    if runingCodeFromExecutable:
-        root_dir, _ = getBaseDir(sys, os)
-        system = platform.system()
-        if system == "Windows":
-            flags = (subprocess.CREATE_NEW_PROCESS_GROUP |
-                subprocess.DETACHED_PROCESS)   # launch *detached*
-            exePath_Controller = os.path.join(root_dir, "bin" , "main_Controller" , "main_Controller.exe")
-            subprocess.Popen(exePath_Controller, creationflags=flags)
-        elif system == "Darwin":
-            print("\nRunning executable on Mac")
-            exePath_Controller = os.path.join(root_dir, "bin", "main_Controller.app")
-            subprocess.Popen(['open', exePath_Controller])
-    else:
-        print("Running as main_Controller.py")
+def runPingController():
 
-def loadingMessage():
-    print("\n")
+    executableName = 'DailyWordDefinitionPingController'
 
-    # print("Loading ")
-    # while True:
-    #     print(".", end="", flush=True)
-    #     time.sleep(1)
-
-    # Option 2: Revolving dash
-    chars = ['-', '\\', '|', '/']
-    i = 0
-    while True:
-        print(f"\rLoading {chars[i]}", end="", flush=True)
-        i = (i + 1) % len(chars)
-        time.sleep(0.2)
-
-if __name__ == "__main__":
-
-    # threading.Thread(target=loadingMessage, daemon=True).start()
-    # time.sleep(4)
-
-    # # Start loading message in a daemon thread
-    # threading.Thread(target=loadingMessage, daemon=True).start()
+    if isProgramAlreadyRunning(executableName, dep):
+        print(f'{executableName} is already running')
+        return
+    
+    # Create a named local socket so other copies can check if this one is running (to prevent multiple instances)
+    server = QLocalServer()
+    server.listen(executableName)
 
     # Set up a port listener for receiving messages from the Controller
     portListener = PortListener(dep, 'portNum_PingController.txt', 'portNum_Controller.txt')
@@ -79,3 +53,24 @@ if __name__ == "__main__":
             print("No response received from Controller after running its executable.  Exiting...")
     # Clean up (clear) the port number in portNum_PingController.txt
     portListener.clearPortNumber()
+
+def runControllerExecutable():
+    # First check to see if this script is running as a .py or executable
+    runingCodeFromExecutable = getattr(sys, 'frozen', False) # The 'frozen' attribute in sys is set to True if the script is running as an executable
+    if runingCodeFromExecutable:
+        root_dir, _ = getBaseDir(sys, os)
+        system = platform.system()
+        if system == "Windows":
+            flags = (subprocess.CREATE_NEW_PROCESS_GROUP |
+                subprocess.DETACHED_PROCESS)   # launch *detached*
+            exePath_Controller = os.path.join(root_dir, "bin" , "main_Controller" , "main_Controller.exe")
+            subprocess.Popen(exePath_Controller, creationflags=flags)
+        elif system == "Darwin":
+            print("\nRunning executable on Mac")
+            exePath_Controller = os.path.join(root_dir, "bin", "main_Controller.app")
+            subprocess.Popen(['open', exePath_Controller])
+    else:
+        print("Running as main_Controller.py")
+
+if __name__ == "__main__":
+    runPingController()

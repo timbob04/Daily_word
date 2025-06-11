@@ -59,11 +59,10 @@ from DailyWordApp.main_DailyWordApp import runDailyWordApp
 from Timer.main_Timer import runTimer
 from EditWordList.main_EditWordList import makeEditWordListApp
 from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
-from consoleMessages.programStarting import consoleMessage_startProgram
-from Controller.createLaunchAgent import CreateLaunchAgent
+from Controller.LaunchAgent import CreateLaunchAgent, checkIfRunningFromLaunchAgent
 from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
 from Controller.makeMenuIcon import makeMenuIcon
-from Controller.utils import isProgramAlreadyRunning
+from utils.utils import isProgramAlreadyRunning
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -84,7 +83,7 @@ def startController():
 
     # Shut down script if a previous instance is already running
     if isProgramAlreadyRunning(executableName, dep):
-        print('DailyWordDefinitionController is already running')
+        print(f'{executableName} is already running')
         return
 
     # Create a named local socket so other copies can check if this one is running (to prevent multiple instances)
@@ -95,11 +94,13 @@ def startController():
     # Create the controller object
     controller = Controller(app, dep)
 
-    # Start the startProgram app (this will also start the timer)
-    controller.workers['startProgram'].start()
-
     # Make the menu icon
     makeMenuIcon(dep, app, controller)
+
+    # If running from launch agent, start the main program (timer and dailyWordApp) directly
+    if checkIfRunningFromLaunchAgent(dep, 'main_Controller'):
+        print("Running from launch agent - starting timer directly")
+        controller.startTask.emit('timer')
 
     # Start the event loop and get the exit code
     exit_code = app.exec_()
@@ -147,12 +148,15 @@ class Controller(QObject):
         # Connect cleanup to application quit
         self.app.aboutToQuit.connect(self.cleanUp)
 
+    def userInitiatedQuit(self):
+        print("User initiated quit - unlinking launch agent")
+        launchAgent = CreateLaunchAgent(self.dep, 'main_Controller')
+        launchAgent.unlinkPlist()
+        self.app.quit()
+
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
-        # remove the launch agent so the program doesn't start on login
-        if self.launchAgent:
-            self.launchAgent.unlinkPlist() 
 
     def pingReceivedFromUser(self, message):
         print(f"pingReceivedFromUser: {message}")
@@ -195,6 +199,8 @@ class DailyWordAppWrapper(QObject):
         # Now run the dailyWordApp
         self.window = runDailyWordApp(self.app, self.dep, self) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
         self.dailyWordAppRunning = True
+        self.window.raise_()
+        self.window.activateWindow()
         
     def shutdown(self):
         self.window.close()
@@ -226,12 +232,13 @@ class EditWordListWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        if hasattr(self, 'window') and self.window:
-            self.window.raise_()  # Bring window to front
-            self.window.activateWindow()  # Make it the active window
-        else:
+        if not hasattr(self, 'window') or not self.window:
             self.window = makeEditWordListApp(self.app, self.dep)
             self.EditWordListOpen = True
+        
+        # Always try to bring window to front
+        self.window.raise_()
+        self.window.activateWindow()
 
 class StartProgramWrapper(QObject):
 
@@ -247,19 +254,21 @@ class StartProgramWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        if hasattr(self, 'window') and self.window:
-            self.window.raise_()  # Bring window to front
-            self.window.activateWindow()  # Make it the active window
-        else:
+        if not hasattr(self, 'window') or not self.window:
             self.window = runStartProgramApp(self.app, self.dep, self)
-            self.window.closeEvent = lambda event: self.app.quit()  # Quit app when window is closed
+            self.window.closeEvent = lambda event: self.app.quit() if not self.window.startButtonClicked else None  # Only quit if window is closed via X button, not via Start button
             self.StartProgramOpen = True
+        
+        # Always try to bring window to front
+        self.window.raise_()
+        self.window.activateWindow()
 
     def shutdown(self):
         print('\n\nThe user has clicked the Start button')
         self.StartProgramOpen = False
+        self.window.startButtonClicked = True  # Set flag to indicate Start button was clicked
         self.saveTimeToRunMainApp()
-        self.window.close()
+        self.window.close() 
         self.request_start.emit("timer") # start timer script   
         self.launchAgent = CreateLaunchAgent(self.dep, 'main_Controller') # create a lanch agent for this program, so it now starts up on login
 
@@ -282,18 +291,19 @@ class StopProgramWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        if hasattr(self, 'window') and self.window:
-            self.window.raise_()  # Bring window to front
-            self.window.activateWindow()  # Make it the active window
-        else:
+        if not hasattr(self, 'window') or not self.window:
             self.window = runStopProgramApp(self.app, self.dep, self)
             self.StopProgramOpen = True
+        
+        # Always try to bring window to front
+        self.window.raise_()
+        self.window.activateWindow()
 
     def shutdown(self):
         print('\n\nController to stop main app here')
         self.StopProgramOpen = False
         self.window.close()
-        self.app.quit()  # This will trigger cleanup and exit the application
+        self.app.controller.userInitiatedQuit()  # Use the new function instead of app.quit()
 
 if __name__ == "__main__":
     startController()

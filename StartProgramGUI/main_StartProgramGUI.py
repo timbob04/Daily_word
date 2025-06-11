@@ -8,6 +8,7 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
     # Make main window
     window = dep.QMainWindow()
     window.setWindowTitle("Start program")
+    window.startButtonClicked = False  # Initialize flag to track if Start button was clicked
 
     fonts = dep.DefineFontSizes(app,dep)
     

@@ -1,15 +1,15 @@
-from EditWordList.makeAppContents import makeAppContents
+from EditTime.makeAppContents import makeAppContents
 
-def makeEditWordListApp(app, dep):
+def makeEditTimeApp(app, dep):
 
     window = dep.QMainWindow()
-    window.setWindowTitle("Edit word list")
+    window.setWindowTitle("Edit time")
 
     fonts = dep.DefineFontSizes(app,dep)
     
     # Define size of app using sentence width and number of lines
-    sentence = "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    numLines = 35
+    sentence = "0000000000000000000000000000000000"
+    numLines = 15
     appSizeOb = dep.AppSize(app,dep,fonts,sentence,numLines)
 
     UIsizes = dep.DefineUIsizes(appSizeOb)
