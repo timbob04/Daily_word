@@ -1,13 +1,15 @@
 class SetWindowTitle():
-    def __init__(self,window,datetime):
+    def __init__(self, window, datetime, dep):
         # Inputs
         self.window = window
-        self.datetime = datetime        
+        self.datetime = datetime   
+        self.dep = dep
         # Initializer methods
         self.getTodaysDay()
         self.getSuffixForTodaysDay()
         self.formatTitleToIncludeDay()
         self.setTitle()
+        self.getTitleWidth()
 
     def getTodaysDay(self):
         self.todaysDate = self.datetime.now()
@@ -24,4 +26,24 @@ class SetWindowTitle():
         self.dateForTitle = self.todaysDate.strftime(f"{day_without_zero}{self.suffix} %B %Y")
 
     def setTitle(self):          
-        self.window.setWindowTitle("Word of the day.  " + self.dateForTitle)     
+        self.title = "Word of the day.  " + self.dateForTitle
+        self.window.setWindowTitle(self.title)     
+
+    def getTitleWidth(self):
+        # Get the title text width using QFontMetrics
+        font = self.window.font()
+        fontMetrics = self.dep.QFontMetrics(font)
+        self.titleTextWidth = fontMetrics.horizontalAdvance(self.title)
+        
+        # Get the width of the window control buttons (close, minimize, zoom)
+        style = self.window.style()
+        # Get the width of a single button
+        buttonWidth = style.pixelMetric(self.dep.QStyle.PM_TitleBarButtonSize)
+        # On macOS, there are 3 buttons (close, minimize, zoom)
+        self.controlButtonsWidth = buttonWidth * 3
+        # Add some padding for the buttons (using standard spacing)
+        self.controlButtonsWidth += 50 # Standard padding for macOS window controls
+        
+        # Total width including text and controls
+        self.totalTitleWidth = self.titleTextWidth + self.controlButtonsWidth
+        

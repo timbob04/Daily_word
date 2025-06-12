@@ -1,6 +1,6 @@
 from StartProgramGUI.utils import CheckIfTimeEnteredCorrectly
 
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgramApp):
+def makeAppContents(dep, container, fonts, UIsizes, worker_startProgramApp):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -144,7 +144,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgr
                 editTextBox_minutes, t_timeEnteredIncorrectly, launchMainApp)
     editTextBox_hours.tb.textChanged.connect(container.checkTimeEntered.checkTime_HH)
     editTextBox_minutes.tb.textChanged.connect(container.checkTimeEntered.checkTime_MM)
-    pb_start.button.clicked.connect(container.checkTimeEntered.startButtonPressed)
+    pb_start.button.clicked.connect(container.checkTimeEntered.buttonPressed)
 
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium

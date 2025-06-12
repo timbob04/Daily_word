@@ -5,9 +5,9 @@ def makeAppContents(dep, container, fonts, UIsizes, worker_editTimeApp):
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
 
-    # For launching the main app when the start button is pressed, and the time is entered correctly
+    # For completing the actions when the 'change' button is pressed
     def launchMainApp():
-        worker_startProgramApp.shutdown()  
+        worker_editTimeApp.shutdown()  
 
     # Text
     text = 'Edit time for daily word to appear'
@@ -144,7 +144,7 @@ def makeAppContents(dep, container, fonts, UIsizes, worker_editTimeApp):
                 editTextBox_minutes, t_timeEnteredIncorrectly, launchMainApp)
     editTextBox_hours.tb.textChanged.connect(container.checkTimeEntered.checkTime_HH)
     editTextBox_minutes.tb.textChanged.connect(container.checkTimeEntered.checkTime_MM)
-    pb_start.button.clicked.connect(container.checkTimeEntered.startButtonPressed)
+    pb_change.button.clicked.connect(container.checkTimeEntered.buttonPressed)
 
     appContentsWidth = appBoundaries.right + UIsizes.pad_medium
     appContentsHeight = appBoundaries.bottom + UIsizes.pad_medium

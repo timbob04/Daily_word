@@ -7,7 +7,7 @@ def runDailyWordApp(app, dep, worker_dailyWordApp):
    
     # Make main window
     window = dep.QMainWindow()
-    dep.SetWindowTitle(window, dep.datetime)
+    window.titleBar = dep.SetWindowTitle(window, dep.datetime, dep)
 
     fonts = dep.DefineFontSizes(app,dep)
     

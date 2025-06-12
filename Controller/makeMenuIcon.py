@@ -31,6 +31,14 @@ def makeMenuIcon(dep, app, controller):
     bring_all_to_front_action = dep.QAction("Bring all windows to front", menu)
     bring_all_to_front_action.triggered.connect(lambda: [window.raise_() for window in app.topLevelWidgets() if window.isVisible()])
     menu.addAction(bring_all_to_front_action)
+
+    # Add separator
+    menu.addSeparator()
+
+    # Add the Edit time action
+    edit_time_action = dep.QAction("Edit time", menu)
+    edit_time_action.triggered.connect(controller.workers['editTime'].start)
+    menu.addAction(edit_time_action)
     
     # Set the menu as the tray icon's context menu
     tray.setContextMenu(menu)

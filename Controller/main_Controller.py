@@ -63,6 +63,7 @@ from Controller.LaunchAgent import CreateLaunchAgent, checkIfRunningFromLaunchAg
 from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
 from Controller.makeMenuIcon import makeMenuIcon
 from utils.utils import isProgramAlreadyRunning
+from EditTime.main_EditTime import runEditTimeApp
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -129,7 +130,8 @@ class Controller(QObject):
             'timer': TimerWrapper('Timer', dep),
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
             'startProgram': StartProgramWrapper('StartProgram', app, dep),
-            'stopProgram': StopProgramWrapper('StopProgram', app, dep)
+            'stopProgram': StopProgramWrapper('StopProgram', app, dep),
+            'editTime': EditTimeWrapper('EditTime', app, dep)
         }
 
         # Connect internal signals to controller's slots - if I want a worker to interact with another worker
@@ -304,6 +306,39 @@ class StopProgramWrapper(QObject):
         self.StopProgramOpen = False
         self.window.close()
         self.app.controller.userInitiatedQuit()  # Use the new function instead of app.quit()
+
+class EditTimeWrapper(QObject):
+
+    def __init__(self, name, app, dep):
+        super().__init__()
+        self.name = name
+        self.app = app
+        self.dep = dep
+        self.EditTimeOpen = False
+
+    def start(self):
+        print(f"{self.name}: running app...")
+        if not hasattr(self, 'window') or not self.window:
+            self.window = runEditTimeApp(self.app, self.dep, self)
+            self.EditTimeOpen = True
+        
+        # Always try to bring window to front
+        self.window.raise_()
+        self.window.activateWindow()
+
+    def shutdown(self):
+        print('\n\nThe user has clicked the Change button')
+        self.EditTimeOpen = False
+        self.saveTimeToRunMainApp()
+        self.window.close() 
+
+    def saveTimeToRunMainApp(self):
+        timeToSave = self.window.EditTimeOb.timeEntered  
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
+        self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
+        with open(self.filePath, 'w') as f:
+            f.write(timeToSave)
 
 if __name__ == "__main__":
     startController()

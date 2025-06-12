@@ -9,11 +9,11 @@ class CheckIfTimeEnteredCorrectly:
         self.correctYN_HH = False
         self.correctYN_MM = False
         self.correctYN_both = False  
-        self.startButtonHasBeenPressed = False # becomes true once the Start button is pressed
+        self.buttonHasBeenPressed = False # becomes true once the Start button is pressed
         self.timeEntered = None
 
-    def startButtonPressed(self, checked=False):
-        self.startButtonHasBeenPressed = True
+    def buttonPressed(self, checked=False):
+        self.buttonHasBeenPressed = True
         self.showOrHideText()
         if self.correctYN_both:
             self.launchMainApp()
@@ -47,7 +47,7 @@ class CheckIfTimeEnteredCorrectly:
         self.timeEntered = f"{hh}:{mm}"
 
     def showOrHideText(self):        
-        if not self.startButtonHasBeenPressed:
+        if not self.buttonHasBeenPressed:
             return
         
         if self.correctYN_both:

@@ -21,7 +21,7 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
 
     # Make app contents (in central widget)
     container = dep.QWidget()
-    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, worker_startProgramApp) 
+    width, height = makeAppContents(dep, container, fonts, UIsizes, worker_startProgramApp) 
     dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen

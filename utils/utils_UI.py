@@ -415,6 +415,10 @@ def resizeWindow(window, width, height, appSizeOb, percentage=0.03):
     widthOfWindowWithContents = width + width * percentage
     heightOfWindowWithContents = height + height * percentage
 
+    # If the contents of the GUI is less wide than the title bar, make the window as wide as the title bar
+    if hasattr(window, 'titleBar'):
+        widthOfWindowWithContents = max(widthOfWindowWithContents, window.titleBar.totalTitleWidth)
+
     # Make sure the window is not bigger than the screen
     windowFinalWidth = min(widthOfWindowWithContents,appSizeOb.screenWidth)
     windowFinalHeight = min(heightOfWindowWithContents,appSizeOb.screenHeight)

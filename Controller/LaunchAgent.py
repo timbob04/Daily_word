@@ -104,7 +104,7 @@ def checkIfRunningFromLaunchAgent(dep, executable_name):
         # Check if the launch agent is actually loaded
         result = dep.subprocess.run(["launchctl", "print", domain_target], 
                                   capture_output=True, text=True, check=False)
-        print(f"Launch agent status output:\n{result.stdout}")
+        # print(f"Launch agent status output:\n{result.stdout}")
         is_loaded = f"com.myapp.{executable_name}" in result.stdout
         print(f"Launch agent is {'loaded' if is_loaded else 'not loaded'}")
         return is_loaded

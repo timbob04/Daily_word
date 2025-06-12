@@ -36,13 +36,22 @@ class makeExecutables():
         ] 
 
     def createPyInstallerCommand(self):    
+        # Get icon path for macOS
+        icon_cmd = []
+        if self.dep.sys.platform == 'darwin':
+            root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+            icon_path = self.dep.os.path.join(root_dir, 'accessoryFiles', 'app_icon.icns')
+            if self.dep.os.path.exists(icon_path):
+                icon_cmd = ['--icon', icon_path]
+
         self.pyInstallerCommand = [
             "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed", "--noconsole",
             "--name", self.executableName,
             "--distpath", "bin",
             self.pythonFile,
             *self.hidden_imports_cmd,
-            *self.neededFoldersCmd
+            *self.neededFoldersCmd,
+            *icon_cmd
         ] 
 
     def runPyInstallerCommand(self):   
@@ -106,7 +115,6 @@ def makeLauncher(dep, app_name="UserInput", binary_name="PingController"):
             close window 1
         end tell
         '''
-
 
     # Write the AppleScript to file
     with open(script_path, 'w') as f:

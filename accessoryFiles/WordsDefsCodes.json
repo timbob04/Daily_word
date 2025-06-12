@@ -3,21 +3,21 @@
         "word": "Big ol",
         "definition": "bag",
         "wordShown": true,
-        "isPriorityWord": true,
+        "isPriorityWord": false,
         "priorityWordShown": true
     },
     {
         "word": "Esoteric",
         "definition": "intended for or likely to be understood by only a small number of people with a specialized knowledge or interest.",
-        "wordShown": false,
-        "isPriorityWord": true,
+        "wordShown": true,
+        "isPriorityWord": false,
         "priorityWordShown": true
     },
     {
         "word": "Intransigent",
         "definition": "unwilling or refusing to change one's views or to agree about something",
-        "wordShown": false,
-        "isPriorityWord": false,
+        "wordShown": true,
+        "isPriorityWord": true,
         "priorityWordShown": true
     },
     {
@@ -31,7 +31,7 @@
         "word": "Pork",
         "definition": "Store",
         "wordShown": false,
-        "isPriorityWord": true,
-        "priorityWordShown": true
+        "isPriorityWord": false,
+        "priorityWordShown": false
     }
 ]

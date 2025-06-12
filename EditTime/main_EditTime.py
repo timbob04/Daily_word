@@ -1,6 +1,9 @@
 from EditTime.makeAppContents import makeAppContents
 
-def makeEditTimeApp(app, dep):
+def runEditTimeApp(app, dep, worker_editTimeApp):
+
+    # Set the app to not quit when the last window is closed
+    app.setQuitOnLastWindowClosed(False)
 
     window = dep.QMainWindow()
     window.setWindowTitle("Edit time")
@@ -8,21 +11,23 @@ def makeEditTimeApp(app, dep):
     fonts = dep.DefineFontSizes(app,dep)
     
     # Define size of app using sentence width and number of lines
-    sentence = "0000000000000000000000000000000000"
-    numLines = 15
+    sentence = "00000000000000000000000000000000000000000"
+    numLines = 30
     appSizeOb = dep.AppSize(app,dep,fonts,sentence,numLines)
 
     UIsizes = dep.DefineUIsizes(appSizeOb)
 
     container = dep.QWidget()
     
-    appBoundaries = makeAppContents(dep, container, fonts, UIsizes, appSizeOb) 
+    width, height = makeAppContents(dep, container, fonts, UIsizes, worker_editTimeApp) 
     
     dep.makeScrollAreaForCentralWidget(dep, window, container)
 
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
-    dep.resizeWindow(window, appBoundaries.right, appSizeOb.appHeight, appSizeOb)
+    dep.resizeWindow(window, width, height, appSizeOb)
 
     window.show()
+
+    window.EditTimeOb = container.checkTimeEntered
 
     return window
