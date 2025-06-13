@@ -158,5 +158,5 @@ class DailyPriorityWord():
         self.priorityWordAndDef = prioriotyWord + ": " + definition\
 
     def returnWordAndDefinition(self):
-            return self.priorityWordAndDef                 
+        return self.priorityWordAndDef                 
          

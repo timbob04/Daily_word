@@ -1,4 +1,4 @@
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord, worker_dailyWordApp):
+def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()

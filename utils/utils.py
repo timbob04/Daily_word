@@ -2,13 +2,7 @@ def getBaseDir(sys, os):
     # Check if the program is running as an executable
     if getattr(sys, 'frozen', False):                
         baseDir = os.path.dirname(sys.executable)
-        # rootDir = os.path.abspath(os.path.join(baseDir, ".."))
-        if sys.platform == 'darwin':
-            # macOS: .../YourApp.app/Contents/MacOS → go up 3 (.app), then 1 (bin)
-            rootDir = os.path.abspath(os.path.join(baseDir, "../../../.."))
-        else:
-            # Windows or other: .../bin/exe_folder → go up 2
-            rootDir = os.path.abspath(os.path.join(baseDir, "../.."))
+        rootDir = os.path.abspath(os.path.join(baseDir, "../../../.."))
     else:
         # If not, find where this python function is being called from, not where this function actually is
         caller_file = sys._getframe(1).f_globals.get("__file__", "")
@@ -55,37 +49,7 @@ class StoreDependencies:
     def setImportsAsClassAttributes(self):
         for name, obj in self.imported_modules.items():
             setattr(self, name, obj)
-
-def setupLogging(dep, app_name="MyApp"):
-    """
-    Sets up logging to a file in the folder the script or executable is being called from,
-    and also prints to terminal if available.
-    """
-    # Get base_dir based on caller's location, not where getBaseDir lives
-    caller_file = dep.sys._getframe(1).f_globals.get("__file__", "")
-    if caller_file:
-        base_dir = dep.os.path.dirname(dep.os.path.abspath(caller_file))
-    else:
-        base_dir = dep.os.getcwd()
-
-    log_path = dep.os.path.join(base_dir, f"{app_name}_log.txt")
-
-    # File handler with timestamped entries
-    file_handler = dep.logging.FileHandler(log_path)
-    file_handler.setFormatter(dep.logging.Formatter(
-        "%(asctime)s - %(message)s", "%Y-%m-%d %H:%M:%S"))
-
-    # Console handler (for terminals, VS Code, etc.)
-    console_handler = dep.logging.StreamHandler(dep.sys.stdout)
-    console_handler.setFormatter(dep.logging.Formatter("%(message)s"))
-
-    dep.logging.basicConfig(
-        level=dep.logging.INFO,
-        handlers=[file_handler, console_handler]
-    )
-
-    dep.logging.info(f"{app_name} started")
-
+            
 class PortListener:
     def __init__(self, dep, fileWithPortNumber, fileWithPortNumberToAvoid):
         # Parameters

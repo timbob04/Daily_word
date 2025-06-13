@@ -69,20 +69,20 @@ from EditTime.main_EditTime import runEditTimeApp
 dep = StoreDependencies(globals())
 
 # This is to stop the icon from appearing in the dock on macOS
-if platform.system() == 'Darwin':
-    from Foundation import NSBundle
-    bundle = NSBundle.mainBundle()
-    info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-    info['LSUIElement'] = 1
+from Foundation import NSBundle
+bundle = NSBundle.mainBundle()
+info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+info['LSUIElement'] = 1
 
+# Main Controller function
 def startController():
     print('Inside the Controller executable')
 
     executableName = 'DailyWordDefinitionController'
 
-    app = QApplication(sys.argv)
+    app = QApplication(sys.argv) # start the application
 
-    # Shut down script if a previous instance is already running
+    # Shut down current script if a previous instance is already running, to prevent multiple instances
     if isProgramAlreadyRunning(executableName, dep):
         print(f'{executableName} is already running')
         return
@@ -95,10 +95,10 @@ def startController():
     # Create the controller object
     controller = Controller(app, dep)
 
-    # Make the menu icon
+    # Make the menu icon for the mac's toolbar
     makeMenuIcon(dep, app, controller)
 
-    # If running from launch agent, start the main program (timer and dailyWordApp) directly
+    # If running from launch agent (on startup), start the main program (timer and dailyWordApp) directly.  Else, run the the controller (above) and wait for user inputs
     if checkIfRunningFromLaunchAgent(dep, 'main_Controller'):
         print("Running from launch agent - starting timer directly")
         controller.startTask.emit('timer')
@@ -117,8 +117,6 @@ class Controller(QObject):
         super().__init__()
         self.app = app
         self.dep = dep
-        # Default values
-        self.launchAgent = None
 
         # Connect the signals (channels) to the slots (methods) that will be sent down the channels
         self.startTask.connect(self.route_start)
@@ -134,20 +132,20 @@ class Controller(QObject):
             'editTime': EditTimeWrapper('EditTime', app, dep)
         }
 
-        # Connect internal signals to controller's slots - if I want a worker to interact with another worker
-        self.workers['dailyWordApp'].button_clicked.connect(self.route_start) # to allow the dailyWordApp worker to start the EditWordList
-        self.workers['startProgram'].button_clicked.connect(self.route_start) # to allow the startProgram worker to start the EditWordList
+        # Connect internal signals to controller's slots - if I want a worker to interact with another worker        
         self.workers['timer'].request_start.connect(self.route_start) # to allow the timer worker to start the dailyWordApp
         self.workers['startProgram'].request_start.connect(self.route_start) # to allow the startProgram worker to start the timer, and the consoleMessage
 
-        # Initialize the port listener and sender objects - to talk to the PingController executable
+        # Initialize the port listener and sender objects - to talk to the PingController executable (what the user runs to interact with the controller)
+        # Listener
         self.portListener = PortListener(self.dep, 'portNum_Controller.txt', 'portNum_PingController.txt')
         threading.Thread(target=self.portListener.listenIndefinitely, args=(self.pingReceivedFromUser,), daemon=True).start() # start listening
+        # Sender
         self.portSender = PortSender(self.dep, 'portNum_PingController.txt')  
         print("CON. Sending ping to PingController on startup")
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
 
-        # Connect cleanup to application quit
+        # Connect cleanup function to application quit
         self.app.aboutToQuit.connect(self.cleanUp)
 
     def userInitiatedQuit(self):
@@ -160,6 +158,7 @@ class Controller(QObject):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
 
+    # Once a ping is received from the user (PingController), do stuff (either start program, if not already running, or stop program, if already running)
     def pingReceivedFromUser(self, message):
         print(f"pingReceivedFromUser: {message}")
         # Send ping to PingController, so it knows its ping has been received
@@ -181,9 +180,10 @@ class Controller(QObject):
         if name in self.workers:
             self.workers[name].shutdown()
 
-class DailyWordAppWrapper(QObject):
+###### Workers for the Controller ######
 
-    button_clicked = pyqtSignal(str)
+# Worker for the dailyWordApp
+class DailyWordAppWrapper(QObject):
 
     # Define the constructor
     def __init__(self, name, app, dep):
@@ -191,7 +191,6 @@ class DailyWordAppWrapper(QObject):
         self.name = name
         self.app = app
         self.dep = dep
-        self.dailyWordAppRunning = False
 
     def start(self):
         print(f"{self.name}: running app...")
@@ -199,17 +198,15 @@ class DailyWordAppWrapper(QObject):
         if hasattr(self, 'window') and self.window:
             self.window.close()
         # Now run the dailyWordApp
-        self.window = runDailyWordApp(self.app, self.dep, self) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
-        self.dailyWordAppRunning = True
+        self.window = runDailyWordApp(self.app, self.dep) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
+        # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
-        
-    def shutdown(self):
-        self.window.close()
-        self.dailyWordAppRunning = False
 
+# Worker for the timer which controls when the dailyWordApp is shown
 class TimerWrapper(QObject):
    
+    # Define the signal to start the dailyWordApp
     request_start = pyqtSignal(str)
 
     def __init__(self, name, dep):
@@ -217,62 +214,59 @@ class TimerWrapper(QObject):
         self.name = name
         self.dep = dep
         self.timerRunning = False
-        self.timer_thread = None
 
     def start(self):
         self.timerRunning = True
         self.timer_thread = self.dep.threading.Thread(target=runTimer, args=(self, self.dep), daemon=True)
         self.timer_thread.start()
 
+# Worker for the EditWordList app
 class EditWordListWrapper(QObject):
+
     def __init__(self, name, app, dep):
         super().__init__()
         self.name = name
         self.app = app
         self.dep = dep
-        self.EditWordListOpen = False
 
     def start(self):
         print(f"{self.name}: running app...")
         if not hasattr(self, 'window') or not self.window:
             self.window = makeEditWordListApp(self.app, self.dep)
-            self.EditWordListOpen = True
-        
-        # Always try to bring window to front
+        # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
 
+# Worker for the StartProgram app
 class StartProgramWrapper(QObject):
 
     request_start = pyqtSignal(str)
-    button_clicked = pyqtSignal(str)
 
     def __init__(self, name, app, dep):
         super().__init__()
         self.name = name
         self.app = app
         self.dep = dep
-        self.StartProgramOpen = False
 
+    # Run the StartProgram app
     def start(self):
         print(f"{self.name}: running app...")
         if not hasattr(self, 'window') or not self.window:
             self.window = runStartProgramApp(self.app, self.dep, self)
+            # Quit app if this window is closed via the X button (only), as the user did not decide to start the program
             self.window.closeEvent = lambda event: self.app.quit() if not self.window.startButtonClicked else None  # Only quit if window is closed via X button, not via Start button
-            self.StartProgramOpen = True
-        
-        # Always try to bring window to front
+        # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
 
+    # Perform functions required to start the program, once the user has clicked the Start button
     def shutdown(self):
         print('\n\nThe user has clicked the Start button')
-        self.StartProgramOpen = False
-        self.window.startButtonClicked = True  # Set flag to indicate Start button was clicked
+        self.window.startButtonClicked = True  # Set flag to indicate Start button was clicked (used in 'start' function)
         self.saveTimeToRunMainApp()
         self.window.close() 
         self.request_start.emit("timer") # start timer script   
-        self.launchAgent = CreateLaunchAgent(self.dep, 'main_Controller') # create a lanch agent for this program, so it now starts up on login
+        CreateLaunchAgent(self.dep, 'main_Controller') # create a lanch agent for this program, so it now starts up on login
 
     def saveTimeToRunMainApp(self):
         timeToSave = self.window.startTimeOb.timeEntered  
@@ -282,6 +276,7 @@ class StartProgramWrapper(QObject):
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
 
+# Worker for the StopProgram app
 class StopProgramWrapper(QObject):
 
     def __init__(self, name, app, dep):
@@ -289,24 +284,23 @@ class StopProgramWrapper(QObject):
         self.name = name
         self.app = app
         self.dep = dep
-        self.StopProgramOpen = False
 
+    # Run the StopProgram app
     def start(self):
         print(f"{self.name}: running app...")
         if not hasattr(self, 'window') or not self.window:
             self.window = runStopProgramApp(self.app, self.dep, self)
-            self.StopProgramOpen = True
-        
-        # Always try to bring window to front
+        # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
 
+    # Perform functions required to stop the program, once the user has clicked the Stop button
     def shutdown(self):
         print('\n\nController to stop main app here')
-        self.StopProgramOpen = False
         self.window.close()
         self.app.controller.userInitiatedQuit()  # Use the new function instead of app.quit()
 
+# Worker for the EditTime app - accessed through menu icon only
 class EditTimeWrapper(QObject):
 
     def __init__(self, name, app, dep):
@@ -314,21 +308,17 @@ class EditTimeWrapper(QObject):
         self.name = name
         self.app = app
         self.dep = dep
-        self.EditTimeOpen = False
 
     def start(self):
         print(f"{self.name}: running app...")
         if not hasattr(self, 'window') or not self.window:
             self.window = runEditTimeApp(self.app, self.dep, self)
-            self.EditTimeOpen = True
-        
-        # Always try to bring window to front
+        # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
 
     def shutdown(self):
         print('\n\nThe user has clicked the Change button')
-        self.EditTimeOpen = False
         self.saveTimeToRunMainApp()
         self.window.close() 
 

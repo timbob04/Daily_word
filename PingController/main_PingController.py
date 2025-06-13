@@ -1,12 +1,11 @@
-import socket
 import sys
 import os
 import platform
 import subprocess
+import socket
 from utils.utils import getBaseDir
 import time
 import threading
-from Controller.main_Controller import startController
 from utils.utils import PortListener, PortSender, StoreDependencies
 from utils.utils import isProgramAlreadyRunning
 from PyQt5.QtNetwork  import (
@@ -20,6 +19,7 @@ def runPingController():
 
     executableName = 'DailyWordDefinitionPingController'
 
+    # Don't run if another instance is already running
     if isProgramAlreadyRunning(executableName, dep):
         print(f'{executableName} is already running')
         return
@@ -59,16 +59,9 @@ def runControllerExecutable():
     runingCodeFromExecutable = getattr(sys, 'frozen', False) # The 'frozen' attribute in sys is set to True if the script is running as an executable
     if runingCodeFromExecutable:
         root_dir, _ = getBaseDir(sys, os)
-        system = platform.system()
-        if system == "Windows":
-            flags = (subprocess.CREATE_NEW_PROCESS_GROUP |
-                subprocess.DETACHED_PROCESS)   # launch *detached*
-            exePath_Controller = os.path.join(root_dir, "bin" , "main_Controller" , "main_Controller.exe")
-            subprocess.Popen(exePath_Controller, creationflags=flags)
-        elif system == "Darwin":
-            print("\nRunning executable on Mac")
-            exePath_Controller = os.path.join(root_dir, "bin", "main_Controller.app")
-            subprocess.Popen(['open', exePath_Controller])
+        print("\nRunning executable on Mac")
+        exePath_Controller = os.path.join(root_dir, "bin", "main_Controller.app")
+        subprocess.Popen(['open', exePath_Controller])
     else:
         print("Running as main_Controller.py")
 

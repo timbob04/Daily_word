@@ -1,6 +1,6 @@
 from DailyWordApp.makeAppContents import makeAppContents
 
-def runDailyWordApp(app, dep, worker_dailyWordApp):
+def runDailyWordApp(app, dep):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(False)
@@ -24,7 +24,7 @@ def runDailyWordApp(app, dep, worker_dailyWordApp):
 
     # Make app contents (in central widget)
     container = dep.QWidget()
-    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord, worker_dailyWordApp) 
+    width, height = makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord) 
     dep.makeScrollAreaForCentralWidget(dep, window, container)
     
     # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen

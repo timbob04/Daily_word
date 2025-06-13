@@ -38,11 +38,10 @@ class makeExecutables():
     def createPyInstallerCommand(self):    
         # Get icon path for macOS
         icon_cmd = []
-        if self.dep.sys.platform == 'darwin':
-            root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-            icon_path = self.dep.os.path.join(root_dir, 'accessoryFiles', 'app_icon.icns')
-            if self.dep.os.path.exists(icon_path):
-                icon_cmd = ['--icon', icon_path]
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        icon_path = self.dep.os.path.join(root_dir, 'accessoryFiles', 'app_icon.icns')
+        if self.dep.os.path.exists(icon_path):
+            icon_cmd = ['--icon', icon_path]
 
         self.pyInstallerCommand = [
             "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed", "--noconsole",
@@ -86,47 +85,3 @@ class GetModuleImports():
                 if node.module:  # Ignore relative imports with None
                     self.imports.add(node.module)
         self.imports = list(self.imports)  # Convert back to a list          
-
-
-def makeLauncher(dep, app_name="UserInput", binary_name="PingController"):
-
-    if dep.sys.platform != 'darwin':
-        return
-    
-    print("Making launcher for mac")
-
-    project_dir, _ = dep.getBaseDir(dep.sys, dep.os)
-    script_path = dep.os.path.join(project_dir, f"{app_name}.applescript")
-    app_path = dep.os.path.join(project_dir, f"{app_name}.app")
-
-    # Start afresh
-    if dep.os.path.exists(app_path):
-        dep.subprocess.run(["rm", "-rf", app_path], check=True)
-
-    applescript = f'''\
-        tell application "Terminal"
-            set appPath to POSIX path of (path to me)
-            set binPath to appPath & "../bin/{binary_name}.app/Contents/MacOS/{binary_name}"
-            do script binPath
-            delay 0.5
-            repeat while busy of window 1
-                delay 0.2
-            end repeat
-            close window 1
-        end tell
-        '''
-
-    # Write the AppleScript to file
-    with open(script_path, 'w') as f:
-        f.write(applescript)
-
-    # Compile into a .app
-    dep.subprocess.run(["osacompile", "-o", app_path, script_path], check=True)
-
-    # Remove temporary .applescript
-    dep.os.remove(script_path)
-
-    print(f"✅ Created .app launcher at: {app_path}")
-
-
-

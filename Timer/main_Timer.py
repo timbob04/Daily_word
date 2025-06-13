@@ -9,7 +9,6 @@ def runTimer(timer_wrapper, dep):
             timer_wrapper.request_start.emit('dailyWordApp')  # Emit signal to start DailyWordApp
         dep.time.sleep(5)
         
-
 class TimingControl():
     def __init__(self, dep):
         self.dep = dep

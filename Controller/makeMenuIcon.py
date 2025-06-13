@@ -1,5 +1,6 @@
 def makeMenuIcon(dep, app, controller):
-    # 1. tiny tray-icon (becomes a menu-bar icon on macOS)
+    
+    # Get icon for the mac's toolbar
     root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
     dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
     icon_path = dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
