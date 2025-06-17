@@ -60,7 +60,7 @@ def runControllerExecutable():
     if runingCodeFromExecutable:
         root_dir, _ = getBaseDir(sys, os)
         print("\nRunning executable on Mac")
-        exePath_Controller = os.path.join(root_dir, "bin", "main_Controller.app")
+        exePath_Controller = os.path.join(root_dir, "bin", "Controller.app")
         subprocess.Popen(['open', exePath_Controller])
     else:
         print("Running as main_Controller.py")

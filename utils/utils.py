@@ -188,9 +188,13 @@ def readPortNumber(dep, fileWithPortNumToSendPings):
     except (ValueError, OSError):
         return None
     
-def isProgramAlreadyRunning(server_name, dep):
-    sock = dep.QLocalSocket()
-    sock.connectToServer(server_name)
-    running = sock.waitForConnected(100)
-    sock.abort()
-    return running    
+def isProgramAlreadyRunning(executableName, dep):
+    probe = dep.QLocalSocket()
+    probe.connectToServer(executableName)
+    if probe.waitForConnected(50):
+        probe.close()
+        return True
+
+    # Fallback: remove a stale socket in case a previous instance crashed
+    dep.QLocalServer.removeServer(executableName)
+    return False

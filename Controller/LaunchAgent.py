@@ -104,10 +104,23 @@ def checkIfRunningFromLaunchAgent(dep, executable_name):
         # Check if the launch agent is actually loaded
         result = dep.subprocess.run(["launchctl", "print", domain_target], 
                                   capture_output=True, text=True, check=False)
-        # print(f"Launch agent status output:\n{result.stdout}")
         is_loaded = f"com.myapp.{executable_name}" in result.stdout
         print(f"Launch agent is {'loaded' if is_loaded else 'not loaded'}")
-        return is_loaded
+        
+        # Check if we were launched by launchd
+        if is_loaded:
+            # Get the parent process ID
+            ppid = dep.os.getppid()
+            # Get the parent process name
+            try:
+                parent_name = dep.subprocess.check_output(['ps', '-p', str(ppid), '-o', 'comm='], text=True).strip()
+                print(f"Parent process: {parent_name}")
+                # Check if parent is launchd
+                return parent_name == 'launchd'
+            except:
+                print("Could not determine parent process")
+                return False
+        return False
     else:
         print("✗ Plist file does not exist")
         return False      

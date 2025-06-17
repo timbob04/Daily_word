@@ -68,28 +68,26 @@ from EditTime.main_EditTime import runEditTimeApp
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
 
-# This is to stop the icon from appearing in the dock on macOS
-from Foundation import NSBundle
-bundle = NSBundle.mainBundle()
-info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-info['LSUIElement'] = 1
-
 # Main Controller function
 def startController():
     print('Inside the Controller executable')
 
     executableName = 'DailyWordDefinitionController'
-
-    app = QApplication(sys.argv) # start the application
-
+    
     # Shut down current script if a previous instance is already running, to prevent multiple instances
     if isProgramAlreadyRunning(executableName, dep):
         print(f'{executableName} is already running')
-        return
+        sys.exit(0)
+    
+    print(f'{executableName} is NOT already running.  Carrying on...')
+    
+    app = QApplication(sys.argv) # start the application
 
     # Create a named local socket so other copies can check if this one is running (to prevent multiple instances)
     server = QLocalServer()
-    server.listen(executableName)
+    if not server.listen(executableName):
+        QLocalServer.removeServer(executableName)
+        server.listen(executableName)
     app.server = server # Store it on the app to prevent it from being garbage collected
 
     # Create the controller object
@@ -157,6 +155,7 @@ class Controller(QObject):
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
+
 
     # Once a ping is received from the user (PingController), do stuff (either start program, if not already running, or stop program, if already running)
     def pingReceivedFromUser(self, message):

@@ -1,18 +1,20 @@
 class makeExecutables():
-    def __init__(self,dep, fileName):
+    def __init__(self, dep, fileName, appName, background=False):
         # Input parameters
         self.dep = dep
         self.fileName = fileName    
         # Fixed parameters
         self.projectRoot, _ = dep.getBaseDir(dep.sys, dep.os)
-        self.executableName = self.fileName.split(".")[-1]
+        self.appName = appName
+        self.background = background
         # Initializer methods
         self.getPythonFilePath()
         self.getModuleDependencies()
         self.makeCommandsToAddDependencies()
         self.makeCommandsToAddNeededFolders()
         self.createPyInstallerCommand()
-        self.runPyInstallerCommand()              
+        self.runPyInstallerCommand()   
+        self.makeBackgroundApp()           
 
     def getPythonFilePath(self):
         self.pythonFile = self.dep.os.path.join(self.projectRoot, self.fileName.replace(".", self.dep.os.sep)) + ".py"              
@@ -38,14 +40,14 @@ class makeExecutables():
     def createPyInstallerCommand(self):    
         # Get icon path for macOS
         icon_cmd = []
-        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        icon_path = self.dep.os.path.join(root_dir, 'accessoryFiles', 'app_icon.icns')
+        self.root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        icon_path = self.dep.os.path.join(self.root_dir, 'accessoryFiles', 'app_icon.icns')
         if self.dep.os.path.exists(icon_path):
             icon_cmd = ['--icon', icon_path]
 
         self.pyInstallerCommand = [
             "pyinstaller", "--onedir", "--noupx", "--clean", "--windowed", "--noconsole",
-            "--name", self.executableName,
+            "--name", self.appName,
             "--distpath", "bin",
             self.pythonFile,
             *self.hidden_imports_cmd,
@@ -55,6 +57,24 @@ class makeExecutables():
 
     def runPyInstallerCommand(self):   
         self.dep.subprocess.run(self.pyInstallerCommand , capture_output=True, text=True)
+
+    def makeBackgroundApp(self):
+        if not self.background:
+            return
+
+        plist_path = self.dep.os.path.join(self.root_dir, "bin", self.appName + ".app", "Contents", "Info.plist")
+        
+        # Load, update, and save
+        with open(plist_path, 'rb') as f:
+            plist = self.dep.plistlib.load(f)
+
+        plist['LSUIElement'] = True
+
+        with open(plist_path, 'wb') as f:
+            self.dep.plistlib.dump(plist, f)
+
+        print("LSUIElement set to true.")
+
 
 # Finds all imports at the top of the main file being made into the executable
 class GetModuleImports():
