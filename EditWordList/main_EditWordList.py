@@ -2,6 +2,8 @@ from EditWordList.makeAppContents import makeAppContents
 
 def makeEditWordListApp(app, dep):
 
+    app.setQuitOnLastWindowClosed(False)
+
     window = dep.QMainWindow()
     window.setWindowTitle("Edit word list")
 

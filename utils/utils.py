@@ -1,4 +1,14 @@
+from pathlib import Path
+
 def getBaseDir(sys, os):
+
+    # If the program is installed, give the installed path
+    lib_path = Path.home() / 'Library' / 'Application Support' / 'Daily Word'
+    if lib_path.exists():
+        baseDir = str(lib_path)
+        rootDir = str(lib_path)
+        return rootDir, baseDir
+
     # Check if the program is running as an executable
     if getattr(sys, 'frozen', False):                
         baseDir = os.path.dirname(sys.executable)

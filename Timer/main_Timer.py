@@ -34,8 +34,8 @@ class TimingControl():
         
     def getTimeToRunApplicationPath(self):
         # Get path of accessory files
-        root_dur, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        accessoryFiles_dir = self.dep.os.path.join(root_dur, 'accessoryFiles')
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        accessoryFiles_dir = self.dep.os.path.join(root_dir, 'accessoryFiles')
         # Path to json file for words and definitions
         return self.dep.os.path.join(accessoryFiles_dir, 'timeToRunApplication.txt')    
     
@@ -57,8 +57,8 @@ class TimingControl():
                 return None
             
     def getDateLastRunPath(self):             
-        root_dur, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
-        common_dir = self.dep.os.path.join(root_dur, 'accessoryFiles')    
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        common_dir = self.dep.os.path.join(root_dir, 'accessoryFiles')    
         return self.dep.os.path.join(common_dir, 'dateLastRun.txt')          
         
     def writeNewDate(self):

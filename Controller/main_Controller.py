@@ -14,6 +14,7 @@ import subprocess
 import pathlib
 import textwrap
 import stat
+from Foundation import NSProcessInfo 
 
 # Third-party imports
 from PyQt5.QtWidgets import (
@@ -144,7 +145,7 @@ class Controller(QObject):
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
 
         # Connect cleanup function to application quit
-        self.app.aboutToQuit.connect(self.cleanUp)
+        self.app.aboutToQuit.connect(self.cleanUp)  
 
     def userInitiatedQuit(self):
         print("User initiated quit - unlinking launch agent")
@@ -155,7 +156,6 @@ class Controller(QObject):
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
-
 
     # Once a ping is received from the user (PingController), do stuff (either start program, if not already running, or stop program, if already running)
     def pingReceivedFromUser(self, message):
@@ -194,7 +194,7 @@ class DailyWordAppWrapper(QObject):
     def start(self):
         print(f"{self.name}: running app...")
         # Close any previous instances of the dailyWordApp
-        if hasattr(self, 'window') and self.window:
+        if isGUIAlreadyOpen(self):
             self.window.close()
         # Now run the dailyWordApp
         self.window = runDailyWordApp(self.app, self.dep) # pass self to allow the button_clicked signal to be used by the 'Edit Word List' button
@@ -230,9 +230,10 @@ class EditWordListWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        if not hasattr(self, 'window') or not self.window:
+        if not isGUIAlreadyOpen(self):
             self.window = makeEditWordListApp(self.app, self.dep)
-        # Bring window to front
+        
+        # Always bring window to front
         self.window.raise_()
         self.window.activateWindow()
 
@@ -247,13 +248,17 @@ class StartProgramWrapper(QObject):
         self.app = app
         self.dep = dep
 
-    # Run the StartProgram app
     def start(self):
         print(f"{self.name}: running app...")
-        if not hasattr(self, 'window') or not self.window:
+        if not isGUIAlreadyOpen(self):
             self.window = runStartProgramApp(self.app, self.dep, self)
-            # Quit app if this window is closed via the X button (only), as the user did not decide to start the program
-            self.window.closeEvent = lambda event: self.app.quit() if not self.window.startButtonClicked else None  # Only quit if window is closed via X button, not via Start button
+            # Quit app if this window is closed via the X button (only),
+            # as the user did not decide to start the program
+            self.window.closeEvent = (
+                lambda event: self.app.quit()
+                if not self.window.startButtonClicked
+                else None            # Only quit if window is closed via X button,
+            )
         # Bring window to front
         self.window.raise_()
         self.window.activateWindow()
@@ -265,7 +270,7 @@ class StartProgramWrapper(QObject):
         self.saveTimeToRunMainApp()
         self.window.close() 
         self.request_start.emit("timer") # start timer script   
-        CreateLaunchAgent(self.dep, 'main_Controller') # create a lanch agent for this program, so it now starts up on login
+        CreateLaunchAgent(self.dep, 'Controller') # create a lanch agent for this program, so it now starts up on login
 
     def saveTimeToRunMainApp(self):
         timeToSave = self.window.startTimeOb.timeEntered  
@@ -287,7 +292,7 @@ class StopProgramWrapper(QObject):
     # Run the StopProgram app
     def start(self):
         print(f"{self.name}: running app...")
-        if not hasattr(self, 'window') or not self.window:
+        if not isGUIAlreadyOpen(self):
             self.window = runStopProgramApp(self.app, self.dep, self)
         # Bring window to front
         self.window.raise_()
@@ -310,7 +315,7 @@ class EditTimeWrapper(QObject):
 
     def start(self):
         print(f"{self.name}: running app...")
-        if not hasattr(self, 'window') or not self.window:
+        if not isGUIAlreadyOpen(self):
             self.window = runEditTimeApp(self.app, self.dep, self)
         # Bring window to front
         self.window.raise_()
@@ -328,6 +333,14 @@ class EditTimeWrapper(QObject):
         self.filePath = self.dep.os.path.join(dir_accessoryFiles, 'timeToRunApplication.txt')
         with open(self.filePath, 'w') as f:
             f.write(timeToSave)
+
+def isGUIAlreadyOpen(worker):
+    return (hasattr(worker, 'window') and 
+            worker.window and 
+            not worker.window.isHidden() and
+            worker.window.isVisible())
+
+
 
 if __name__ == "__main__":
     startController()
