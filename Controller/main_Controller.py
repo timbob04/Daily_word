@@ -38,6 +38,11 @@ from PyQt5.QtNetwork  import (
     QLocalServer, QLocalSocket
 )
 
+# Add these imports after the existing PyQt5 imports (near other third-party imports)
+from AppKit import NSWorkspace
+from Foundation import NSObject, NSDistributedNotificationCenter # Gives access to macOS workspace & its notifications
+import objc  # PyObjC bridge: allows calling Objective-C selectors
+
 # Local imports
 from utils.utils import (
     readJSONfile, getBaseDir, 
@@ -65,6 +70,7 @@ from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
 from Controller.makeMenuIcon import makeMenuIcon
 from utils.utils import isProgramAlreadyRunning
 from EditTime.main_EditTime import runEditTimeApp
+from Controller.raiseWindowOnUnlock import RaiseWindowOnUnlock
 
 # Store a reference to each dependency above
 dep = StoreDependencies(globals())
@@ -124,7 +130,7 @@ class Controller(QObject):
         # Define the workers: the wrappers around a particular part of a program, that define specific actions
         self.workers = {
             'dailyWordApp': DailyWordAppWrapper('DailyWordApp', app, dep),
-            'timer': TimerWrapper('Timer', dep),
+            'timer': TimerWrapper('Timer', dep, self),  # pass controller so timer can access sessionObserver
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
             'startProgram': StartProgramWrapper('StartProgram', app, dep),
             'stopProgram': StopProgramWrapper('StopProgram', app, dep),
@@ -145,7 +151,10 @@ class Controller(QObject):
         threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
 
         # Connect cleanup function to application quit
-        self.app.aboutToQuit.connect(self.cleanUp)  
+        self.app.aboutToQuit.connect(self.cleanUp)
+        
+        # If the time to display word occurs when display is not on (mac locked, etc), for the first unlock after this, bring DailyWordApp to the forefront on unlock
+        self.sessionObserver = RaiseWindowOnUnlock(self.app, self.dep, self.workers)
 
     def userInitiatedQuit(self):
         print("User initiated quit - unlinking launch agent")
@@ -156,6 +165,7 @@ class Controller(QObject):
     def cleanUp(self):
         self.portListener.closeSocket()
         self.portListener.clearPortNumber()
+        NSDistributedNotificationCenter.defaultCenter().removeObserver_(self.sessionObserver)
 
     # Once a ping is received from the user (PingController), do stuff (either start program, if not already running, or stop program, if already running)
     def pingReceivedFromUser(self, message):
@@ -208,10 +218,11 @@ class TimerWrapper(QObject):
     # Define the signal to start the dailyWordApp
     request_start = pyqtSignal(str)
 
-    def __init__(self, name, dep):
+    def __init__(self, name, dep, controller):
         super().__init__()
         self.name = name
         self.dep = dep
+        self.controller = controller  # keep reference to controller to reset observer flag
         self.timerRunning = False
 
     def start(self):
@@ -339,7 +350,6 @@ def isGUIAlreadyOpen(worker):
             worker.window and 
             not worker.window.isHidden() and
             worker.window.isVisible())
-
 
 
 if __name__ == "__main__":

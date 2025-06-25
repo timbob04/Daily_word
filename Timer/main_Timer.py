@@ -5,6 +5,9 @@ def runTimer(timer_wrapper, dep):
     timingControl = TimingControl(dep)
     while True:  
         if timingControl.checkIfTimeToRunProgram():     
+            # Reset flag via controller's sessionObserver so window can raise after next unlock
+            if hasattr(timer_wrapper, 'controller') and hasattr(timer_wrapper.controller, 'sessionObserver'):
+                timer_wrapper.controller.sessionObserver.reset()
             print("Time to run the program")       
             timer_wrapper.request_start.emit('dailyWordApp')  # Emit signal to start DailyWordApp
         dep.time.sleep(5)

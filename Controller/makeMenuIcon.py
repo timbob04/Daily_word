@@ -1,51 +1,74 @@
-def makeMenuIcon(dep, app, controller):
-    
-    # Get icon for the mac's toolbar
-    root_dir, _ = dep.getBaseDir(dep.sys, dep.os)
-    dir_accessoryFiles = dep.os.path.join(root_dir, 'accessoryFiles')
-    icon_path = dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
+class makeMenuIcon():
+    def __init__(self, dep, app, controller):
+        self.dep = dep
+        self.app = app
+        self.controller = controller
+        # Constructor methods
+        self.getIconPaths()
+        self.createTrayIcon()
+        self.makeTrayActions()
+        self.storeTrayIcon()
 
-    # Create the system tray icon
-    tray = dep.QSystemTrayIcon(dep.QIcon(icon_path), parent=app)
-    tray.setToolTip("Daily Word Definition")
-    
-    # Create the menu
-    menu = dep.QMenu()
-    
-    # Add the Quit action
-    quit_action = dep.QAction("Quit", menu)
-    quit_action.triggered.connect(controller.userInitiatedQuit)
-    menu.addAction(quit_action)
+    def getIconPaths(self):
+        # Get icon for the mac's toolbar
+        root_dir, _ = self.dep.getBaseDir(self.dep.sys, self.dep.os)
+        dir_accessoryFiles = self.dep.os.path.join(root_dir, 'accessoryFiles')
+        self.icon_path = self.dep.os.path.join(dir_accessoryFiles, 'iconTemplate.png')
+        self.icon_path_active = self.dep.os.path.join(dir_accessoryFiles, 'iconTemplate_dot.png')
 
-    # Add a separator
-    menu.addSeparator()
+    def createTrayIcon(self):    
+        # Create the system tray icon
+        self.tray = self.dep.QSystemTrayIcon(self.dep.QIcon(self.icon_path), parent=self.app)
+        self.tray.setToolTip("Daily Word Definition")
+        # Define action on icon click
+        self.tray.activated.connect(self.defineActionOnIconClick)
+        # Create the menu
+        self.menu = self.dep.QMenu()
 
-    # Add the Edit word list action
-    edit_word_list_action = dep.QAction("Edit word list", menu)
-    edit_word_list_action.triggered.connect(controller.workers['editWordList'].start)
-    menu.addAction(edit_word_list_action)
+    def makeTrayActions(self):  
+        # Add the Edit time action
+        edit_time_action = self.dep.QAction("Edit time", self.menu)
+        edit_time_action.triggered.connect(self.controller.workers['editTime'].start)
+        self.menu.addAction(edit_time_action)  
+        # Add a separator
+        self.menu.addSeparator()
 
-    # Add separator
-    menu.addSeparator()
+        # Add the Edit word list action
+        edit_word_list_action = self.dep.QAction("Edit word list", self.menu)
+        edit_word_list_action.triggered.connect(self.controller.workers['editWordList'].start)
+        self.menu.addAction(edit_word_list_action)
+        # Add separator
+        self.menu.addSeparator()
 
-    # Add action to bring all windows to front
-    bring_all_to_front_action = dep.QAction("Bring all windows to front", menu)
-    bring_all_to_front_action.triggered.connect(lambda: [window.raise_() for window in app.topLevelWidgets() if window.isVisible()])
-    menu.addAction(bring_all_to_front_action)
+        # Add the Quit action
+        quit_action = self.dep.QAction("Quit", self.menu)
+        quit_action.triggered.connect(self.controller.userInitiatedQuit)
+        self.menu.addAction(quit_action)
+                
+        # Set the menu as the tray icon's context menu
+        self.tray.setContextMenu(self.menu)
+        # Make sure the icon is visible
+        self.tray.show()
 
-    # Add separator
-    menu.addSeparator()
+    def defineActionOnIconClick(self, reason):
+        if reason == self.dep.QSystemTrayIcon.Trigger: # when the icon is clicked
+            wins = [w for w in self.app.topLevelWidgets() if w.isVisible()] # get all visible windows
 
-    # Add the Edit time action
-    edit_time_action = dep.QAction("Edit time", menu)
-    edit_time_action.triggered.connect(controller.workers['editTime'].start)
-    menu.addAction(edit_time_action)
-    
-    # Set the menu as the tray icon's context menu
-    tray.setContextMenu(menu)
-    
-    # Make sure the icon is visible
-    tray.show()
-    
-    # Store the tray icon in the app for later reference
-    app.tray = tray
+            # Sort the windows from largest to smallest so larger ones end up behind
+            wins.sort(key=lambda w: w.width() * w.height(),reverse=True)
+            
+            # Raise the windows from largest to smallest so larger ones end up behind
+            for w in wins:
+                w.raise_()
+                w.activateWindow()
+
+    def storeTrayIcon(self):
+        # Store the tray icon in the app for later reference
+        self.app.icon = self
+
+    def changeIconToActiveState(self):
+        self.app.icon.tray.setIcon(self.dep.QIcon(self.icon_path_active))
+
+    def changeIconToInactiveState(self):
+        print("Changing icon to inactive state")
+        self.app.icon.tray.setIcon(self.dep.QIcon(self.icon_path))

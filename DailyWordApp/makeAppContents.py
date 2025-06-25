@@ -1,4 +1,4 @@
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord):
+def makeAppContents(dep, app,container, fonts, UIsizes, appSizeOb, dailyWord, dailyPriorityWord):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -108,6 +108,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb, dailyWord, dailyP
     pb_reveal.button.clicked.connect(lambda: ts_priorityWordAndDef.showTextObject())
     pb_reveal.button.clicked.connect(lambda: t_priorityWord.showTextObject())
     pb_reveal.button.clicked.connect(lambda: toggle_priorityWord.showToggle())
+    pb_reveal.button.clicked.connect(lambda: app.icon.changeIconToInactiveState())
     
     # Update app boundaries
     lowestPoint = pb_reveal.positionAdjust[1] + pb_reveal.positionAdjust[3]
