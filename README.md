@@ -7,7 +7,7 @@
 * At the scheduled time (see below), the Daily Word app opens and initially displays the word only — giving you a moment to recall its definition.  Press 'Reveal' to see the definition.
 
 
-## Installer
+## Installation
 * An installer for the program can be found at: 
 * Once installed, the program can be found in the Applications folder
 * All accessory files for the program can be found in '~/Library/Application Support/Daily Word'
