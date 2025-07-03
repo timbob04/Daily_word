@@ -4,7 +4,7 @@
 * This is a desktop app for Mac that displays a word and its definition once a day
 * The goal of the program is to enhance your vocabulary
 * Users define the words and their definitions
-* At the specified time (below), when the Daily Word app appears, only the word is shown at first — giving you a moment to recall the definition. Press 'Reveal' to see it.
+* At the scheduled time (see below), the Daily Word app opens and initially displays the word only — giving you a moment to recall its definition.  Press 'Reveal' to see the definition.
 
 
 ## Installer
