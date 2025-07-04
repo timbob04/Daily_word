@@ -2,13 +2,13 @@
 
 ## General info
 * This is a desktop app for Mac that displays a word and its definition once a day
-* The goal of the program is to enhance your vocabulary
+* The goal of the app is to enhance your vocabulary
 * Users define the words and their definitions
 * At the scheduled time (see below), the Daily Word app opens and initially displays the word only — giving you a moment to recall its definition.  Press 'Reveal' to see the definition.
 
 
 ## Installation
-* An installer for the program can be found here: [installer](https://github.com/timbob04/Daily_word/releases/download/v1.0/Daily.Word.Installer.pkg)
+* Download installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.0/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
 * Once installed, the program can be found in the Applications folder
 * All accessory files for the program can be found in '~/Library/Application Support/Daily Word'
 
