@@ -5,6 +5,8 @@ def runEditTimeApp(app, dep, worker_editTimeApp):
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(False)
 
+    dep.checkForDarkMode_reset()
+
     window = dep.QMainWindow()
     window.setWindowTitle("Edit time")
 

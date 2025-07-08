@@ -1,15 +1,27 @@
 import subprocess
 
-def is_dark_mode():
-    try:
-        result = subprocess.run(['defaults', 'read', '-g', 'AppleInterfaceStyle'], 
-                              capture_output=True, text=True)
-        return result.stdout.strip() == "Dark"
-    except:
-        return False
+# Cache the dark mode result per GUI session
+_dark_mode_cache = None
+
+def checkForDarkMode():
+    global _dark_mode_cache
+    if _dark_mode_cache is None:
+        try:
+            result = subprocess.run(['defaults', 'read', '-g', 'AppleInterfaceStyle'], 
+                                  capture_output=True, text=True)
+            _dark_mode_cache = result.stdout.strip() == "Dark"
+        except:
+            _dark_mode_cache = False
+    return _dark_mode_cache
+
+# 
+def checkForDarkMode_reset():
+    """Reset the theme cache - call this when opening a new GUI"""
+    global _dark_mode_cache
+    _dark_mode_cache = None
 
 def buttonStyle(padding):
-    if is_dark_mode():
+    if checkForDarkMode():
         return f"""
             QPushButton {{ 
                 text-align: center;
@@ -51,13 +63,13 @@ def buttonStyle(padding):
         """
 
 def textStyle():
-    if is_dark_mode():
+    if checkForDarkMode():
         return "QLabel { color: #ffffff; }"
     else:
         return "QLabel { color: #000000; }"
 
 def toggleStyle(toggleWidth):
-    if is_dark_mode():
+    if checkForDarkMode():
         return f"""
             QCheckBox::indicator {{
                 width: {toggleWidth}px;

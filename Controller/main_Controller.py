@@ -57,7 +57,7 @@ from utils.utils_UI import (
     EditTextBox
 )
 from utils.styles import (
-    buttonStyle, toggleStyle, textStyle
+    buttonStyle, toggleStyle, textStyle, checkForDarkMode_reset
 ) 
 from DailyWordApp.getDailyWords import DailyWord, DailyPriorityWord
 from DailyWordApp.utils import SetWindowTitle

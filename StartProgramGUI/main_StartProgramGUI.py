@@ -4,6 +4,8 @@ def runStartProgramApp(app, dep, worker_startProgramApp):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(False)
+
+    dep.checkForDarkMode_reset()
    
     # Make main window
     window = dep.QMainWindow()

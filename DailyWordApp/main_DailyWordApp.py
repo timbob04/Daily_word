@@ -5,6 +5,8 @@ def runDailyWordApp(app, dep):
 
     # Set the app to not quit when the last window is closed
     app.setQuitOnLastWindowClosed(False)
+
+    dep.checkForDarkMode_reset()
    
     # Make main window
     window = dep.QMainWindow()

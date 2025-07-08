@@ -4,6 +4,8 @@ def makeEditWordListApp(app, dep):
 
     app.setQuitOnLastWindowClosed(False)
 
+    dep.checkForDarkMode_reset()
+
     window = dep.QMainWindow()
     window.setWindowTitle("Edit word list")
 
