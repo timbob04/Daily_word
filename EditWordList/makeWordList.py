@@ -26,7 +26,7 @@ class MakeWordList():
         curText = "Priority\nword"
         pos = [self.UIsizes.pad_medium, self.appBoundaries.bottom + self.UIsizes.pad_medium, 0, 0]
         self.t_priorityWord = self.dep.StaticText(self.dep, self.container, \
-            self.fonts.defaultFontSize*self.fonts.fontScalers["tiny"], \
+            self.fonts.defaultFontSize*self.fonts.fontScalers["xsmall"], \
             curText, self.dep.Qt.AlignCenter, [int(x) for x in pos])
         self.t_priorityWord.makeTextObject()
         self.t_priorityWord.showTextObject()

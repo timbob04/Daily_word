@@ -4,7 +4,7 @@ class DefineFontSizes:
         self.app = app
         self.dep = dep
         # Default values
-        self.fontScalers = {"tiny":0.5, "small":0.8, "default":1, "large":1.3 }        
+        self.fontScalers = {"tiny":0.5,"xsmall":0.65, "small":0.8, "default":1, "large":1.3 }        
         # Constructor functions
         self.getSystemDefaultFont()
         self.getBaseDPI()
@@ -101,7 +101,10 @@ class StaticText:
         self.textOb.setGeometry(*(int(x) for x in self.positionAdjust))
         self.textOb.setFont(self.font)
         self.textOb.setAlignment(self.textAlignment)
-        self.textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")        
+        if self.color == 'red':
+            self.textOb.setStyleSheet(f"QLabel {{ color : {self.color}; }}")
+        else:
+            self.textOb.setStyleSheet(self.dep.textStyle())
         self.textOb.hide()
         return self.textOb   
 
