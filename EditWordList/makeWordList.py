@@ -21,6 +21,7 @@ class MakeWordList():
         self.getHeightOfEachWordDef()
         self.getStartPositions_y()
         self.makeWordList()
+        self.makeDeleteAllWordsButton()
 
     def makeTitles(self):
         curText = "Priority\nword"
@@ -31,8 +32,9 @@ class MakeWordList():
         self.t_priorityWord.makeTextObject()
         self.t_priorityWord.showTextObject()
         # Update app boundaries
-        lowestPoint = self.t_priorityWord.positionAdjust[1] + self.t_priorityWord.positionAdjust[3]        
-        self.appBoundaries.setNewBoundaries(bottom=lowestPoint)
+        lowestPoint = self.t_priorityWord.positionAdjust[1] + self.t_priorityWord.positionAdjust[3]      
+        priorityWordMidHeight = self.t_priorityWord.positionAdjust[1] + self.t_priorityWord.positionAdjust[3] / 2
+        self.appBoundaries.setNewBoundaries(bottom=lowestPoint, store={'priorityWordMidHeight': priorityWordMidHeight})
 
     def findListElementPositionsAndSizes(self):   
         # Priority word toggle title width and center point
@@ -184,6 +186,21 @@ class MakeWordList():
         text.showTextObject()
         self.wordList[ind]["text"] = text
 
+    def makeDeleteAllWordsButton(self):
+        buttonMiddle = self.appBoundaries.priorityWordMidHeight
+        buttonRight = self.xPos_text_start + self.width_wordDef
+        deleteAllWordsButton = self.dep.PushButton(self.dep, self.container, \
+            self.fonts.defaultFontSize*self.fonts.fontScalers[self.delButonFontSize], \
+            'Delete all words', [buttonRight, buttonMiddle, 0, 0] )
+        deleteAllWordsButton.rightAlign()
+        deleteAllWordsButton.centerAlign_V()
+        deleteAllWordsButton.makeButton()
+        # Add red text color to the existing button style
+        deleteAllWordsButton.button.setStyleSheet(deleteAllWordsButton.button.styleSheet() + " QPushButton { color: #ff0000; }")
+        deleteAllWordsButton.showButton()
+        # Connect button to function to delete all the words
+        deleteAllWordsButton.button.clicked.connect(self.deleteAllWords)
+
     def saveWordListToJson(self):
         # Get elements of wordList to save
         wordListToSave = []  
@@ -257,6 +274,25 @@ class MakeWordList():
             self.makeWordList()
             # Re-adjust the size of the container
             self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom+self.UIsizes.pad_medium))
+            self.container.update()
+            # Save the edited wordList to json file
+            self.saveWordListToJson()
+
+    def deleteAllWords(self):
+        # Confirm delete dialog box
+        reply = self.dep.QMessageBox.question(self.container, 'Delete all words',
+            "Are you sure you want to delete ALL words?",
+            self.dep.QMessageBox.Yes | self.dep.QMessageBox.No, self.dep.QMessageBox.No)
+        # If user clicks 'Yes'
+        if reply == self.dep.QMessageBox.Yes:
+            # Delete the widgets
+            self.deleteListElements()
+            # Delete all words from the wordList
+            self.wordList.clear()
+            # Reset the app boundaries
+            self.appBoundaries.setNewBoundaries(bottom=self.listStartingPos_y)
+            # Re-adjust the size of the container
+            self.container.resize(int(self.appBoundaries.right), int(self.appBoundaries.bottom))
             self.container.update()
             # Save the edited wordList to json file
             self.saveWordListToJson()
