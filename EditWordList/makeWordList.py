@@ -1,6 +1,9 @@
+from EditWordList.editWordWindow import EditWordListApp  
+
 class MakeWordList():
-    def __init__(self, dep, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes):
+    def __init__(self, dep, app, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes):
         self.dep = dep
+        self.app = app
         self.container = container
         self.fonts = fonts
         self.UIsizes = UIsizes
@@ -49,9 +52,15 @@ class MakeWordList():
         self.width_deleteButton = b_deleteButton.button.width()
         # Button height
         self.height_button = b_deleteButton.button.height()
+        # Edit button width
+        curText = "Edit"
+        b_editButton = self.dep.PushButton(self.dep, self.container, self.fonts.defaultFontSize*self.fonts.fontScalers[self.delButonFontSize], curText, [0, 0, 0, 0])
+        b_editButton.makeButton()
+        self.width_editButton = b_editButton.button.width()
         # Width of everything apart from word and definition
         width_excludeWordDef = self.UIsizes.pad_medium + self.width_priorityWord + \
             self.hSpacer + self.width_deleteButton + \
+            self.hSpacer + self.width_editButton + \
             self.hSpacer + self.UIsizes.pad_medium                       
         # Width of the word and definition area
         self.width_wordDef = self.appBoundaries.right - width_excludeWordDef
@@ -69,6 +78,7 @@ class MakeWordList():
         self.findIncrements_y()
         # Delete things not needed anymore
         b_deleteButton.button.deleteLater()
+        b_editButton.button.deleteLater()
         toggle.toggle.deleteLater()
 
     def getFontMetrics(self, fontSize):
@@ -80,7 +90,8 @@ class MakeWordList():
     def findStartPositions_x(self):
         self.xPos_toggle_center = self.UIsizes.pad_medium + self.width_priorityWord / 2
         self.xPos_deleteButton_start = self.UIsizes.pad_medium + self.width_priorityWord + self.hSpacer
-        self.xPos_text_start = self.xPos_deleteButton_start + self.width_deleteButton + self.hSpacer
+        self.xPos_editButton_start = self.xPos_deleteButton_start + self.width_deleteButton + self.hSpacer
+        self.xPos_text_start = self.xPos_editButton_start + self.width_editButton + self.hSpacer
    
     def findIncrements_y(self): 
         # Finds the distance needed to push down each list element (text, buttonm toggle) to get them all centered on the same line/row
@@ -142,7 +153,8 @@ class MakeWordList():
         # Also reset the app boundaries (bottom) to self.listStartingPos_y - to do
         for ind in range(len(self.wordList)):
             self.makeToggle(ind)
-            self.makeDeleteButton(ind)            
+            self.makeDeleteButton(ind)
+            self.makeEditButton(ind)            
             self.printWord(ind)
         # After making list elements (above), update the scroll area - to do
             
@@ -174,6 +186,20 @@ class MakeWordList():
         deleteButton.button.clicked.connect(_deleteButtonPressed) # clicked.connect sends one input (which for a button, is always 'False') to the function (slot) in the parentheses
         # Store delete button object in wordList
         self.wordList[ind]["deleteButton"] = deleteButton
+
+    def makeEditButton(self, ind):
+        buttonTop = self.wordList[ind]["startPos_y"] + self.increment_button
+        editButton = self.dep.PushButton( self.dep, self.container, \
+            self.fonts.defaultFontSize*self.fonts.fontScalers[self.delButonFontSize], \
+            'Edit', [self.xPos_editButton_start, buttonTop, 0, 0] )
+        editButton.makeButton()
+        editButton.showButton()
+        # Connect button to function dealing with the edit button being pressed
+        def _editButtonPressed(_unusedSlotArgument, i=ind):
+            self.editWord(i)
+        editButton.button.clicked.connect(_editButtonPressed) # clicked.connect sends one input (which for a button, is always 'False') to the function (slot) in the parentheses
+        # Store edit button object in wordList
+        self.wordList[ind]["editButton"] = editButton
 
     def printWord(self, ind):
         textTop = self.wordList[ind]["startPos_y"] + self.increment_text
@@ -225,6 +251,7 @@ class MakeWordList():
         for ind in range(len(self.wordList)):
             self.wordList[ind]["toggle"].toggle.deleteLater()
             self.wordList[ind]["deleteButton"].button.deleteLater()
+            self.wordList[ind]["editButton"].button.deleteLater()
             self.wordList[ind]["text"].textOb.deleteLater()
 
     def wordAdded(self):
@@ -278,6 +305,37 @@ class MakeWordList():
             # Save the edited wordList to json file
             self.saveWordListToJson()
 
+    def editWord(self, ind):
+        # Get current word and definition
+        currentWord = self.wordList[ind]["word"]
+        currentDefinition = self.wordList[ind]["definition"]
+        
+        # Create window for user to enter the edited word and/or definition            
+        editWindow = EditWordListApp(self.app, self.dep, self.container, currentWord, currentDefinition)
+        editButtonPressed = editWindow.exec_()
+
+        print("outside Edit loop")
+        
+        # If user clicked Save (not Cancel)
+        if editButtonPressed:
+
+            print("...new word editing now")
+            newWord, newDefinition = editWindow.getNewText()
+            # Update the word and definition in wordList
+            self.wordList[ind]["word"] = newWord
+            self.wordList[ind]["definition"] = newDefinition
+            
+            # Re-make the word list to reflect changes
+            self.deleteListElements()
+            self.getWordsWithDefinitons()
+            self.sortWordListAlphabetically()
+            self.getHeightOfEachWordDef()
+            self.getStartPositions_y()
+            self.makeWordList()
+            
+            # Save changes to JSON
+            self.saveWordListToJson()
+        
     def deleteAllWords(self):
         # Confirm delete dialog box
         reply = self.dep.QMessageBox.question(self.container, 'Delete all words',
@@ -296,3 +354,4 @@ class MakeWordList():
             self.container.update()
             # Save the edited wordList to json file
             self.saveWordListToJson()
+

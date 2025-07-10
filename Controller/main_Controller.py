@@ -22,11 +22,12 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QWidget, QScrollArea, 
     QPushButton, QStyle, QCheckBox,
     QLineEdit, QMessageBox, QSystemTrayIcon,
-    QMenu, QAction
+    QMenu, QAction, QDialog
 )
 from PyQt5.QtCore import (
     Qt, QObject, pyqtSignal, pyqtSlot,
-    QTimer, QThread, QCoreApplication
+    QTimer, QThread, QCoreApplication,
+    QEventLoop
 )
 from PyQt5.QtGui import (
     QFont, QFontMetrics, QCursor, 

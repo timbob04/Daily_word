@@ -83,3 +83,28 @@ def getWordListPath(dep):
     accessoryFiles_dir = dep.os.path.join(root_dir, 'accessoryFiles')
     # Path to json file for words and definitions
     return dep.os.path.join(accessoryFiles_dir, 'WordsDefsCodes.json')   
+
+def makeEditTextBox(dep, window, fonts, left, top, width, fontSize, startingText=""):
+    # Make edit text box
+    tb = dep.QLineEdit(window)  
+    font = dep.QFont()
+    fontSizeToUse = fonts.fontScalers[fontSize] 
+    font.setPointSizeF(int(fonts.defaultFontSize * fontSizeToUse))
+    tb.setFont(font)
+    fontMetrics = dep.QFontMetrics(font) 
+    bounding_rect = fontMetrics.boundingRect(0,0,0,0, dep.Qt.AlignLeft | dep.Qt.AlignVCenter, "0") 
+    height = bounding_rect.height()
+    height += height*0.1
+    tb.setGeometry(int(left), int(top), int(width), int(height) )
+    tb.setAlignment(dep.Qt.AlignLeft | dep.Qt.AlignVCenter)
+    tb.setStyleSheet("QLineEdit { border: 1px solid black; }")
+    # Set the starting text
+    tb.setText(startingText)  
+    tb.setCursorPosition(0)  # Move cursor to start of text
+    # Get the position of the edit text box
+    xy = tb.pos()
+    wh = tb.size()
+    pos = [xy.x(), xy.y(), wh.width(), wh.height()]
+    return tb, pos
+
+

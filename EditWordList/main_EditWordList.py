@@ -20,7 +20,7 @@ def makeEditWordListApp(app, dep):
 
     container = dep.QWidget()
     
-    appBoundaries = makeAppContents(dep, container, fonts, UIsizes, appSizeOb) 
+    appBoundaries = makeAppContents(dep, app, container, fonts, UIsizes, appSizeOb) 
     
     dep.makeScrollAreaForCentralWidget(dep, window, container)
 

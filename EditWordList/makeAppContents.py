@@ -1,7 +1,7 @@
 from EditWordList.utils import addNewWordTextBoxes
 from EditWordList.makeWordList import MakeWordList
 
-def makeAppContents(dep, container, fonts, UIsizes, appSizeOb):
+def makeAppContents(dep, app, container, fonts, UIsizes, appSizeOb):
 
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -108,7 +108,7 @@ def makeAppContents(dep, container, fonts, UIsizes, appSizeOb):
     rightMostPoint = t_editWordListTitle.positionAdjust[0] + t_editWordListTitle.positionAdjust[2]
     appBoundaries.setNewBoundaries(bottom=lowestPoint,right=rightMostPoint)
 
-    wordList = MakeWordList(dep, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes)
+    wordList = MakeWordList(dep, app, container, fonts, UIsizes, appSizeOb, appBoundaries, editTextBoxes)
     appBoundaries = wordList.appBoundaries
 
     container.resize(int(appBoundaries.right), int(appBoundaries.bottom+UIsizes.pad_medium))
