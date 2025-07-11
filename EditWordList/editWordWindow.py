@@ -1,64 +1,66 @@
 from EditWordList.utils import makeEditTextBox
 
-def EditWordListApp(app, dep, mainWindow, currentWord="", currentDefinition=""):
+class EditWordListApp:
+    def __init__(self, app, dep, mainWindow, currentWord, currentDefinition):
+        self.app = app
+        self.dep = dep
+        self.mainWindow = mainWindow
+        self.currentWord = currentWord
+        self.currentDefinition = currentDefinition
+        self.editButtonPressed = False  # turns true when the user presses the 'Edit' button
+        self.initializeWindow()
+        self.startEventLoop()
 
-    app.setQuitOnLastWindowClosed(False)
+    def initializeWindow(self):
+        
+        self.app.setQuitOnLastWindowClosed(False)
 
-    dep.checkForDarkMode_reset()
+        self.dep.checkForDarkMode_reset()
 
-    window = dep.QMainWindow() # Make a window
-    window.setWindowTitle("Edit word") # set its title
-    window.setWindowModality(dep.Qt.ApplicationModal)  # Make it modal - blocks entire app
-    window.setParent(mainWindow, dep.Qt.Window)  # set window as a child of the Edit Word List window
-    
-    window.editButtonPressed = False  # turns true when the user presses the 'Edit' button
+        self.window = self.dep.QMainWindow() # Make a window
+        self.window.setWindowTitle("Edit word") # set its title
+        self.window.setWindowModality(self.dep.Qt.ApplicationModal)  # Make it modal - blocks entire app
+        self.window.setParent(self.mainWindow, self.dep.Qt.Window)  # set window as a child of the Edit Word List window
 
-    fonts = dep.DefineFontSizes(app,dep)
-    
-    # Define size of app using sentence width and number of lines
-    sentence = "000000000000000000000000000000000000000000000000000000"
-    numLines = 20
-    appSizeOb = dep.AppSize(app,dep,fonts,sentence,numLines)
+        fonts = self.dep.DefineFontSizes(self.app,self.dep)
+        
+        # Define size of app using sentence width and number of lines
+        sentence = "000000000000000000000000000000000000000000000000000000"
+        numLines = 20
+        appSizeOb = self.dep.AppSize(self.app,self.dep,fonts,sentence,numLines)
 
-    UIsizes = dep.DefineUIsizes(appSizeOb)
+        UIsizes = self.dep.DefineUIsizes(appSizeOb)
 
-    container = dep.QWidget()
-    
-    appBoundaries = makeAppContents_EditWord(dep, container, fonts, UIsizes, appSizeOb, currentWord, currentDefinition) 
-    
-    dep.makeScrollAreaForCentralWidget(dep, window, container)
+        # Make container in the window to put the app's contents
+        self.container = self.dep.QWidget()
+        
+        appBoundaries = makeAppContents_EditWord(self, self.dep, self.container, fonts, UIsizes, appSizeOb, self.currentWord, self.currentDefinition) 
+        
+        self.dep.makeScrollAreaForCentralWidget(self.dep, self.window, self.container)
 
-    # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
-    dep.resizeWindow(window, appBoundaries.right + UIsizes.pad_medium, appBoundaries.bottom + UIsizes.pad_medium, appSizeOb)
+        # Resize window to app contents, or the screen width/height with scroll bars if the contents are bigger than the screen
+        self.dep.resizeWindow(self.window, appBoundaries.right + UIsizes.pad_medium, appBoundaries.bottom + UIsizes.pad_medium, appSizeOb)
 
-    window.show()
+        self.window.show()
 
-    # Add methods to the window object
-    def getNewText():
-        return container.tb_word.text(), container.tb_def.text()
-    
-    def exec_():
+    def startEventLoop(self):
         # Create a local event loop for the modal window
-        loop = dep.QEventLoop()
-        
-        def checkWindowClosed():
-            if not window.isVisible():
-                loop.quit()
-        
+        self.loop = self.dep.QEventLoop()
         # Check every 100ms if window is still visible
-        timer = dep.QTimer()
-        timer.timeout.connect(checkWindowClosed)
+        timer = self.dep.QTimer()
+        timer.timeout.connect(self.checkWindowClosed)
         timer.start(100)
-        
-        loop.exec_()
-        return window.editButtonPressed  # Return True if Edit button was pressed, False otherwise
+        # Start the event loop
+        self.loop.exec_()
+
+    def checkWindowClosed(self):
+        if not self.window.isVisible():
+            self.loop.quit()
     
-    window.getNewText = getNewText
-    window.exec_ = exec_
+    def returnEditedWord(self):
+        return self.container.tb_word.text(), self.container.tb_def.text()
 
-    return window
-
-def makeAppContents_EditWord(dep, container, fonts, UIsizes, appSizeOb, currentWord="", currentDefinition=""):
+def makeAppContents_EditWord(windowOb, dep, container, fonts, UIsizes, appSizeOb, currentWord="", currentDefinition=""):
     
     # App sizing variables
     appBoundaries = dep.AppBoundaries()
@@ -124,11 +126,8 @@ def makeAppContents_EditWord(dep, container, fonts, UIsizes, appSizeOb, currentW
     pb_Edit.showButton()
     # Connect to set the flag when Edit is pressed
     def onEditButtonClicked():
-        print("Edit button clicked!")
-        container.window().editButtonPressed = True
-        print("About to close window...")
+        windowOb.editButtonPressed = True
         container.window().close()
-        print("Window.close() called")
     
     pb_Edit.button.clicked.connect(onEditButtonClicked)
 

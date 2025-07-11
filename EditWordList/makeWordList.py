@@ -310,17 +310,12 @@ class MakeWordList():
         currentWord = self.wordList[ind]["word"]
         currentDefinition = self.wordList[ind]["definition"]
         
-        # Create window for user to enter the edited word and/or definition            
-        editWindow = EditWordListApp(self.app, self.dep, self.container, currentWord, currentDefinition)
-        editButtonPressed = editWindow.exec_()
+        # Creates a modal window for user to enter the edited word and/or definition - starts an event loop that pauses the entire app until the user has finished editing the word/definition           
+        editWordListApp = EditWordListApp(self.app, self.dep, self.container, currentWord, currentDefinition)
 
-        print("outside Edit loop")
-        
-        # If user clicked Save (not Cancel)
-        if editButtonPressed:
-
-            print("...new word editing now")
-            newWord, newDefinition = editWindow.getNewText()
+        # If user clicked Edit in the modal window (above), rather than closed the window
+        if editWordListApp.editButtonPressed:
+            newWord, newDefinition = editWordListApp.returnEditedWord()
             # Update the word and definition in wordList
             self.wordList[ind]["word"] = newWord
             self.wordList[ind]["definition"] = newDefinition

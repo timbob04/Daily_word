@@ -1,7 +1,7 @@
 [
     {
         "word": "Abject",
-        "definition": "Abject poverty",
+        "definition": "(of something bad) experienced or present to the maximum degree; (of a person or their behavior) completely without pride or dignity; self-abasing",
         "wordShown": true,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -15,15 +15,15 @@
     },
     {
         "word": "Admonish",
-        "definition": "warn or reprimand someone firmly.",
+        "definition": "warn or reprimand someone firmly",
         "wordShown": true,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Adulate",
-        "definition": "praise (someone) excessively or obsequiously.",
-        "wordShown": false,
+        "definition": "praise (someone) excessively or obsequiously",
+        "wordShown": true,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
@@ -36,28 +36,28 @@
     },
     {
         "word": "Apocryphal",
-        "definition": "(of a story or statement) of doubtful authenticity, although widely circulated as being true.",
+        "definition": "(of a story or statement) of doubtful authenticity, although widely circulated as being true",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Arrogate",
-        "definition": "take or claim (something) without justification.",
+        "definition": "take or claim (something) without justification",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Ascetic",
-        "definition": "characterized by or suggesting the practice of severe self-discipline and abstention from all forms of indulgence, typically for religious reasons.",
+        "definition": "characterized by or suggesting the practice of severe self-discipline and abstention from all forms of indulgence, typically for religious reasons",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Assuage",
-        "definition": "make (an unpleasant feeling) less intense.",
+        "definition": "make (an unpleasant feeling) less intense",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -71,63 +71,63 @@
     },
     {
         "word": "Commensurate",
-        "definition": "corresponding in size or degree; in proportion.",
+        "definition": "corresponding in size or degree; in proportion",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Contrite",
-        "definition": "feeling or expressing remorse or penitence; affected by guilt.",
+        "definition": "feeling or expressing remorse or penitence; affected by guilt",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Contingent",
-        "definition": "occurring or existing only if certain circumstances are the case; subject to chance.",
+        "definition": "occurring or existing only if certain circumstances are the case; subject to chance",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Desultory",
-        "definition": "lacking a plan, purpose, or enthusiasm.",
+        "definition": "lacking a plan, purpose, or enthusiasm",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Diffident",
-        "definition": "modesty or shyness resulting from a lack of self-confidence.",
+        "definition": "modesty or shyness resulting from a lack of self-confidence",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Digress",
-        "definition": "leave the main subject temporarily in speech or writing.",
+        "definition": "leave the main subject temporarily in speech or writing",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Divest",
-        "definition": "deprive (someone) of power, rights, or possessions.",
+        "definition": "deprive (someone) of power, rights, or possessions",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Dragoon",
-        "definition": "coerce (someone) into doing something.",
+        "definition": "coerce (someone) into doing something",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Effable",
-        "definition": "able to be described in words.",
+        "definition": "able to be described in words",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -148,7 +148,7 @@
     },
     {
         "word": "Extemporize",
-        "definition": "compose, perform, or produce something such as music or a speech without preparation; improvise.",
+        "definition": "compose, perform, or produce something such as music or a speech without preparation; improvise",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -162,35 +162,35 @@
     },
     {
         "word": "Furtive",
-        "definition": "attempting to avoid notice or attention, typically because of guilt or a belief that discovery would lead to trouble; secretive.",
+        "definition": "attempting to avoid notice or attention, typically because of guilt or a belief that discovery would lead to trouble; secretive",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Gourmand",
-        "definition": "a person who enjoys eating and often eats too much.",
+        "definition": "a person who enjoys eating and often eats too much",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Gregarious",
-        "definition": "(of a person) fond of company; sociable.",
+        "definition": "(of a person) fond of company; sociable",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Heterodox",
-        "definition": "not conforming with accepted or orthodox standards or beliefs.",
+        "definition": "not conforming with accepted or orthodox standards or beliefs",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Hyperbole",
-        "definition": "exaggerated statements or claims not meant to be taken literally.",
+        "definition": "exaggerated statements or claims not meant to be taken literally",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -204,7 +204,7 @@
     },
     {
         "word": "Imbibe",
-        "definition": "drink alcohol; absorb or assimilate.",
+        "definition": "drink alcohol; absorb or assimilate",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -225,56 +225,49 @@
     },
     {
         "word": "Incorrigible",
-        "definition": "(of a person or their tendencies) not able to be corrected, improved, or reformed.",
+        "definition": "(of a person or their tendencies) not able to be corrected, improved, or reformed",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Indolent",
-        "definition": "wanting to avoid activity or exertion; lazy.",
+        "definition": "wanting to avoid activity or exertion; lazy",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Infirmity",
-        "definition": "physical or mental weakness.",
+        "definition": "physical or mental weakness",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Ingenue",
-        "definition": "an innocent or unsophisticated young woman, especially in a play or film.",
+        "definition": "an innocent or unsophisticated young woman, especially in a play or film",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Intransigent",
-        "definition": "unwilling or refusing to change one's views or to agree about something.",
-        "wordShown": false,
-        "isPriorityWord": false,
-        "priorityWordShown": false
-    },
-    {
-        "word": "Intransigent",
-        "definition": "unwilling or refusing to change one's views or to agree about something.",
+        "definition": "unwilling or refusing to change one's views or to agree about something",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Kitschy",
-        "definition": "(of art, objects, or design) considered to be in poor taste because of excessive garishness or sentimentality, but sometimes appreciated in an ironic or knowing way.",
+        "definition": "(of art, objects, or design) considered to be in poor taste because of excessive garishness or sentimentality, but sometimes appreciated in an ironic or knowing way",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Levity",
-        "definition": "humor or frivolity, especially the treatment of a serious matter with humor or in a manner lacking due respect.",
+        "definition": "humor or frivolity, especially the treatment of a serious matter with humor or in a manner lacking due respect",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -288,14 +281,14 @@
     },
     {
         "word": "Molder",
-        "definition": "slowly decay or disintegrate, especially because of neglect.",
+        "definition": "slowly decay or disintegrate, especially because of neglect",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Obfuscate",
-        "definition": "render obscure, unclear, or unintelligible.",
+        "definition": "render obscure, unclear, or unintelligible",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -309,21 +302,21 @@
     },
     {
         "word": "Ostentatious",
-        "definition": "characterized by vulgar or pretentious display; designed to impress or attract notice.",
+        "definition": "characterized by vulgar or pretentious display; designed to impress or attract notice",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Pejorative",
-        "definition": "expressing contempt or disapproval.",
+        "definition": "expressing contempt or disapproval",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Perfunctory",
-        "definition": "(of an action or gesture) carried out with a minimum of effort or reflection.",
+        "definition": "(of an action or gesture) carried out with a minimum of effort or reflection",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -331,13 +324,6 @@
     {
         "word": "Platitude",
         "definition": "remark or statement, especially one with a moral content, that has been used too often to be interesting or thoughtful",
-        "wordShown": false,
-        "isPriorityWord": false,
-        "priorityWordShown": false
-    },
-    {
-        "word": "Platitude",
-        "definition": "a remark or statement, especially one with a moral content, that has been used too often to be interesting or thoughtful.",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -351,21 +337,21 @@
     },
     {
         "word": "Preambulate",
-        "definition": "walk or travel through or around a place or area, especially for pleasure and in a leisurely way.",
+        "definition": "walk or travel through or around a place or area, especially for pleasure and in a leisurely way",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Pretension",
-        "definition": "a claim or assertion of a claim to something",
+        "definition": "a claim or assertion of a claim to something; the use of affectation to impress; ostentatiousness",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Prescient",
-        "definition": "having or showing knowledge of events before they take place.",
+        "definition": "having or showing knowledge of events before they take place",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -379,7 +365,7 @@
     },
     {
         "word": "Quixotic",
-        "definition": "extremely idealistic; unrealistic and impractical.",
+        "definition": "extremely idealistic; unrealistic and impractical",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -393,56 +379,56 @@
     },
     {
         "word": "Reductive",
-        "definition": "tending to present a subject or problem in a simplified form, especially one viewed as crude.",
+        "definition": "tending to present a subject or problem in a simplified form, especially one viewed as crude",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Replete",
-        "definition": "filled or well-supplied with something.",
+        "definition": "filled or well-supplied with something",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Repudiate",
-        "definition": "refuse to accept or be associated with.",
+        "definition": "refuse to accept or be associated with",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Restive",
-        "definition": "(of a person) unable to keep still or silent and becoming increasingly difficult to control, especially because of impatience, dissatisfaction, or boredom.",
+        "definition": "(of a person) unable to keep still or silent and becoming increasingly difficult to control, especially because of impatience, dissatisfaction, or boredom",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Sedition",
-        "definition": "conduct or speech inciting people to rebel against the authority of a state or monarch.",
+        "definition": "conduct or speech inciting people to rebel against the authority of a state or monarch",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Sensationalist",
-        "definition": "a person who presents stories in a way that is intended to provoke public interest or excitement, at the expense of accuracy.",
+        "definition": "a person who presents stories in a way that is intended to provoke public interest or excitement, at the expense of accuracy",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Sonorous",
-        "definition": "having a deep loud and pleasant sound.",
+        "definition": "having a deep, loud and pleasant sound",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Soporific",
-        "definition": "tending to induce drowsiness or sleep.",
+        "definition": "tending to induce drowsiness or sleep",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -456,14 +442,14 @@
     },
     {
         "word": "Subjugate",
-        "definition": "bring under domination or control, especially by conquest.",
+        "definition": "bring under domination or control, especially by conquest",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Surly",
-        "definition": "bad-tempered and unfriendly.",
+        "definition": "bad-tempered and unfriendly",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -477,7 +463,7 @@
     },
     {
         "word": "Tenable",
-        "definition": "able to be maintained or defended against attack or objection.",
+        "definition": "able to be maintained or defended against attack or objection",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
@@ -491,35 +477,35 @@
     },
     {
         "word": "Transgress",
-        "definition": "infringe or go beyond the bounds of (a moral principle or other established standard of behavior).",
+        "definition": "infringe or go beyond the bounds of (a moral principle or other established standard of behavior)",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Transmogrify",
-        "definition": "transform in a surprising or magical manner.",
+        "definition": "transform in a surprising or magical manner",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Trite",
-        "definition": "(of a remark, opinion, or idea) overused and consequently of little import; lacking originality or freshness.",
+        "definition": "(of a remark, opinion, or idea) overused and consequently of little import; lacking originality or freshness",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Truculent",
-        "definition": "eager or quick to argue or fight; aggressively defiant.",
+        "definition": "eager or quick to argue or fight; aggressively defiant",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
     },
     {
         "word": "Vapid",
-        "definition": "offering nothing that is stimulating or challenging.",
+        "definition": "offering nothing that is stimulating or challenging",
         "wordShown": false,
         "isPriorityWord": false,
         "priorityWordShown": false
