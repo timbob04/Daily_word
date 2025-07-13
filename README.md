@@ -6,9 +6,8 @@
 * Users define the words and their definitions
 * At the scheduled time (see below), the Daily Word app opens and initially displays the word only — giving you a moment to recall its definition.  Press 'Reveal' to see the definition.
 
-
 ## Installation
-* Download installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.1/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
+* Download the installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.1/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
 * Once installed, the program can be found in the Applications folder
 * All accessory files for the program can be found in '~/Library/Application Support/Daily Word'
 
@@ -21,7 +20,7 @@
 ## Edit the time when the word appears
 * Click on the 'DW' icon in the Mac's menu bar and select 'Edit time'
 
-## Edit word list
+## Edit the word list
 * Click on the 'DW' icon in the Mac's menu bar and select 'Edit word list'
 * Here you can edit or delete current words, or add new ones.
 
