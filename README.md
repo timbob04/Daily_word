@@ -8,7 +8,7 @@
 
 
 ## Installation
-* Download installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.0/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
+* Download installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.1/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
 * Once installed, the program can be found in the Applications folder
 * All accessory files for the program can be found in '~/Library/Application Support/Daily Word'
 
