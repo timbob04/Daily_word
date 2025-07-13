@@ -22,7 +22,7 @@
 
 ## Edit the word list
 * Click on the 'DW' icon in the Mac's menu bar and select 'Edit word list'
-* Here you can edit or delete current words, or add new ones.
+* Here you can edit, delete or add words.
 
 ## Stopping the program
 * Click on the 'DW' icon in the Mac's menu bar and select 'Quit'
