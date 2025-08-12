@@ -63,7 +63,7 @@ class CreateLaunchAgent():
                                           <string>{exe_path}</string>
                                         </array>
             <key>RunAtLoad</key>        <true/>
-            <key>KeepAlive</key>        <false/>
+            <key>KeepAlive</key>        <true/>
           </dict>
         </plist>
     """)

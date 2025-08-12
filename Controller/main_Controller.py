@@ -105,7 +105,7 @@ def startController():
     makeMenuIcon(dep, app, controller)
 
     # If running from launch agent (on startup), start the main program (timer and dailyWordApp) directly.  Else, run the the controller (above) and wait for user inputs
-    if checkIfRunningFromLaunchAgent(dep, 'main_Controller'):
+    if checkIfRunningFromLaunchAgent(dep, 'Controller'):
         print("Running from launch agent - starting timer directly")
         controller.startTask.emit('timer')
 
@@ -159,7 +159,7 @@ class Controller(QObject):
 
     def userInitiatedQuit(self):
         print("User initiated quit - unlinking launch agent")
-        launchAgent = CreateLaunchAgent(self.dep, 'main_Controller')
+        launchAgent = CreateLaunchAgent(self.dep, 'Controller')
         launchAgent.unlinkPlist()
         self.app.quit()
 
