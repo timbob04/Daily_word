@@ -66,7 +66,7 @@ from DailyWordApp.main_DailyWordApp import runDailyWordApp
 from Timer.main_Timer import runTimer
 from EditWordList.main_EditWordList import makeEditWordListApp
 from StartProgramGUI.main_StartProgramGUI import runStartProgramApp
-from Controller.LaunchAgent import CreateLaunchAgent, checkIfRunningFromLaunchAgent
+from Controller.LaunchAgent import createLaunchAgent, deleteLaunchAgent
 from StopProgramGUI.main_StopProgramGUI import runStopProgramApp
 from Controller.makeMenuIcon import makeMenuIcon
 from utils.utils import isProgramAlreadyRunning
@@ -104,9 +104,9 @@ def startController():
     # Make the menu icon for the mac's toolbar
     makeMenuIcon(dep, app, controller)
 
-    # If running from launch agent (on startup), start the main program (timer and dailyWordApp) directly.  Else, run the the controller (above) and wait for user inputs
-    if checkIfRunningFromLaunchAgent(dep, 'Controller'):
-        print("Running from launch agent - starting timer directly")
+    # If launched by LaunchAgent (detected by flag set in LaunchAgent.py), start the timer automatically (stating after reboot with launch agent up and running)
+    if '--from-launchagent' in sys.argv:
+        print("LaunchAgent flag detected — starting timer")
         controller.startTask.emit('timer')
 
     # Start the event loop and get the exit code
@@ -134,7 +134,7 @@ class Controller(QObject):
             'timer': TimerWrapper('Timer', dep, self),  # pass controller so timer can access sessionObserver
             'editWordList': EditWordListWrapper('EditWordList', app, dep),
             'startProgram': StartProgramWrapper('StartProgram', app, dep),
-            'stopProgram': StopProgramWrapper('StopProgram', app, dep),
+            'stopProgram': StopProgramWrapper('StopProgram', app, dep, self),
             'editTime': EditTimeWrapper('EditTime', app, dep)
         }
 
@@ -149,7 +149,7 @@ class Controller(QObject):
         # Sender
         self.portSender = PortSender(self.dep, 'portNum_PingController.txt')  
         print("CON. Sending ping to PingController on startup")
-        threading.Thread(target=self.portSender.sendPing, args=(1.5,), daemon=True).start() # send ping to PingController
+        threading.Thread(target=self.portSender.sendPing, args=(0.5,), daemon=True).start() # send ping to PingController
 
         # Connect cleanup function to application quit
         self.app.aboutToQuit.connect(self.cleanUp)
@@ -159,8 +159,7 @@ class Controller(QObject):
 
     def userInitiatedQuit(self):
         print("User initiated quit - unlinking launch agent")
-        launchAgent = CreateLaunchAgent(self.dep, 'Controller')
-        launchAgent.unlinkPlist()
+        deleteLaunchAgent(self.dep)        
         self.app.quit()
 
     def cleanUp(self):
@@ -282,7 +281,7 @@ class StartProgramWrapper(QObject):
         self.saveTimeToRunMainApp()
         self.window.close() 
         self.request_start.emit("timer") # start timer script   
-        CreateLaunchAgent(self.dep, 'Controller') # create a lanch agent for this program, so it now starts up on login
+        createLaunchAgent(dep) # create a lanch agent for this program, so it now starts up on login
 
     def saveTimeToRunMainApp(self):
         timeToSave = self.window.startTimeOb.timeEntered  
@@ -295,11 +294,12 @@ class StartProgramWrapper(QObject):
 # Worker for the StopProgram app
 class StopProgramWrapper(QObject):
 
-    def __init__(self, name, app, dep):
+    def __init__(self, name, app, dep, controller):
         super().__init__()
         self.name = name
         self.app = app
         self.dep = dep
+        self.controller = controller
 
     # Run the StopProgram app
     def start(self):
@@ -314,7 +314,7 @@ class StopProgramWrapper(QObject):
     def shutdown(self):
         print('\n\nController to stop main app here')
         self.window.close()
-        self.app.controller.userInitiatedQuit()  # Use the new function instead of app.quit()
+        self.controller.userInitiatedQuit()  # Use the new function instead of app.quit()
 
 # Worker for the EditTime app - accessed through menu icon only
 class EditTimeWrapper(QObject):
