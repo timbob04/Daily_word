@@ -7,7 +7,7 @@
 * At the scheduled time (see below), the Daily Word app opens and initially displays the word only — giving you a moment to recall its definition.  Press 'Reveal' to see the definition.
 
 ## Installation
-* Download the installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.1/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
+* Download the installer [here](https://github.com/timbob04/Daily_word/releases/download/v1.2/Daily.Word.Installer.pkg), or find it in this repo's "Releases" section
 * Once installed, the program can be found in the Applications folder
 * All accessory files for the program can be found in '~/Library/Application Support/Daily Word'
 
